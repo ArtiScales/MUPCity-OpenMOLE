@@ -1,0 +1,68 @@
+val seed = Val[Long]
+
+val name = Val[String]
+val folderIn = Val[File]
+val folderOut = Val[File]
+val projectFile = Val[File]
+val resultFolder = workDirectory / "results"
+
+val rangeSeed = (42L to 42L)
+val rangeThreshold = (0.0 to 0.01 by 0.001)
+
+val xmin = Val[Double]
+val ymin = Val[Double]
+val width = Val[Double]
+val height = Val[Double]
+val xshift = Val[Double]
+val yshift = Val[Double]
+val minSize = Val[Double]
+val maxSize = Val[Double]
+
+val threshold = Val[Double]
+val nMax = Val[Int]
+val strict = Val[Boolean]
+val ahp0 = Val[Double]
+val ahp1 = Val[Double]
+val ahp2 = Val[Double]
+val ahp3 = Val[Double]
+val ahp4 = Val[Double]
+val ahp5 = Val[Double]
+val ahp6 = Val[Double]
+val ahp7 = Val[Double]
+val ahp8 = Val[Double]
+val mean = Val[Boolean]
+
+//val explo = ExplorationTask(seed in rangeSeed x threshold in rangeThreshold)
+val explo = ExplorationTask(threshold in rangeThreshold)
+
+val javaTask = ScalaTask("val folderOut = newDir(); val projectFile = org.thema.mupcity.task.ProjectCreationAndDecompositionTask.run(name, folderIn, folderOut, xmin, ymin, width, height, xshift, yshift, minSize, maxSize, threshold)") set (
+  libraries += workDirectory / "mupcity-openMole-0.0.1-SNAPSHOT-shaded.jar",
+  folderIn := workDirectory / "data",
+  name := "${minSize}_${maxSize}_${threshold}",
+  xmin := 914760.0,
+  ymin := 6680157.0,
+  width := 28303.0,
+  height := 21019.0,
+  xshift := 0.0,
+  yshift := 0.0,
+  minSize := 20.0,
+  maxSize := 1620.0,
+  ahp0 := 0.111,
+  ahp1 := 0.111,
+  ahp2 := 0.111,
+  ahp3 := 0.111,
+  ahp4 := 0.111,
+  ahp5 := 0.111,
+  ahp6 := 0.111,
+  ahp7 := 0.111,
+  ahp8 := 0.111,
+  inputs += (name, folderIn, xmin, ymin, width, height, xshift, yshift, minSize, maxSize, threshold),
+  outputs += (folderOut, minSize, maxSize, threshold)
+)
+
+val copyHook =  CopyFileHook(folderOut, resultFolder / "${minSize}_${maxSize}_${threshold}")
+
+//val env = LocalEnvironment(6)
+val env = EGIEnvironment("vo.complex-systems.eu")
+
+explo -< (javaTask on env hook (copyHook))
