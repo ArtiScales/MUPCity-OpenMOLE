@@ -35,7 +35,7 @@ val mean = Val[Boolean]
 //val explo = ExplorationTask(seed in rangeSeed x threshold in rangeThreshold)
 val explo = ExplorationTask(threshold in rangeThreshold)
 
-val javaTask = ScalaTask("val folderOut = newDir(); val projectFile = org.thema.mupcity.task.ProjectCreationAndDecompositionTask.run(name, folderIn, folderOut, xmin, ymin, width, height, xshift, yshift, minSize, maxSize, threshold)") set (
+val javaTask = ScalaTask("val folderOut = newDir(); val projectFile = fr.ign.ProjectCreationAndDecompositionTask.run(name, folderIn, folderOut, xmin, ymin, width, height, xshift, yshift, minSize, maxSize, threshold)") set (
   libraries += workDirectory / "mupcity-openMole-0.0.1-SNAPSHOT-shaded.jar",
   folderIn := workDirectory / "data",
   name := "${minSize}_${maxSize}_${threshold}",
@@ -63,6 +63,10 @@ val javaTask = ScalaTask("val folderOut = newDir(); val projectFile = org.thema.
 val copyHook =  CopyFileHook(folderOut, resultFolder / "${minSize}_${maxSize}_${threshold}")
 
 //val env = LocalEnvironment(6)
-val env = EGIEnvironment("vo.complex-systems.eu")
+
+val env = EGIEnvironment(
+  "vo.complex-systems.eu",
+  openMOLEMemory = 2048 megabytes
+)
 
 explo -< (javaTask on env hook (copyHook))
