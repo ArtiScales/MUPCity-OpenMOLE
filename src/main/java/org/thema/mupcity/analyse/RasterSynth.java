@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.io.AbstractGridFormat;
@@ -21,22 +20,51 @@ import org.opengis.parameter.ParameterValue;
 
 public class RasterSynth {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		// génère un raster avec uniquement des cellules stables (a plusieurs echelles différentes)
+		
+		
+		File fileIn = new File("/home/mcolomb/donnee/autom/besancon/donnee-carte/diff-batie.tif");
+		
+		System.out.println(countCellPos(fileIn ));
+	}
 
+	public static int countCellPos(File file) throws IOException {
+		int nbCell = 0;
+		ParameterValue<OverviewPolicy> policy = AbstractGridFormat.OVERVIEW_POLICY.createValue();
+		policy.setValue(OverviewPolicy.IGNORE);
+		ParameterValue<String> gridsize = AbstractGridFormat.SUGGESTED_TILE_SIZE.createValue();
+		ParameterValue<Boolean> useJaiRead = AbstractGridFormat.USE_JAI_IMAGEREAD.createValue();
+		useJaiRead.setValue(true);
+		GeneralParameterValue[] params = new GeneralParameterValue[] { policy, gridsize, useJaiRead };
+		GridCoverage2DReader reader = new GeoTiffReader(file);
+		GridCoverage2D coverage = reader.read(params);
+		Envelope2D env = coverage.getEnvelope2D();
+		System.out.println("minX : "+env.getMinX()+"maxX : "+env.getMaxX()+"minY : "+env.getMinY()+"maxY : "+env.getMaxY());
+		
+		for (double i = env.getMinX()+10; i < env.getMaxX(); i = i + 20) {
+			for (double j = env.getMinY()+10; j < env.getMaxY(); j = j + 20) {
+				DirectPosition2D pt = new DirectPosition2D(i, j);
+				float[] val = (float[]) coverage.evaluate(pt);
+				if (val[0] !=0) {
+					nbCell = nbCell + 1;
+				}
+			}
+		}
+		return nbCell;
 	}
 
 	private static void selectRasterStable(ArrayList<File> listRepliFile) throws IOException {
 
 		Hashtable<GridCoordinates2D, Integer> cellRepet = new Hashtable<GridCoordinates2D, Integer>();
-	
+
 		int nbDeScenar = 0;
 
 		double[] histo = new double[listRepliFile.size()];
 		int iter = 0;
 
-		//Object salut = Project.originalBounds;
-		//variables for merged raster
+		// Object salut = Project.originalBounds;
+		// variables for merged raster
 
 		float[][] imagePixelData = null;
 		float[][] imagePD = null;
@@ -66,7 +94,7 @@ public class RasterSynth {
 			int compteurNombre = 0;
 			nbDeScenar = nbDeScenar + 1;
 
-			// beginning of the all cells loop			
+			// beginning of the all cells loop
 			int debI = 0;
 			int debJ = 0;
 

@@ -41,7 +41,7 @@ public class RasterAnalyse {
 	 */
 
 	public static File rootFile = new File("/media/mcolomb/Data_2/resultExplo/");
-	public static File discreteFile = new File("/home/mcolomb/informatique/MUP/explo/data/admin_typo.shp");
+	public static File discreteFile = new File("/home/mcolomb/informatique/MUP/explo/dataExtra/admin_typo.shp");
 	public static boolean discrete = false;
 	public static boolean stabilite = false;
 	public static boolean sensibility = false;
@@ -457,6 +457,8 @@ public class RasterAnalyse {
 	public static void gridSensibility() throws Exception {
 		ArrayList<File> listRepliFile = new ArrayList<File>();
 
+		cutBorder = true;
+		
 		for (int i = 0; i <= 8; i++) {
 			File file = new File(rootFile + "/data" + i + "/replication_numero-42-eval_anal-" + echelle + ".0.tif");
 			listRepliFile.add(file);
@@ -505,7 +507,6 @@ public class RasterAnalyse {
 	 * @throws Exception
 	 */
 	public static File mergeRasters(List<File> listRepliFile, String nameScenar) throws Exception {
-
 
 		// variables to create statistics
 
@@ -578,9 +579,9 @@ public class RasterAnalyse {
 
 			// developpement pour les cas ou l'on veut une analyse discrétisée ou si les bordures doivent être coupées
 			if (((discrete == true && Double.parseDouble(echelle) <= 180)) || cutBorder == true) {
-				for (double r = Xmin + Double.parseDouble(echelle)/2; r <= Xmax; r = r + Double.parseDouble(echelle)) {
-					// those values are the bounds from project (and upped to correspond to a multiple of 180 to	analyse all the cells in the project)
-					for (double t = Ymin+ Double.parseDouble(echelle)/2; t <= Ymax; t = t + Double.parseDouble(echelle)) {
+				for (double r = Xmin + Double.parseDouble(echelle) / 2; r <= Xmax; r = r + Double.parseDouble(echelle)) {
+					// those values are the bounds from project (and upped to correspond to a multiple of 180 to analyse all the cells in the project)
+					for (double t = Ymin + Double.parseDouble(echelle) / 2; t <= Ymax; t = t + Double.parseDouble(echelle)) {
 						DirectPosition2D coordCentre = new DirectPosition2D(r, t);
 						float[] yo = (float[]) coverage.evaluate(coordCentre);
 						if (yo[0] > 0) {
@@ -641,11 +642,9 @@ public class RasterAnalyse {
 		// compare different scales of cells
 		if (compare20_180 == true) {
 			compare180(cellRepetCentroid, cellEvalCentroid, nameScenar);
-
 		}
 		if (compare20_60 == true) {
 			compare60(cellRepetCentroid, cellEvalCentroid, nameScenar);
-
 		}
 
 		// truandage pour faire passer dans la methode createStat le nombre de cellule dans une simulation stricte et leurs évaluations
@@ -662,10 +661,10 @@ public class RasterAnalyse {
 		File statFile = new File("");
 		// création de statistiques pour une analyse discrétisé
 		if ((discrete == true || cutBorder == true) && (compare20_180 == false || compare20_60 == false)) {
-			statFile = splitMergedTypo(nameScenar, cellRepetCentroid, cellEvalCentroid);
+			statFile = splitMergedTypo(nameScenar, cellRepetCentroid, cellEvalCentroid, nbDeScenar);
 		}
 		// création de statistiques pour une analyse normale
-		else if (discrete == false && (compare20_180 == false || compare20_60 == false)) {
+		else if (discrete == false ) {
 			statFile = createStats(nameScenar, histo, statNb, cellRepet, cellEval);
 		}
 		return statFile;
@@ -682,26 +681,19 @@ public class RasterAnalyse {
 	 *            : Collection of the cell's evaluation
 	 * @throws IOException
 	 */
-	private static File splitMergedTypo(String nameScenar, Hashtable<DirectPosition2D, Integer> cellRepet, Hashtable<DirectPosition2D, Float> cellEval) throws IOException {
-		Hashtable<DirectPosition2D, Integer> cellRepetPeriCentre = new Hashtable<DirectPosition2D, Integer>();
+	private static File splitMergedTypo(String nameScenar, Hashtable<DirectPosition2D, Integer> cellRepet, Hashtable<DirectPosition2D, Float> cellEval, int repl)
+			throws IOException {
+		Hashtable<DirectPosition2D, Integer> cellRepetCentre = new Hashtable<DirectPosition2D, Integer>();
 		Hashtable<DirectPosition2D, Integer> cellRepetBanlieue = new Hashtable<DirectPosition2D, Integer>();
 		Hashtable<DirectPosition2D, Integer> cellRepetPeriUrbain = new Hashtable<DirectPosition2D, Integer>();
 		Hashtable<DirectPosition2D, Integer> cellRepetRural = new Hashtable<DirectPosition2D, Integer>();
-		Hashtable<DirectPosition2D, Integer> cellRepetHyperCentre = new Hashtable<DirectPosition2D, Integer>();
-
-		int repl = 10;
-		if (sensibility = true) {
-			repl = 9;
-		} else if (stabilite == true) {
-			repl = 1000;
-		}
 
 		ArrayList<Hashtable<DirectPosition2D, Integer>> listCellByTypo = new ArrayList<Hashtable<DirectPosition2D, Integer>>();
 
 		Hashtable<String, double[]> cellByCity = new Hashtable<String, double[]>();
 		Hashtable<String, ArrayList<Float>> evalByCity = new Hashtable<String, ArrayList<Float>>();
 
-		File statFile = new File(rootFile + "/stats-discrete");
+		File statFile = new File(rootFile + "/stats");
 		statFile.mkdirs();
 
 		String[] premiereCol = new String[12];
@@ -770,7 +762,7 @@ public class RasterAnalyse {
 						nbByCity[4] = 3;
 						break;
 					case "peri-centre":
-						cellRepetPeriCentre.put(coord, cellRepet.get(coord));
+						cellRepetCentre.put(coord, cellRepet.get(coord));
 						nbByCity[4] = 1;
 						break;
 					case "banlieue":
@@ -778,7 +770,7 @@ public class RasterAnalyse {
 						nbByCity[4] = 2;
 						break;
 					case "hypercentre":
-						cellRepetHyperCentre.put(coord, cellRepet.get(coord));
+						cellRepetCentre.put(coord, cellRepet.get(coord));
 						nbByCity[4] = 1;
 						break;
 					}
@@ -803,18 +795,16 @@ public class RasterAnalyse {
 			generateCsvFileCol(cellByCity, statFile, "cityInEachGrid");
 		}
 
-		listCellByTypo.add(cellRepetPeriCentre);
+		listCellByTypo.add(cellRepetCentre);
 		listCellByTypo.add(cellRepetBanlieue);
 		listCellByTypo.add(cellRepetPeriUrbain);
 		listCellByTypo.add(cellRepetRural);
-		listCellByTypo.add(cellRepetHyperCentre);
 
-		String[] listNom = new String[5];
-		listNom[0] = "peri_centre";
+		String[] listNom = new String[4];
+		listNom[0] = "centre";
 		listNom[1] = "banlieue";
 		listNom[2] = "peri-urbain";
 		listNom[3] = "rural";
-		listNom[4] = "hypercentre";
 
 		premiereCol[0] = "echelle";
 		for (int y = 1; y <= 10; y++) {
@@ -1159,6 +1149,22 @@ public class RasterAnalyse {
 		return statFile;
 	}
 
+	public static void generateCsvFileMultTab(Hashtable<String, Hashtable<String, Double>> results, File file, String name) throws IOException {
+
+		File fileName = new File(file + "/" + name + ".csv");
+		FileWriter writer = new FileWriter(fileName, true);
+		for (String tab : results.keySet()) {
+			Hashtable<String, Double> intResult = results.get(tab);
+			writer.append("scenario "+ tab +"\n");
+			for (String nomScenar : intResult.keySet()) {
+				writer.append(nomScenar + ","+intResult.get(nomScenar));
+				writer.append("\n");
+			}
+			writer.append("\n");
+		}
+		writer.close();
+	}
+
 	private static void generateCsvFile(Hashtable<String, Double> cellRepet, File file, String name) throws IOException {
 		Hashtable<String, double[]> newCellRepet = new Hashtable<String, double[]>();
 		System.out.println("size:" + cellRepet.size());
@@ -1207,6 +1213,24 @@ public class RasterAnalyse {
 	}
 
 	public static void main(String[] args) throws Exception {
+
+		rootFile = new File("/media/mcolomb/Data_2/resultExplo/testNov/exOct/");
+		String nameSimul = "seed_42-eval_anal-20.0.tif";
+		for (File f : rootFile.listFiles()) {
+			if (f.isDirectory()) {
+				for (File ff : f.listFiles()) {
+					if (ff.getName().endsWith(nameSimul)) {
+						List<File> select = new ArrayList<>();
+						select.add(ff);
+						echelle = "20";
+						mergeRasters(select, "diffDonnee");
+						discrete = true;
+						mergeRasters(select, "diffDonnee");
+					}
+				}
+			}
+		}
+
 		/*
 		 * //oneSIm echelle = "20"; ArrayList<File> atest = new ArrayList<File>(); File dir1 = new
 		 * File("/media/mcolomb/Data_2/resultTest/OneTest/LAEA/N5--St--org.thema.mupcity.AHP@610455d6--Moy--1-analyse-20.0.tif"); atest.add(dir1); File dir2 = new
@@ -1242,21 +1266,21 @@ public class RasterAnalyse {
 		// }
 		//
 		// }
-		discrete = true;
-		compare20_180 = true;
-		compare20_60 = true;
-		// for(Integer tc=22;tc<=22;tc=tc+1){
-		rootFile = new File("/media/mcolomb/Data_2/resultExplo/Stability/N5YagBa");
-		// echelle = tc.toString();
-		for (Integer ech = 20; ech <= 180; ech = ech * 3) {
-			echelle = ech.toString();
-			String echStr = echelle + "m";
-			System.out.println("echelle :" + echStr);
-			// rootFile = new File(rootFile, echStr);
-			List<File> fileToTest = new ArrayList<File>();
-			fileToTest = selectWith("", null);
-			mergeRasters(fileToTest, echStr + "analyse");
-		}
+		// discrete = true;
+		// compare20_180 = true;
+		// compare20_60 = true;
+		// // for(Integer tc=22;tc<=22;tc=tc+1){
+		// rootFile = new File("/media/mcolomb/Data_2/resultExplo/Stability/N5YagBa");
+		// // echelle = tc.toString();
+		// for (Integer ech = 20; ech <= 180; ech = ech * 3) {
+		// echelle = ech.toString();
+		// String echStr = echelle + "m";
+		// System.out.println("echelle :" + echStr);
+		// // rootFile = new File(rootFile, echStr);
+		// List<File> fileToTest = new ArrayList<File>();
+		// fileToTest = selectWith("", null);
+		// mergeRasters(fileToTest, echStr + "analyse");
+		// }
 
 		// }
 
@@ -1350,4 +1374,5 @@ public class RasterAnalyse {
 		 * File statest = new File("/media/mcolomb/Data_2/resultTest/changement_grille/decal-180/stats-discrete/"); compareCities(listFil, statest);
 		 */
 	}
+
 }

@@ -17,11 +17,11 @@ import org.thema.mupcity.scenario.ScenarioAuto;
 public class SimulTask {
 
 	public static void main(String[] args) throws Exception {
-		File projFile = new File("/media/mcolomb/Data_2/resultExplo/testOct/exOct");
+		File projFile = new File("/home/mcolomb/workspace/mupcity-openMole/result/exOct/");
 
 		String name = "exOct";
 
-		boolean strict = true;
+		// for yager
 		double ahp0 = 0.111;
 		double ahp1 = 0.111;
 		double ahp2 = 0.111;
@@ -31,23 +31,33 @@ public class SimulTask {
 		double ahp6 = 0.111;
 		double ahp7 = 0.111;
 		double ahp8 = 0.111;
+		
+		//for moy
+//		double ahp0 = 1;
+//		double ahp1 = 1;
+//		double ahp2 = 1;
+//		double ahp3 = 1;
+//		double ahp4 = 1;
+//		double ahp5 = 1;
+//		double ahp6 = 1;
+//		double ahp7 = 1;
+//		double ahp8 = 1;
 
+		boolean strict = false;
 		boolean mean = true;
-		boolean useNU = true;
-int nMax = 5;
-	for (long seed = 42;seed <=1042;seed =seed +1){
-		run(projFile, name, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, useNU);
-	}
+		int nMax = 5;
+		long seed = 42;
+	//	for (long seed = 42; seed <= 1042; seed = seed + 1) {
+			run(projFile, name, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed);
+	//	}
 	}
 
-
-	
 	public static File run(File decompFile, String name, int nMax, boolean strict, double ahp0, double ahp1, double ahp2, double ahp3, double ahp4, double ahp5, double ahp6,
-			double ahp7, double ahp8, boolean mean, long seed, boolean useNU) throws Exception {
-		return run(decompFile, name, nMax, strict, prepareAHP(ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8), mean, seed, useNU);
+			double ahp7, double ahp8, boolean mean, long seed) throws Exception {
+		return run(decompFile, name, nMax, strict, prepareAHP(ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8), mean, seed);
 	}
 
-	public static File run(File projectFile, String name, int nMax, boolean strict, AHP ahp, boolean mean, long seed, boolean useNU) throws Exception {
+	public static File run(File projectFile, String name, int nMax, boolean strict, AHP ahp, boolean mean, long seed) throws Exception {
 
 		Project project = Project.load(new File(projectFile, name + ".xml"));
 		String nBa = "Ba";
@@ -62,15 +72,22 @@ int nMax = 5;
 		File projOut = new File(projectFile, scenarName);
 		projOut.mkdir();
 
+		boolean useNU = true;
+
+		System.out.println(project.getInfoLayer());
+		if(!project.hasNoBuild()){
+			useNU=false;
+		}
+			
 		NavigableSet<Double> res = project.getMSGrid().getResolutions();
 		ScenarioAuto scenario = ScenarioAuto.createMultiScaleScenario(scenarName, res.first(), res.last(), nMax, strict, ahp, useNU, mean, 3, seed, false, false);
 		project.performScenarioAuto(scenario);
 		scenario.extractEvalAnal(projOut, project);
-		
+
 		// save the project
-//		scenario.save(projOut, project);
-//		scenario.extractEvalAnal(projOut, project);
-//		project.getMSGrid().saveRaster(scenarName + "-eval", projOut);
+		// scenario.save(projOut, project);
+		// scenario.extractEvalAnal(projOut, project);
+		// project.getMSGrid().saveRaster(scenarName + "-eval", projOut);
 
 		return projOut;
 

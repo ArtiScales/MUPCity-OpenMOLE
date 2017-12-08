@@ -28,11 +28,18 @@ public class RasterMerge {
 
 	public static void main(String[] args) throws Exception {
 
-		File fileIn = new File("/media/mcolomb/Data_2/resultExplo/testNov/exOct");
-		File fileOut = new File("/media/mcolomb/Data_2/resultExplo/testNov/exOct/raster/remerged.tif");
+//		File fileIn = new File("/media/mcolomb/Data_2/resultExplo/testNov/exOct");
+//		File fileOut = new File("/media/mcolomb/Data_2/resultExplo/testNov/exOct/raster/remerged.tif");
+		File file1 = new File("/media/mcolomb/Data_2/resultExplo/testNov/exOct/N6_Ba_Yag_ahpx_seed_42/N6_Ba_Yag_ahpx_seed_42-eval_anal-20.0.tif");
+		File file2 = new File("/home/mcolomb/workspace/mupcity-openMole/result/exOct/N6_Ba_Yag_ahpx_seed_42/N6_Ba_Yag_ahpx_seed_42-eval_anal-20.0.tif");
+		File fileOut = new File("/home/mcolomb/workspace/mupcity-openMole/result/exOct/N6_Ba_Yag_ahpx_seed_42/merged.tiff");			
+		List<File> lFile = new ArrayList<File>();
+		lFile.add(file2);
+		lFile.add(file1);
+		
 		String nameSimul = "N5_St_Moy_ahpx_seed_";
-		String echelle = "20";
-		merge(fileIn, fileOut, nameSimul, echelle);
+		int echelle = 20;
+		merge(lFile, fileOut, echelle);
 	}
 
 	/** merge multiple raster to get their replication. Overloaded in the case of a raw mupcity output;
@@ -99,8 +106,6 @@ public class RasterMerge {
 		double yMin = env.getMinY();
 
 		for (int fInd = 0; fInd < (folderIn.size()); fInd++) {
-
-			System.out.println("Image n° " + fInd + "  sur " + (folderIn.size() - 1));
 
 			GeoTiffReader reader = new GeoTiffReader(folderIn.get(fInd));
 			GridCoverage2D coverage = reader.read(params);
