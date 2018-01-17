@@ -52,11 +52,14 @@ val exploStab = ExplorationTask((seed in rangeSeed) x
 							(folderIn in (workDirectory / "data"))
 							)
 
-val ProjectCreationTask = ScalaTask("val projectFile = fr.ign.ProjectCreationTask.run(name, folderIn, newDir(), xmin, ymin, width, height, xshift, yshift);val nameProjet = fr.ign.ProjectCreationTask.getName();") set (
+val ProjectCreationTask = ScalaTask("val projectFile = fr.ign.task.ProjectCreationTask.run(name, folderIn, newDir(), xmin, ymin, width, height, xshift, yshift);val nameProjet = fr.ign.task.ProjectCreationTask.getName();") set (
   libraries += workDirectory / "mupcity-openMole-0.0.1-SNAPSHOT-shaded.jar",
   name := "Stability",
   xmin := 914760.0,
   ymin := 6680157.0,
+  //vraies valeurs 
+  //width := 26590,
+   //height := 26590,
   width := 2000,
   height := 2000,
   xshift := 0.0,
@@ -65,7 +68,7 @@ val ProjectCreationTask = ScalaTask("val projectFile = fr.ign.ProjectCreationTas
   outputs += (projectFile, nameProjet, seed, strict,mean, nMax, folderIn)
 )
 
-val DecompTask = ScalaTask("fr.ign.DecompTask.run(projectFile, nameProjet, minSize, maxSize, seuilDensBuild);") set (
+val DecompTask = ScalaTask("fr.ign.task.DecompTask.run(projectFile, nameProjet, minSize, maxSize, seuilDensBuild);") set (
   libraries += workDirectory / "mupcity-openMole-0.0.1-SNAPSHOT-shaded.jar",
   minSize :=810,
   maxSize :=1620,
@@ -74,7 +77,7 @@ val DecompTask = ScalaTask("fr.ign.DecompTask.run(projectFile, nameProjet, minSi
  outputs += (projectFile, nameProjet, seed, strict,mean, nMax, folderIn)
 )
 
-val SimuTask = ScalaTask("fr.ign.SimulTask.run(projectFile, nameProjet, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed);val nameTotal = fr.ign.SimulTask.getName();") set (
+val SimuTask = ScalaTask("fr.ign.task.SimulTask.run(projectFile, nameProjet, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed);val nameTotal = fr.ign.task.SimulTask.getName();") set (
   libraries += workDirectory / "mupcity-openMole-0.0.1-SNAPSHOT-shaded.jar",
   ahp0 := 0.111,
   ahp1 := 0.111,
@@ -89,7 +92,7 @@ val SimuTask = ScalaTask("fr.ign.SimulTask.run(projectFile, nameProjet, nMax, st
   outputs += (projectFile, nameTotal,folderIn,nameProjet)
 )
 
-val ResultTask = ScalaTask("val resultFile = fr.ign.RasterAnalyseTask.runStab(projectFile, folderIn, nameTotal);") set (
+val ResultTask = ScalaTask("val resultFile = fr.ign.task.RasterAnalyseTask.runStab(projectFile, folderIn, nameTotal);") set (
   libraries += workDirectory / "mupcity-openMole-0.0.1-SNAPSHOT-shaded.jar",
   inputs += (projectFile, folderIn, nameTotal),
   outputs += (resultFile, projectFile)
