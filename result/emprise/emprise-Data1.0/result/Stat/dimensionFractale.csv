@@ -1,0 +1,36 @@
+scenario N5_St-20
+dimension de corrélation,1.2711322008061874
+R2,0.9904794877504083
+BootStrap Confidence Interval Low,1.1691158913900952
+BootStrap Confidence Interval High,1.375171664272817
+
+scenario N5_St-60
+dimension de corrélation,1.2818173326320412
+R2,0.9806221033513435
+BootStrap Confidence Interval Low,1.1289404329858614
+BootStrap Confidence Interval High,1.4337011189114024
+
+scenario N5_St-180
+dimension de corrélation,1.3147665307853655
+R2,0.9665891864884679
+BootStrap Confidence Interval Low,1.1165890624435821
+BootStrap Confidence Interval High,1.5186457066830819
+
+scenario N5_St-20
+dimension de corrélation,1.2711322008061874
+R2,0.9904794877504083
+BootStrap Confidence Interval Low,1.1705193672265393
+BootStrap Confidence Interval High,1.3751616840810355
+
+scenario N5_St-60
+dimension de corrélation,1.2818173326320412
+R2,0.9806221033513435
+BootStrap Confidence Interval Low,1.1219901950268025
+BootStrap Confidence Interval High,1.4349548835867698
+
+scenario N5_St-180
+dimension de corrélation,1.3147665307853655
+R2,0.9665891864884679
+BootStrap Confidence Interval Low,1.1127771076712434
+BootStrap Confidence Interval High,1.5187944071848887
+

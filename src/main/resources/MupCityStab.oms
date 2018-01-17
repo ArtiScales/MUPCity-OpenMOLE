@@ -1,14 +1,14 @@
-
-
 val name = Val[String]
+val nameProjet = Val[String]
+val nameTotal = Val[String]
 val folderIn = Val[File]
-val dataFiles = ListDirectoriesSource(workDirectory / "data", folderIn)
+//val dataFiles = ListDirectoriesSource(workDirectory / "data")
 val folderOut = Val[File]
 val projectFile = Val[File]
+val resultFile = Val[File]
 val resultFolder = workDirectory / "results"
 
-val rangeSeed = (42L to 1042L)
-val rangenMax = (3 to 7)
+val rangeSeed = (42L to 42L) // (42L to 1042L)
 
 //project param
 val seed = Val[Long]
@@ -18,10 +18,10 @@ val width = Val[Double]
 val height = Val[Double]
 val xshift = Val[Double]
 val yshift = Val[Double]
-val dataHT = Vam[Collection]
 
 //decomp param
 val threshold = Val[Double]
+val seuilDensBuild=Val[Double]
 val minSize = Val[Double]
 val maxSize = Val[Double]
 
@@ -39,37 +39,42 @@ val mean = Val[Boolean]
 val strict = Val[Boolean]
 val nMax = Val[Int]
 
+//val exploStab = ExplorationTask((seed in rangeSeed) x 
+//								(nMax in (3 to 7 by 1)) x 	
+//								(mean in List(true,false)) x
+//								(strict in List(true,false)) x
+//								(folderIn in (workDirectory / "data"))
+//								)
+val exploStab = ExplorationTask((seed in rangeSeed) x 
+								(nMax in (3 to 3 by 1)) x 	
+							(mean in List(true)) x
+							(strict in List(true)) x
+							(folderIn in (workDirectory / "data"))
+							)
 
-val exploStab = ExplorationTask(seed in rangeSeed x 
-								nMax in rangenMax x 	
-								mean in List("True","False") x
-								strict in List("True","False") x
-								folderIn in dataFiles
-								)
-
-val ProjectCreationTask = ScalaTask("val projectFile = newDir(); val projectFile = fr.ign.ProjectCreationTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY)") set (
+val ProjectCreationTask = ScalaTask("val projectFile = fr.ign.ProjectCreationTask.run(name, folderIn, newDir(), xmin, ymin, width, height, xshift, yshift);val nameProjet = fr.ign.ProjectCreationTask.getName();") set (
   libraries += workDirectory / "mupcity-openMole-0.0.1-SNAPSHOT-shaded.jar",
-  folderIn := workDirectory / dataFiles	,
-  name := Stability,
+  name := "Stability",
   xmin := 914760.0,
   ymin := 6680157.0,
-  width := 28303.0,
-  height := 21019.0,
+  width := 2000,
+  height := 2000,
   xshift := 0.0,
   yshift := 0.0,
-  inputs += (name, folderIn, xmin, ymin, width, height, xshift, yshift),
-  outputs += (projectFile)
+  inputs += (name, folderIn, xmin, ymin, width, height, xshift, yshift, seed, strict,mean, nMax, folderIn),
+  outputs += (projectFile, nameProjet, seed, strict,mean, nMax, folderIn)
 )
 
-val ProjectCreationTask = ScalaTask("fr.ign.DecompTask.run(projectFile, name, minSize, maxSize, seuilDensBuild);") set (
+val DecompTask = ScalaTask("fr.ign.DecompTask.run(projectFile, nameProjet, minSize, maxSize, seuilDensBuild);") set (
   libraries += workDirectory / "mupcity-openMole-0.0.1-SNAPSHOT-shaded.jar",
-  minSize :=20,
-  maxSize :=1620 
-  seuilDensBuild :=0
-  inputs += (projectFile,name,minSize,maxSize,seuilDensBuild),
+  minSize :=810,
+  maxSize :=1620,
+  seuilDensBuild :=0,
+  inputs += (projectFile,nameProjet,minSize,maxSize,seuilDensBuild, seed, strict,mean, nMax, folderIn),
+ outputs += (projectFile, nameProjet, seed, strict,mean, nMax, folderIn)
 )
 
-val SimuTask = ScalaTask("fr.ign.SimulTask.run(projectFile, name, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed)") set (
+val SimuTask = ScalaTask("fr.ign.SimulTask.run(projectFile, nameProjet, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed);val nameTotal = fr.ign.SimulTask.getName();") set (
   libraries += workDirectory / "mupcity-openMole-0.0.1-SNAPSHOT-shaded.jar",
   ahp0 := 0.111,
   ahp1 := 0.111,
@@ -80,25 +85,20 @@ val SimuTask = ScalaTask("fr.ign.SimulTask.run(projectFile, name, nMax, strict, 
   ahp6 := 0.111,
   ahp7 := 0.111,
   ahp8 := 0.111,
-  inputs += (projectFile, name, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed),
-  outputs += (folderOut)
+  inputs += (projectFile, nameProjet, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, folderIn),
+  outputs += (projectFile, nameTotal,folderIn,nameProjet)
 )
 
-val ResultTask = ScalaTask("val resultFile = newDir(); val resultFile = fr.ign.RasterAnalyseTask.runStab(projectFile, discreteFile, buildFile, name);") set (
+val ResultTask = ScalaTask("val resultFile = fr.ign.RasterAnalyseTask.runStab(projectFile, folderIn, nameTotal);") set (
   libraries += workDirectory / "mupcity-openMole-0.0.1-SNAPSHOT-shaded.jar",
-  discreteFile := workDirectory / "data/admin_typo.shp",
-  buildFile := workDirectory / "data/batiment.shp",
-  inputs += (projectFile, discreteFile,buildFile,name),
-  outputs += (resultFile)
+  inputs += (projectFile, folderIn, nameTotal),
+  outputs += (resultFile, projectFile)
 )
 
 val copyHook =  CopyFileHook(resultFile, resultFolder / "${projectFile}")
 
-//val env = LocalEnvironment(6)
+//val env = EGIEnvironment(  "vo.complex-systems.eu",openMOLEMemory = 2048 megabytes)
 
-val env = EGIEnvironment(
-  "vo.complex-systems.eu",
-  openMOLEMemory = 2048 megabytes
-)
+val env = LocalEnvironment(4)
 
-explo -< (ProjectCreationTask -- DecompTask -- SimuTask -- ResultTask  on env hook (copyHook))
+exploStab -< (ProjectCreationTask  on env) -- (DecompTask on env)-- (SimuTask on env)-- (ResultTask on env hook copyHook)

@@ -1,0 +1,5 @@
+scenario,echelle,nombre moyen de cellules sélectionnées par simulations,ecart-type du nombre des cellules sélectionnées par simulations,coeff de variation du nombre de cellules sélectionnées par simulations,repet 1,repet 2,repet 3,repet 4,repet 5,repet 6,repet 7,repet 8,repet 9,repet 10,null,moyenne evaluation des cellules instables,ecart type des cellules instables,coefficient de variation des cellules instables,moyenne evaluation des cellules stables,ecart type des cellules stables,coefficient de variation des cellules stables,null,
+comp_data,20.0,119755.0,0.0,0.0,0.0,119755.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.44535419017861655,0.09911577925400028,0.22255494938589954,NaN,NaN,NaN,0.0,
+comp_data,20.0,121391.0,0.0,0.0,0.0,121391.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.44201454516690175,0.09554913410824412,0.21616739800308019,NaN,NaN,NaN,0.0,
+comp_data,20.0,3871.0,0.0,0.0,0.0,3871.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.06247924711526712,0.10928437793413602,1.7491308391171672,NaN,NaN,NaN,0.0,
+comp_data,20.0,44976.0,0.0,0.0,0.0,44976.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.46778245301097504,0.09950954150209267,0.21272610988629365,NaN,NaN,NaN,0.0,

@@ -1,0 +1,18 @@
+scenario N5_St
+dimension de corrélation,1.510046812501521
+R2,0.9999185907422316
+BootStrap Confidence Interval Low,1.4976253973673261
+BootStrap Confidence Interval High,1.51774993718337
+
+scenario N5_St
+dimension de corrélation,1.510046812501521
+R2,0.9999185907422316
+BootStrap Confidence Interval Low,1.497500117806842
+BootStrap Confidence Interval High,1.5178171324353926
+
+scenario N5_St
+dimension de corrélation,1.510046812501521
+R2,0.9999185907422316
+BootStrap Confidence Interval Low,1.4982170127421648
+BootStrap Confidence Interval High,1.5176016780295614
+
