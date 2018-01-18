@@ -30,7 +30,7 @@ public static String nameDec;
 			return projFile;
 	}
 	
-	private static void cleanProject(Project project) throws IOException {
+	public static void cleanProject(Project project) throws IOException {
 		// TODO mettre propre :  vraiment pas beau mais je jette l'éponge sur les milliers de types d'objets différents pour pouvoir retrouver le shapefile des layers
 		for (File f : project.getDirectory().listFiles()) {
 			if (f.getName().endsWith(".shp") || f.getName().endsWith(".dbf") || f.getName().endsWith(".fix") || f.getName().endsWith(".prj") || f.getName().endsWith(".shx")) {

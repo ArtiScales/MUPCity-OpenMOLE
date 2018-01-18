@@ -7,20 +7,22 @@ val folderOut = Val[File]
 val projectFile = Val[File]
 val resultFile = Val[File]
 val resultFolder = workDirectory / "results"
-
-val rangeSeed = (42L to 42L) // (42L to 1042L)
+val seed = 42L 
 
 //project param
-val seed = Val[Long]
 val xmin = Val[Double]
 val ymin = Val[Double]
+
+
 val width = Val[Double]
 val height = Val[Double]
 val xshift = Val[Double]
+val xRange:List[Double] = List()
 val yshift = Val[Double]
 
 //decomp param
 val seuilDensBuild=Val[Double]
+val seuilRange: List[Double] = List(0.00001,0.0001,0.001,0.01)
 val minSize = Val[Double]
 val maxSize = Val[Double]
 
@@ -38,18 +40,14 @@ val mean = Val[Boolean]
 val strict = Val[Boolean]
 val nMax = Val[Int]
 
-//val exploStab = ExplorationTask((seed in rangeSeed) x 
-//								(nMax in (3 to 7 by 1)) x 	
-//								(mean in List(true,false)) x
-//								(strict in List(true,false)) x
-//								(folderIn in (workDirectory / "data"))
-//								)
-val exploStab = ExplorationTask((seed in rangeSeed) x 
-								(nMax in (3 to 3 by 1)) x 	
-							(mean in List(true)) x
-							(strict in List(true)) x
-							(folderIn in (workDirectory / "data"))
-							)
+val exploStab = ExplorationTask((nMax in (5 to 6 by 1)) x 	
+								(mean in List(true,false)) x
+								(strict in List(true,false)) x
+								(xmin in (915768.0 to 916128.0 by 20)x
+								(ymin in (6677157.0 to 6677517.0 by 20)x
+								(minSize in (15 to 25 by 1)x
+								(seuilDensBuild in seuilRange)
+								)
 
 val ProjectCreationTask = ScalaTask("val projectFile = fr.ign.task.ProjectCreationTask.run(name, folderIn, newDir(), xmin, ymin, width, height, xshift, yshift,maxSize,minSize,seuilDensBuild);val nameProjet = fr.ign.task.ProjectCreationTask.getName();") set (
   libraries += workDirectory / "mupcity-openMole-0.0.1-SNAPSHOT-shaded.jar",
@@ -58,7 +56,7 @@ val ProjectCreationTask = ScalaTask("val projectFile = fr.ign.task.ProjectCreati
   ymin := 6677337.0,
   //vraies valeurs 
   //width := 26590,
-   //height := 26590,
+  //height := 26590,
   width := 2000,
   height := 2000,
   xshift := 0.0,

@@ -42,24 +42,27 @@ public class ProjectCreationTask {
 		double ymin = 6680157;
 		double shiftX = 50;
 		double shiftY = 50;
+		double minSize = 20;
+		double maxSize = 25273;
+		double seuilDensBuild = 0;
 
 		DataSetSelec.main(args);
 		Map<String, String> dataHTproj = DataSetSelec.get("Data2.2");
 
 		System.out.println(dataHTproj);
 
-		ProjectCreationTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHTproj);
+		ProjectCreationTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHTproj,maxSize, minSize, seuilDensBuild);
 	}
 	
 	
 
-	public static File run(String name, File folderIn, File folderOut, double xmin, double ymin, double width, double height, double shiftX, double shiftY) throws Exception {
+	public static File run(String name, File folderIn, File folderOut, double xmin, double ymin, double width, double height, double shiftX, double shiftY, double maxSize, double minSize, double seuilDensBuild) throws Exception {
 		Map<String, String> dataHT = DataSetSelec.dig(folderIn);
-		return run( name,  folderIn,  folderOut,  xmin,  ymin,  width,  height,  shiftX,  shiftY,dataHT);
+		return run( name,  folderIn,  folderOut,  xmin,  ymin,  width,  height,  shiftX,  shiftY,dataHT, maxSize, minSize, seuilDensBuild);
 	}
 	
 	public static File run(String name, File folderIn, File folderOut, double xmin, double ymin, double width, double height, double shiftX, double shiftY,
-			Map<String, String> dataHT) throws Exception {
+			Map<String, String> dataHT, double maxSize, double minSize, double seuilDensBuild) throws Exception {
 		TaskMonitor mon = new TaskMonitor.EmptyMonitor();
 		
 		// Dossier intermédiaire avec les fichiers transformées
@@ -84,7 +87,7 @@ public class ProjectCreationTask {
 
 		//	complete the name
 		
-		nameProj = name +"-"+ dataHT.get("name");
+		nameProj = name +"-"+ dataHT.get("name")+"-"+minSize+"-"+seuilDensBuild;
 		
 		// put in line for the massacre
 		File[] listMassacre = { buildFile, roadFile, facilityFile, leisureFile, busFile, trainFile, restrictFile };
@@ -137,8 +140,11 @@ public class ProjectCreationTask {
 					fDelete.delete();
 				}
 			}
-
 		}
+		
+		project.decomp(3, maxSize, minSize, seuilDensBuild, mon, false);
+		project.save();
+		DecompTask.cleanProject(project);
 		return new File(folderOut, nameProj);
 	}
 

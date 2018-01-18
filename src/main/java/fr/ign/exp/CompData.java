@@ -64,7 +64,7 @@ public class CompData {
 			double shiftY, double minSize, double maxSize, double seuilDensBuild, int nMax, boolean strict, double ahp0, double ahp1, double ahp2, double ahp3, double ahp4,
 			double ahp5, double ahp6, double ahp7, double ahp8, boolean mean, long seed, Map<String, String> dataHT) throws Exception {
 		System.out.println("----------Project creation----------");
-		File projectFile = ProjectCreationTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT);
+		File projectFile = ProjectCreationTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT,minSize, maxSize, seuilDensBuild);
 		System.out.println("----------Decomp task----------");
 		DecompTask.run(projectFile, name, minSize, maxSize, seuilDensBuild);
 		System.out.println("----------Simulation task----------");

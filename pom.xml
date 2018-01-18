@@ -20,6 +20,13 @@
 					<source>1.8</source>
 					<complianceLevel>1.8</complianceLevel>
 					<target>1.8</target>
+    				<excludes>
+      					<exclude>**/CompData.java</exclude>
+      					<exclude>**/MouvData.java</exclude>
+      					<exclude>**/MouvGrid.java</exclude>
+      					<exclude>**/TestStabilite.java</exclude>
+      					<exclude>**/TotalTests.java</exclude>
+    				</excludes>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -71,11 +78,16 @@
 			<groupId>org.thema</groupId>
 			<artifactId>mupcity</artifactId>
 			<version>${mupcity.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.thema</groupId>
-			<artifactId>fracgis</artifactId>
-			<version>0.6.3</version>
+            <exclusions>
+              <exclusion>
+                <groupId>javax.media</groupId>
+                <artifactId>jai_core</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>javax.media</groupId>
+                <artifactId>jai_codec</artifactId>
+              </exclusion>
+            </exclusions>			
 		</dependency>
 	</dependencies>
 	<repositories>

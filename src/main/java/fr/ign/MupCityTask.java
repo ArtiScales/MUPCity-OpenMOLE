@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.geotools.feature.SchemaException;
-import org.thema.drawshape.layer.GroupLayer;
 import org.thema.mupcity.MupCityCLI;
 
 public class MupCityTask {

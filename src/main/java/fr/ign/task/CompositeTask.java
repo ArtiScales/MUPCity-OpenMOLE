@@ -70,15 +70,15 @@ public class CompositeTask {
 			double shiftY, double minSize, double maxSize, double seuilDensBuild, int nMax, boolean strict, double ahp0, double ahp1, double ahp2, double ahp3, double ahp4,
 			double ahp5, double ahp6, double ahp7, double ahp8, boolean mean, long seed, Map<String, String> dataHT) throws Exception {
 		System.out.println("----------Project creation----------");
-		File projectFile = ProjectCreationTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT);
-		System.out.println("----------Decomp task----------");
-		DecompTask.run(projectFile, ProjectCreationTask.getName(), minSize, maxSize, seuilDensBuild);
+		File projectFile = ProjectCreationTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT,maxSize,minSize,seuilDensBuild);
+//		System.out.println("----------Decomp task----------");
+//		DecompTask.run(projectFile, ProjectCreationTask.getName(), minSize, maxSize, seuilDensBuild);
 		System.out.println("----------Simulation task----------");
-		for (long seedCh = 42; seedCh < 1042; seedCh = seedCh + 1) {
+		for (long seedCh = 42; seedCh < 142; seedCh = seedCh + 1) {
 			SimulTask.run(projectFile, ProjectCreationTask.getName(), nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seedCh);
 		}
-		File resultFile = RasterAnalyseTask.runStab(projectFile, discreteFile, buildFile, SimulTask.getName());
+		//File resultFile = RasterAnalyseTask.runStab(projectFile, discreteFile, buildFile, SimulTask.getName());
 		System.out.println("----------End task----------");
-		return resultFile;
+		return projectFile;
 	}
 }

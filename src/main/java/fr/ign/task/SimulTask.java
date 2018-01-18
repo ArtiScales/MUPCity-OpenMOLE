@@ -1,15 +1,10 @@
 package fr.ign.task;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NavigableSet;
 
-import org.geotools.data.simple.SimpleFeatureCollection;
-import org.thema.drawshape.DrawableShape;
-import org.thema.drawshape.layer.Layer;
 import org.thema.mupcity.AHP;
 import org.thema.mupcity.Project;
 import org.thema.mupcity.scenario.ScenarioAuto;
@@ -19,9 +14,9 @@ public class SimulTask {
 	public static String nameTot;
 
 	public static void main(String[] args) throws Exception {
-		File projFile = new File("/home/mcolomb/workspace/mupcity-openMole/result/exOct/");
+		File projFile = new File("/home/mcolomb/workspace/mupcity-openMole/result/emprise/emprise-Data1.0");
 
-		String name = "exOct";
+		String name = "emprise-Data1.0";
 
 		// for yager
 		double ahp0 = 0.111;
