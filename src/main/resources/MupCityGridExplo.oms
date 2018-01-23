@@ -1,24 +1,26 @@
+//names
 val name = Val[String]
 val nameProjet = Val[String]
 val nameTotal = Val[String]
+
+//files
 val folderIn = Val[File]
-//val dataFiles = ListDirectoriesSource(workDirectory / "data")
 val folderOut = Val[File]
 val projectFile = Val[File]
 val resultFile = Val[File]
 val resultFolder = workDirectory / "results"
-val seed = 42L 
+
 
 //project param
 val xmin = Val[Double]
 val ymin = Val[Double]
-
-
 val width = Val[Double]
 val height = Val[Double]
 val xshift = Val[Double]
-val xRange:List[Double] = List()
 val yshift = Val[Double]
+val xRange:List[Double] = List(915768,915888,915928,915948,915968,916008,916128)
+val yRange:List[Double] = List(6677157,6677277,6677317,6677337,6677357,6677397,6677517)
+
 
 //decomp param
 val seuilDensBuild=Val[Double]
@@ -27,6 +29,7 @@ val minSize = Val[Double]
 val maxSize = Val[Double]
 
 //scenar param
+val seed = Val[Long]
 val ahp0 = Val[Double]
 val ahp1 = Val[Double]
 val ahp2 = Val[Double]
@@ -43,29 +46,26 @@ val nMax = Val[Int]
 val exploStab = ExplorationTask((nMax in (5 to 6 by 1)) x 	
 								(mean in List(true,false)) x
 								(strict in List(true,false)) x
-								(xmin in (915768.0 to 916128.0 by 20)x
-								(ymin in (6677157.0 to 6677517.0 by 20)x
-								(minSize in (15 to 25 by 1)x
+								(xmin in xRange)x
+								(ymin in yRange)x
+								(minSize in (15.0 to 25.0 by 1.0))x
 								(seuilDensBuild in seuilRange)
 								)
 
-val ProjectCreationTask = ScalaTask("val projectFile = fr.ign.task.ProjectCreationTask.run(name, folderIn, newDir(), xmin, ymin, width, height, xshift, yshift,maxSize,minSize,seuilDensBuild);val nameProjet = fr.ign.task.ProjectCreationTask.getName();") set (
+val ProjectCreationTask = ScalaTask("val (projectFile,nameProjet) = (fr.ign.task.ProjectCreationDecompTask.run(name, folderIn, newDir(), xmin, ymin, width, height, xshift, yshift,maxSize,minSize,seuilDensBuild), fr.ign.task.ProjectCreationTask.getName())") set (
   libraries += workDirectory / "mupcity-openMole-0.0.1-SNAPSHOT-shaded.jar",
-  name := "Stability",
-  xmin := 915948.0,
-  ymin := 6677337.0,
+  name := "GridExplo",
   //vraies valeurs 
   //width := 26590,
   //height := 26590,
+  folderIn := workDirectory / "data" / "dataAutom",
   width := 2000,
   height := 2000,
   xshift := 0.0,
   yshift := 0.0,
-  minSize :=810,
   maxSize :=1620,
-  seuilDensBuild :=0,
-  inputs += (name, folderIn, xmin, ymin, width, height, xshift, yshift, seed, strict,mean, nMax, folderIn,minSize,maxSize,seuilDensBuild),
-  outputs += (projectFile, nameProjet, seed, strict,mean, nMax, folderIn)
+  inputs += (name, folderIn, xmin, ymin, width, height, xshift, yshift, strict, mean, nMax, minSize, maxSize, seuilDensBuild),
+  outputs += (projectFile, nameProjet, strict,mean, nMax, folderIn)
 )
 
 val SimuTask = ScalaTask("fr.ign.task.SimulTask.run(projectFile, nameProjet, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed);val nameTotal = fr.ign.task.SimulTask.getName();") set (
@@ -79,12 +79,13 @@ val SimuTask = ScalaTask("fr.ign.task.SimulTask.run(projectFile, nameProjet, nMa
   ahp6 := 0.111,
   ahp7 := 0.111,
   ahp8 := 0.111,
+  seed := 42L,
   inputs += (projectFile, nameProjet, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, folderIn),
   outputs += (projectFile, nameTotal,folderIn,nameProjet)
 )
 
 val ResultTask = ScalaTask("val resultFile = fr.ign.task.RasterAnalyseTask.runStab(projectFile, folderIn, nameTotal);") set (
-  libraries += workDirectory / "mupcity-openMole-0.0.1-SNAPSHOT-shaded.jar",
+  libraries += workDirectory / "fracgis-openMole-0.0.1-SNAPSHOT-shaded.jar",
   inputs += (projectFile, folderIn, nameTotal),
   outputs += (resultFile, projectFile)
 )
@@ -95,4 +96,4 @@ val copyHook =  CopyFileHook(resultFile, resultFolder / "${projectFile}")
 
 val env = LocalEnvironment(4)
 
-exploStab -< (ProjectCreationTask  on env) -- (DecompTask on env)-- (SimuTask on env)-- (ResultTask on env hook copyHook)
+exploStab -< (ProjectCreationTask  on env) -- (SimuTask on env)-- (ResultTask on env hook copyHook)

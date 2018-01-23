@@ -11,13 +11,13 @@ public class CompositeTask {
 		DataSetSelec.predefSet();
 		Map<String, String> dataHT = DataSetSelec.get("Data1.0");
 
-		String name = "emprise";
+		String name = "gridExplo";
 		File folderIn = new File("./data/");
 		File folderOut = new File("./result/emprise");
 		File discreteFile = new File("/home/mcolomb/informatique/MUP/explo/dataExtra/admin_typo.shp");
 		File buildFile = new File("/home/mcolomb/donnee/couplage/donneeGeographiques/batiment.shp");
-		double width = 26590/20;
-		double height = 26590/20;
+		double width = 26590 / 20;
+		double height = 26590 / 20;
 		double xmin = 915948;
 		double ymin = 6677337;
 		double shiftX = 0;
@@ -52,9 +52,19 @@ public class CompositeTask {
 
 		boolean mean = true;
 		long seed = 42;
-		File filout = run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0,
-				ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
-		System.out.println(filout);
+		
+		for (nMax = 5; nMax <= 6; nMax = nMax + 1) {
+			for (xmin = 915948; xmin <= 915968; xmin = xmin + 20) {
+				for (ymin = 915948; ymin <= 915968; ymin = ymin + 20) {
+					for (seuilDensBuild = 0; seuilDensBuild <= 0.0001; seuilDensBuild = seuilDensBuild + 0.0001) {
+						for (minSize = 19; minSize <= 20; minSize = minSize + 1) {
+							run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0,
+									ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
+						}
+					}
+				}
+			}
+		}
 	}
 
 	public static File run(String name, File folderIn, File folderOut, File discreteFile, File buildFile, double xmin, double ymin, double width, double height, double shiftX,
@@ -69,15 +79,10 @@ public class CompositeTask {
 	public static File run(String name, File folderIn, File folderOut, File discreteFile, File buildFile, double xmin, double ymin, double width, double height, double shiftX,
 			double shiftY, double minSize, double maxSize, double seuilDensBuild, int nMax, boolean strict, double ahp0, double ahp1, double ahp2, double ahp3, double ahp4,
 			double ahp5, double ahp6, double ahp7, double ahp8, boolean mean, long seed, Map<String, String> dataHT) throws Exception {
-		System.out.println("----------Project creation----------");
-		File projectFile = ProjectCreationTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT,maxSize,minSize,seuilDensBuild);
-//		System.out.println("----------Decomp task----------");
-//		DecompTask.run(projectFile, ProjectCreationTask.getName(), minSize, maxSize, seuilDensBuild);
+		System.out.println("----------Project & Decomp creation----------");
+		File projectFile = ProjectCreationDecompTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT, maxSize, minSize, seuilDensBuild);
 		System.out.println("----------Simulation task----------");
-		for (long seedCh = 42; seedCh < 142; seedCh = seedCh + 1) {
-			SimulTask.run(projectFile, ProjectCreationTask.getName(), nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seedCh);
-		}
-		//File resultFile = RasterAnalyseTask.runStab(projectFile, discreteFile, buildFile, SimulTask.getName());
+		SimulTask.run(projectFile, ProjectCreationDecompTask.getName(), nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed);
 		System.out.println("----------End task----------");
 		return projectFile;
 	}

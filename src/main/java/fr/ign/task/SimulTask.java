@@ -82,7 +82,7 @@ public class SimulTask {
 		project.performScenarioAuto(scenario);
 		scenario.extractEvalAnal(projOut, project);
 
-		setName(DecompTask.getName()+"_"+scenarName);
+		setName(ProjectCreationDecompTask.getName()+"_"+scenarName);
 		
 		// save the project
 		if (saveWholeProj) {

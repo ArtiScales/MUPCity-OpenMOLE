@@ -1,7 +1,9 @@
 package fr.ign.task;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -27,7 +29,7 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import fr.ign.exp.DataSetSelec;
 
-public class ProjectCreationTask {
+public class ProjectCreationDecompTask {
 
 	public static String nameProj;
 	
@@ -51,7 +53,7 @@ public class ProjectCreationTask {
 
 		System.out.println(dataHTproj);
 
-		ProjectCreationTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHTproj,maxSize, minSize, seuilDensBuild);
+		run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHTproj,maxSize, minSize, seuilDensBuild);
 	}
 	
 	
@@ -144,13 +146,23 @@ public class ProjectCreationTask {
 		
 		project.decomp(3, maxSize, minSize, seuilDensBuild, mon, false);
 		project.save();
-		DecompTask.cleanProject(project);
+		cleanProject(project);
 		return new File(folderOut, nameProj);
 	}
 
 	public static String getName(){
 		return nameProj;
 	}
+	
+	public static void cleanProject(Project project) throws IOException {
+		// TODO mettre propre :  vraiment pas beau mais je jette l'éponge sur les milliers de types d'objets différents pour pouvoir retrouver le shapefile des layers
+		for (File f : project.getDirectory().listFiles()) {
+			if (f.getName().endsWith(".shp") || f.getName().endsWith(".dbf") || f.getName().endsWith(".fix") || f.getName().endsWith(".prj") || f.getName().endsWith(".shx")) {
+				Files.delete(f.toPath());
+			}
+		}
+
+}
 	
 	private static void translateSHP(File fileIn, File fileOut, double shiftX, double shiftY) throws Exception {
 		ShapefileDataStore dataStore = new ShapefileDataStore(fileIn.toURI().toURL());
