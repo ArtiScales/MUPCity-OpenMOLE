@@ -5,11 +5,36 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NavigableSet;
 
+import javax.imageio.spi.IIORegistry;
+import javax.media.jai.JAI;
+import javax.media.jai.OperationRegistry;
+
 import org.thema.mupcity.AHP;
 import org.thema.mupcity.Project;
 import org.thema.mupcity.scenario.ScenarioAuto;
 
+import com.sun.media.jai.imageioimpl.ImageReadWriteSpi;
+
+import it.geosolutions.imageio.stream.input.spi.URLImageInputStreamSpi;
+
 public class SimulTask {
+//    static {
+//        IIORegistry.getDefaultInstance().registerServiceProvider(new URLImageInputStreamSpi());
+//    }
+    protected static void initJAI() {
+        
+        // See [URL]http://docs.oracle.com/cd/E17802_01/products/products/java-media/jai/forDevelopers/jai-apidocs/javax/media/jai/OperationRegistry.html[/URL]
+        OperationRegistry registry = JAI.getDefaultInstance().getOperationRegistry();
+        if( registry == null) {
+            System.out.println("Error with JAI initialization (needed for GeoTools).");
+        } else {
+            try {
+                new ImageReadWriteSpi().updateRegistry(registry);
+            } catch(IllegalArgumentException e) {
+                // Probably indicates it was already registered.
+            }
+        }
+    }
 	public static boolean saveWholeProj = false;
 	public static String nameTot;
 
@@ -51,6 +76,7 @@ public class SimulTask {
 
 	public static File run(File decompFile, String name, int nMax, boolean strict, double ahp0, double ahp1, double ahp2, double ahp3, double ahp4, double ahp5, double ahp6,
 			double ahp7, double ahp8, boolean mean, long seed) throws Exception {
+	    initJAI();
 		return run(decompFile, name, nMax, strict, prepareAHP(ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8), mean, seed);
 	}
 
