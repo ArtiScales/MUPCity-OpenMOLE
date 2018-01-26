@@ -78,19 +78,25 @@
 			<groupId>org.thema</groupId>
 			<artifactId>mupcity</artifactId>
 			<version>${mupcity.version}</version>
-            <exclusions>
-              <exclusion>
-                <groupId>javax.media</groupId>
-                <artifactId>jai_core</artifactId>
-              </exclusion>
-              <exclusion>
-                <groupId>javax.media</groupId>
-                <artifactId>jai_codec</artifactId>
-              </exclusion>
-            </exclusions>			
+<!--             <exclusions> -->
+<!--               <exclusion> -->
+<!--                 <groupId>javax.media</groupId> -->
+<!--                 <artifactId>jai_core</artifactId> -->
+<!--               </exclusion> -->
+<!--               <exclusion> -->
+<!--                 <groupId>javax.media</groupId> -->
+<!--                 <artifactId>jai_codec</artifactId> -->
+<!--               </exclusion> -->
+<!--             </exclusions>			 -->
 		</dependency>
 	</dependencies>
 	<repositories>
+	       <repository>
+            <id>thema-sf</id>
+            <name>ThéMA libs Repository</name>
+            <url>http://themalibs.sourceforge.net/repository/</url>
+        </repository>
+	
 		<repository>
 			<id>ign-snapshots</id>
 			<name>Cogit Snapshots Repository</name>
