@@ -9,11 +9,16 @@ import org.thema.mupcity.AHP;
 import org.thema.mupcity.Project;
 import org.thema.mupcity.scenario.ScenarioAuto;
 
-public class SimulTask {
-	public static boolean saveWholeProj = false;
-	public static String nameTot;
+import javax.imageio.spi.IIORegistry;
+import it.geosolutions.imageio.stream.input.spi.URLImageInputStreamSpi;
 
-	public static void main(String[] args) throws Exception {
+public class SimulTask {
+    public static boolean saveWholeProj = false;
+    public static String nameTot;
+    static {
+        IIORegistry.getDefaultInstance().registerServiceProvider(new URLImageInputStreamSpi());
+    }
+    public static void main(String[] args) throws Exception {
 		File projFile = new File("/home/mcolomb/workspace/mupcity-openMole/result/emprise/emprise-Data1.0");
 
 		String name = "emprise-Data1.0";
