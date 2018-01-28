@@ -51,7 +51,7 @@ val exploStab = ExplorationTask((seed in rangeSeed) x
 							(folderIn in (workDirectory / "data"))
 							)
 
-val ProjectCreationTask = ScalaTask("val (projectFile,nameProjet) = (fr.ign.task.ProjectCreationDecompTask.run(name, folderIn, newDir(), xmin, ymin, width, height, xshift, yshift,maxSize,minSize,seuilDensBuild),fr.ign.task.ProjectCreationTask.getName())") set (
+val ProjectCreationTask = ScalaTask("val (projectFile,nameProjet) = (fr.ign.task.ProjectCreationDecompTask.run(name, folderIn, newDir(), xmin, ymin, width, height, xshift, yshift,maxSize,minSize,seuilDensBuild),fr.ign.task.ProjectCreationDecompTask.getName())") set (
   libraries += workDirectory / "mupcity-openMole-0.0.1-SNAPSHOT-shaded.jar",
   name := "Stability",
   xmin := 915948.0,
