@@ -17,10 +17,19 @@ import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.data.simple.SimpleFeatureStore;
 import org.geotools.data.store.ContentFeatureCollection;
+import org.geotools.factory.CommonFactoryFinder;
+import org.geotools.factory.GeoTools;
+import org.geotools.factory.Hints;
 import org.geotools.feature.DefaultFeatureCollection;
+import org.geotools.feature.DefaultFeatureCollections;
+import org.geotools.filter.FilterFactoryImpl;
 import org.geotools.geometry.jts.JTS;
+import org.geotools.referencing.factory.ReferencingObjectFactory;
+import org.geotools.referencing.factory.epsg.FactoryUsingWKT;
+import org.geotools.referencing.operation.DefaultMathTransformFactory;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.referencing.datum.DatumAuthorityFactory;
 import org.thema.common.swing.TaskMonitor;
 import org.thema.mupcity.Project;
 import org.thema.mupcity.rule.OriginDistance;
@@ -32,41 +41,62 @@ import fr.ign.exp.DataSetSelec;
 public class ProjectCreationDecompTask {
 
 	public static String nameProj;
-	
+
 	public static void main(String[] args) throws Exception {
 
-		String name = "Project";
+		String name = "ProjectLol";
 		File folderIn = new File("./data/");
 		File folderOut = new File("./result/");
-		double width = 28303;
-		double height = 21019;
-		double xmin = 914760;
-		double ymin = 6680157;
+		double width = 26590;
+		double height = 26590;
+		double xmin = 915948;
+		double ymin = 6677337;
 		double shiftX = 50;
 		double shiftY = 50;
 		double minSize = 20;
-		double maxSize = 25273;
+		double maxSize = 43740;
 		double seuilDensBuild = 0;
 
-		DataSetSelec.main(args);
+		DataSetSelec.predefSet();
 		Map<String, String> dataHTproj = DataSetSelec.get("Data2.2");
 
 		System.out.println(dataHTproj);
 
-		run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHTproj,maxSize, minSize, seuilDensBuild);
+		run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHTproj, maxSize, minSize, seuilDensBuild);
 	}
-	
-	
 
-	public static File run(String name, File folderIn, File folderOut, double xmin, double ymin, double width, double height, double shiftX, double shiftY, double maxSize, double minSize, double seuilDensBuild) throws Exception {
+	public static File run(String name, File folderIn, File folderOut, double xmin, double ymin, double width, double height, double shiftX, double shiftY, double maxSize,
+			double minSize, double seuilDensBuild) throws Exception {
+
+		// inits();
+
 		Map<String, String> dataHT = DataSetSelec.dig(folderIn);
-		return run( name,  folderIn,  folderOut,  xmin,  ymin,  width,  height,  shiftX,  shiftY,dataHT, maxSize, minSize, seuilDensBuild);
+		return run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT, maxSize, minSize, seuilDensBuild);
 	}
-	
+
+	// public static Hints hints = null;
+	//
+	// public static void inits() {
+	//
+	// System.out.println("HINTS ADDED !!!!!");
+	//
+	// hints = GeoTools.getDefaultHints();
+	// hints.put(Hints.FILTER_FACTORY, FilterFactoryImpl.class);
+	// hints.put(Hints.CRS_AUTHORITY_FACTORY, FactoryUsingWKT.class);
+	// hints.put(Hints.CRS_FACTORY, ReferencingObjectFactory.class);
+	// hints.put(Hints.MATH_TRANSFORM_FACTORY, DefaultMathTransformFactory.class);
+	// hints.put(Hints.DATUM_FACTORY, ReferencingObjectFactory.class);
+	// hints.put(Hints.FEATURE_COLLECTIONS, DefaultFeatureCollections.class);
+	//
+	// GeoTools.init(hints);
+	//
+	// }
+
 	public static File run(String name, File folderIn, File folderOut, double xmin, double ymin, double width, double height, double shiftX, double shiftY,
 			Map<String, String> dataHT, double maxSize, double minSize, double seuilDensBuild) throws Exception {
+
 		TaskMonitor mon = new TaskMonitor.EmptyMonitor();
-		
+
 		// Dossier intermédiaire avec les fichiers transformées
 		// File folderTemp = new File(folderIn + "/tmp/");
 		folderOut.mkdirs();
@@ -87,10 +117,10 @@ public class ProjectCreationDecompTask {
 			System.out.println("no non-urbanisable layer set");
 		}
 
-		//	complete the name
-		
-		nameProj = name +"-"+ dataHT.get("name")+"-"+minSize+"-"+seuilDensBuild;
-		
+		// complete the name
+
+		nameProj = name + "-" + dataHT.get("name") + "-CM" + minSize + "-S" + seuilDensBuild + "-GP_" + xmin + "_" + ymin;
+
 		// put in line for the massacre
 		File[] listMassacre = { buildFile, roadFile, facilityFile, leisureFile, busFile, trainFile, restrictFile };
 		if (!useNU) {
@@ -143,27 +173,29 @@ public class ProjectCreationDecompTask {
 				}
 			}
 		}
-		
+
 		project.decomp(3, maxSize, minSize, seuilDensBuild, mon, false);
+
 		project.save();
 		cleanProject(project);
 		return new File(folderOut, nameProj);
 	}
 
-	public static String getName(){
+	public static String getName() {
 		return nameProj;
 	}
-	
+
 	public static void cleanProject(Project project) throws IOException {
-		// TODO mettre propre :  vraiment pas beau mais je jette l'éponge sur les milliers de types d'objets différents pour pouvoir retrouver le shapefile des layers
+
+		// TODO mettre propre : vraiment pas beau mais je jette l'éponge sur les milliers de types d'objets différents pour pouvoir retrouver le shapefile des layers
 		for (File f : project.getDirectory().listFiles()) {
 			if (f.getName().endsWith(".shp") || f.getName().endsWith(".dbf") || f.getName().endsWith(".fix") || f.getName().endsWith(".prj") || f.getName().endsWith(".shx")) {
 				Files.delete(f.toPath());
 			}
 		}
 
-}
-	
+	}
+
 	private static void translateSHP(File fileIn, File fileOut, double shiftX, double shiftY) throws Exception {
 		ShapefileDataStore dataStore = new ShapefileDataStore(fileIn.toURI().toURL());
 		AffineTransform2D translate = new AffineTransform2D(1, 0, 0, 1, shiftX, shiftY);

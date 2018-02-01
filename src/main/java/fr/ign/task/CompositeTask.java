@@ -13,17 +13,20 @@ public class CompositeTask {
 
 		String name = "gridExplo";
 		File folderIn = new File("./data/");
-		File folderOut = new File("./result/emprise");
+		File folderOut = new File("./result/gridExploProjets2");
 		File discreteFile = new File("/home/mcolomb/informatique/MUP/explo/dataExtra/admin_typo.shp");
 		File buildFile = new File("/home/mcolomb/donnee/couplage/donneeGeographiques/batiment.shp");
-		double width = 26590 / 20;
-		double height = 26590 / 20;
+		// double width = 26590;
+		// double height = 26590;
+		double width = 200;
+		double height = 200;
 		double xmin = 915948;
 		double ymin = 6677337;
 		double shiftX = 0;
 		double shiftY = 0;
 
 		double minSize = 20;
+		// double maxSize = 43740;
 		double maxSize = 1620;
 		double seuilDensBuild = 0;
 
@@ -52,17 +55,16 @@ public class CompositeTask {
 
 		boolean mean = true;
 		long seed = 42;
-		
+
 		for (nMax = 5; nMax <= 6; nMax = nMax + 1) {
 			for (xmin = 915948; xmin <= 915968; xmin = xmin + 20) {
-				for (ymin = 915948; ymin <= 915968; ymin = ymin + 20) {
-					for (seuilDensBuild = 0; seuilDensBuild <= 0.0001; seuilDensBuild = seuilDensBuild + 0.0001) {
-						for (minSize = 19; minSize <= 20; minSize = minSize + 1) {
-							run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0,
-									ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
-						}
+				for (seuilDensBuild = 0; seuilDensBuild <= 0.0001; seuilDensBuild = seuilDensBuild + 0.0001) {
+					for (minSize = 19; minSize <= 20; minSize = minSize + 1) {
+						run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0,
+								ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
 					}
 				}
+
 			}
 		}
 	}
