@@ -1,0 +1,110 @@
+val name = Val[String]
+val nameProject = Val[String]
+val nameTotal = Val[String]
+val folderIn = Val[File]
+val dirs = Val[Array[File]]
+//val dataFiles = ListDirectoriesSource(workDirectory / "data")
+val sourceDirs = ListDirectoriesSource(workDirectory / "data" / "stabilite", dirs, "dataManu")
+val folderOut = Val[File]
+val projectFile = Val[File]
+val resultFile = Val[File]
+val resultFolder = workDirectory / "results"
+
+val rangeSeed = (42L to 42L) // (42L to 1042L)
+
+//project param
+val seed = Val[Long]
+val xmin = Val[Double]
+val ymin = Val[Double]
+val width = Val[Double]
+val height = Val[Double]
+val xshift = Val[Double]
+val yshift = Val[Double]
+
+//decomp param
+val seuilDensBuild=Val[Double]
+val minSize = Val[Double]
+val maxSize = Val[Double]
+
+//scenar param
+val ahp0 = Val[Double]
+val ahp1 = Val[Double]
+val ahp2 = Val[Double]
+val ahp3 = Val[Double]
+val ahp4 = Val[Double]
+val ahp5 = Val[Double]
+val ahp6 = Val[Double]
+val ahp7 = Val[Double]
+val ahp8 = Val[Double]
+val mean = Val[Boolean]
+val strict = Val[Boolean]
+val nMax = Val[Int]
+
+val exploStab = ExplorationTask(
+  (seed in rangeSeed) x 
+	(nMax in (3 to 3 by 1)) x 	
+	(mean in List(true)) x
+	(strict in List(true)) x
+	(folderIn in dirs))
+//|val projectFile = withThreadClassLoader(ProjectCreationDecompTask.getClassLoader())(ProjectCreationDecompTask.run(name,folderIn,newDir(),xmin,ymin,width,height,xshift,yshift,maxSize,minSize,seuilDensBuild))
+
+val ProjectCreationTask = ScalaTask("""
+|import fr.ign.task._
+|val projectFile = withThreadClassLoader(classLoader(mupcityplugin.ProjectCreationDecompTask))(mupcityplugin.ProjectCreationDecompTask.apply(name,folderIn,newDir(),xmin,ymin,width,height,xshift,yshift,maxSize,minSize,seuilDensBuild))
+|val nameProject = ProjectCreationDecompTask.getName()""".stripMargin
+) set (
+  plugins += pluginsOf(mupcityplugin.ProjectCreationDecompTask),
+  name := "Stability",
+  xmin := 915948.0,
+  ymin := 6677337.0,
+  //vraies valeurs 
+  //width := 26590,
+   //height := 26590,
+  width := 2000,
+  height := 2000,
+  xshift := 0.0,
+  yshift := 0.0,
+  minSize :=810,
+  maxSize :=1620,
+  seuilDensBuild :=0,
+  seed := 42L,
+  inputs += (name, folderIn, xmin, ymin, width, height, xshift, yshift, seed, strict,mean, nMax,minSize,maxSize,seuilDensBuild),
+  outputs += (projectFile, nameProject, seed, strict,mean, nMax, folderIn)
+)
+//|withThreadClassLoader(SimulTask.getClassLoader())(SimulTask.run(projectFile, nameProject, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed))""".stripMargin
+val SimuTask = ScalaTask("""
+|import fr.ign.task._
+|withThreadClassLoader(classLoader(mupcityplugin.SimulTask))(mupcityplugin.SimulTask.apply(projectFile, nameProject, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed))""".stripMargin
+) set (
+  plugins += pluginsOf(mupcityplugin.SimulTask),
+  ahp0 := 0.111,
+  ahp1 := 0.111,
+  ahp2 := 0.111,
+  ahp3 := 0.111,
+  ahp4 := 0.111,
+  ahp5 := 0.111,
+  ahp6 := 0.111,
+  ahp7 := 0.111,
+  ahp8 := 0.111,
+  inputs += (projectFile, nameProject, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, folderIn),
+  outputs += (projectFile,nameProject,folderIn,seed)
+)
+
+val ResultTask = ScalaTask("""
+|import fr.ign.task._
+|val resultFile = RasterAnalyseTask.runStab(projectFile, folderIn, SimulTask.getTotalName())""".stripMargin
+) set (
+  libraries += workDirectory / "fracgis-openMole-0.0.1-SNAPSHOT-shaded.jar",
+  inputs += (projectFile, folderIn, nameTotal),
+  outputs += (resultFile, projectFile)
+)
+
+val copyProjectHook =  CopyFileHook(projectFile, resultFolder / "${nameProject}")
+val copySimProjectHook =  CopyFileHook(projectFile, resultFolder / "${nameProject}_${seed}")
+val copyHook =  CopyFileHook(resultFile, resultFolder / "${projectFile}")
+
+//val env = EGIEnvironment(  "vo.complex-systems.eu",openMOLEMemory = 2048 megabytes)
+
+val env = LocalEnvironment(4)
+
+(exploStab source sourceDirs) -< (ProjectCreationTask on env hook copyProjectHook) -- (SimuTask on env hook copySimProjectHook) //-- (ResultTask on env hook copyHook)
