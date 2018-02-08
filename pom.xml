@@ -62,6 +62,9 @@
 										<Implementation-Title>${artifactId}</Implementation-Title>
 										<Implementation-Version>${version}</Implementation-Version>
 										<Implementation-Vendor>IGN</Implementation-Vendor>
+										<Export-Package>
+										  org.jdom;fr.ign.task;
+										</Export-Package>
 									</manifestEntries>
 								</transformer>
 								<transformer
