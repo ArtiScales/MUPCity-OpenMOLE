@@ -14,7 +14,7 @@ OsgiKeys.exportPackage := Seq("fr.ign.*,fr.ign.task.*,mupcityplugin.*")
 
 OsgiKeys.importPackage := Seq("*;resolution:=optional")
 
-OsgiKeys.privatePackage := Seq("!scala.*,!java.*,*", "META-INF.services.*", "META-INF.*")
+OsgiKeys.privatePackage := Seq("!scala.*,!java.*,META-INF.services.*,META-INF.*,*")
 
 OsgiKeys.requireCapability := """osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))""""
 
