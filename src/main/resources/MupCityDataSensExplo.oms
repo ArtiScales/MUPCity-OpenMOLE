@@ -64,7 +64,7 @@ val ProjectCreationTask = ScalaTask("val (projectFile,nameProjet) = (fr.ign.task
   height := 2000,
   xshift := 0.0,
   yshift := 0.0,
-  maxSize :=1620,
+  maxSize :=43740,
   inputs += (name, folderIn, xmin, ymin, width, height, xshift, yshift, strict, mean, nMax, minSize, maxSize, seuilDensBuild),
   outputs += (projectFile, nameProjet, strict,mean, nMax, folderIn)
 )

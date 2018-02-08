@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NavigableSet;
 
-import javax.imageio.spi.IIORegistry;
 import javax.media.jai.JAI;
 import javax.media.jai.OperationRegistry;
 
@@ -15,39 +14,33 @@ import org.thema.mupcity.scenario.ScenarioAuto;
 
 import com.sun.media.jai.imageioimpl.ImageReadWriteSpi;
 
-import it.geosolutions.imageio.stream.input.spi.URLImageInputStreamSpi;
-
 public class SimulTask {
-//    static {
-//        IIORegistry.getDefaultInstance().registerServiceProvider(new URLImageInputStreamSpi());
-//    }
-    protected static void initJAI() {
-        
-        // See [URL]http://docs.oracle.com/cd/E17802_01/products/products/java-media/jai/forDevelopers/jai-apidocs/javax/media/jai/OperationRegistry.html[/URL]
-        OperationRegistry registry = JAI.getDefaultInstance().getOperationRegistry();
-        if( registry == null) {
-            System.out.println("Error with JAI initialization (needed for GeoTools).");
-        } else {
-            try {
-                new ImageReadWriteSpi().updateRegistry(registry);
-            } catch(IllegalArgumentException e) {
-                // Probably indicates it was already registered.
-            }
-        }
-    }
+	// static {
+	// IIORegistry.getDefaultInstance().registerServiceProvider(new URLImageInputStreamSpi());
+	// }
+	protected static void initJAI() {
+
+		// See [URL]http://docs.oracle.com/cd/E17802_01/products/products/java-media/jai/forDevelopers/jai-apidocs/javax/media/jai/OperationRegistry.html[/URL]
+		OperationRegistry registry = JAI.getDefaultInstance().getOperationRegistry();
+		if (registry == null) {
+			System.out.println("Error with JAI initialization (needed for GeoTools).");
+		} else {
+			try {
+				new ImageReadWriteSpi().updateRegistry(registry);
+			} catch (IllegalArgumentException e) {
+				// Probably indicates it was already registered.
+			}
+		}
+	}
+
 	public static boolean saveWholeProj = false;
 	public static String nameTot;
+	public static String nameProj;
 
-public class SimulTask {
-    public static boolean saveWholeProj = false;
-    public static String nameTot;
-    static {
-        IIORegistry.getDefaultInstance().registerServiceProvider(new URLImageInputStreamSpi());
-    }
-    public static void main(String[] args) throws Exception {
-		File projFile = new File("/home/mcolomb/workspace/mupcity-openMole/result/emprise/emprise-Data1.0");
+	public static void main(String[] args) throws Exception {
+		File projFile = new File("/home/mcolomb/workspace/mupcity-openMole/result/emprise/emprise-Data1.0-20.0-0.0");
 
-		String name = "emprise-Data1.0";
+		String name = "emprise-Data1.0-20.0-0.0";
 
 		// for yager
 		double ahp0 = 0.111;
@@ -82,7 +75,7 @@ public class SimulTask {
 
 	public static File run(File decompFile, String name, int nMax, boolean strict, double ahp0, double ahp1, double ahp2, double ahp3, double ahp4, double ahp5, double ahp6,
 			double ahp7, double ahp8, boolean mean, long seed) throws Exception {
-	    initJAI();
+		initJAI();
 		return run(decompFile, name, nMax, strict, prepareAHP(ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8), mean, seed);
 	}
 
@@ -98,8 +91,8 @@ public class SimulTask {
 		if (mean) {
 			nYag = "Moy";
 		}
-		String scenarName = "N" + String.valueOf(nMax) + "_" + nBa + "_" + nYag + "_ahpx" + "_seed_" + String.valueOf(seed);
-		File projOut = new File(projectFile, scenarName);
+		String nameProj = "N" + String.valueOf(nMax) + "_" + nBa + "_" + nYag + "_ahpx" + "_seed_" + String.valueOf(seed);
+		File projOut = new File(projectFile, nameProj);
 		projOut.mkdir();
 
 		boolean useNU = true;
@@ -110,30 +103,35 @@ public class SimulTask {
 		}
 
 		NavigableSet<Double> res = project.getMSGrid().getResolutions();
-		ScenarioAuto scenario = ScenarioAuto.createMultiScaleScenario(scenarName, res.first(), res.last(), nMax, strict, ahp, useNU, mean, 3, seed, false, false);
+		ScenarioAuto scenario = ScenarioAuto.createMultiScaleScenario(nameProj, res.first(), res.last(), nMax, strict, ahp, useNU, mean, 3, seed, false, false);
 		project.performScenarioAuto(scenario);
 		scenario.extractEvalAnal(projOut, project);
+		project.getMSGrid().saveRaster(nameProj + "-eval", projOut);
 
-		setName(ProjectCreationDecompTask.getName()+"_"+scenarName);
-		
+		setName(ProjectCreationDecompTask.getName() + "_" + nameProj);
+
 		// save the project
 		if (saveWholeProj) {
 			scenario.save(projOut, project);
 			scenario.extractEvalAnal(projOut, project);
-			project.getMSGrid().saveRaster(scenarName + "-eval", projOut);
+			project.getMSGrid().saveRaster(nameProj + "-eval", projOut);
 		}
 		return projOut;
 
 	}
 
-	private static void setName(String newName){
-		nameTot = newName; 
+	private static void setName(String newName) {
+		nameTot = newName;
 	}
-	
-	public static String getName(){
+
+	public static String getTotalName() {
 		return nameTot;
 	}
-	
+
+	public static String getProjectName() {
+		return nameProj;
+	}
+
 	private static AHP prepareAHP(double ahp0, double ahp1, double ahp2, double ahp3, double ahp4, double ahp5, double ahp6, double ahp7, double ahp8) {
 		List<String> items = new ArrayList<>();
 		items.add("morpho");
