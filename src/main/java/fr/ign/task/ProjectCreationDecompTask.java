@@ -34,12 +34,17 @@ import org.thema.common.swing.TaskMonitor;
 import org.thema.mupcity.Project;
 import org.thema.mupcity.rule.OriginDistance;
 
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.xml.JDomDriver;
 import com.vividsolutions.jts.geom.Geometry;
 
 import fr.ign.exp.DataSetSelec;
 
 public class ProjectCreationDecompTask {
 
+    public static ClassLoader getClassLoader() {
+	return ProjectCreationDecompTask.class.getClassLoader();
+    }
 	public static String nameProj;
 
 	public static void main(String[] args) throws Exception {
@@ -94,6 +99,7 @@ public class ProjectCreationDecompTask {
 
 	public static File run(String name, File folderIn, File folderOut, double xmin, double ymin, double width, double height, double shiftX, double shiftY,
 			Map<String, String> dataHT, double maxSize, double minSize, double seuilDensBuild) throws Exception {
+		XStream xml = new XStream(new JDomDriver());
 
 		TaskMonitor mon = new TaskMonitor.EmptyMonitor();
 
@@ -134,7 +140,7 @@ public class ProjectCreationDecompTask {
 		}
 
 		// Translation des différentes couches
-
+		System.out.println("Translating layers");
 		translateSHP(new File(folderIn, dataHT.get("build")), buildFile, shiftX, shiftY);
 		translateSHP(new File(folderIn, dataHT.get("road")), roadFile, shiftX, shiftY);
 		translateSHP(new File(folderIn, dataHT.get("fac")), facilityFile, shiftX, shiftY);
@@ -144,6 +150,7 @@ public class ProjectCreationDecompTask {
 		if (useNU) {
 			translateSHP(new File(folderIn, dataHT.get("nU")), restrictFile, shiftX, shiftY);
 		}
+		System.out.println("Creating project");
 		// Creation du projet dans le dossier de données translaté
 		Project project = Project.createProject(nameProj, folderOut, buildFile, xmin, ymin, width, height, mon);
 		project.setNetPrecision(0.1);
@@ -162,6 +169,7 @@ public class ProjectCreationDecompTask {
 			project.setLayer(Project.LAYERS.get(Project.Layers.RESTRICT.ordinal()), restrictFile, emptyAttrs);
 		}
 		project.setDistType((network) ? OriginDistance.NetworkDistance.class : OriginDistance.EuclideanDistance.class);
+		System.out.println("Saving project");
 		project.save();
 
 		// MASSACRE
@@ -174,9 +182,12 @@ public class ProjectCreationDecompTask {
 			}
 		}
 
+		System.out.println("Decomposition");
 		project.decomp(3, maxSize, minSize, seuilDensBuild, mon, false);
 
+		System.out.println("Saving project");
 		project.save();
+		System.out.println("Cleanup");
 		cleanProject(project);
 		return new File(folderOut, nameProj);
 	}
@@ -212,7 +223,7 @@ public class ProjectCreationDecompTask {
 				feature.setDefaultGeometry(geomTransformed);
 				nouveaux[cpt] = feature;
 				newFeatures.add(feature);
-				cpt = +1;
+				cpt += 1;
 			}
 		} finally {
 			iterator.close();

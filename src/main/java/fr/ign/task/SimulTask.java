@@ -15,6 +15,10 @@ import org.thema.mupcity.scenario.ScenarioAuto;
 import com.sun.media.jai.imageioimpl.ImageReadWriteSpi;
 
 public class SimulTask {
+    
+    public static ClassLoader getClassLoader() {
+	return SimulTask.class.getClassLoader();
+    }
 	// static {
 	// IIORegistry.getDefaultInstance().registerServiceProvider(new URLImageInputStreamSpi());
 	// }
