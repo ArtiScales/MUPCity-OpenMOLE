@@ -18,7 +18,7 @@ OsgiKeys.privatePackage := Seq("!scala.*,!java.*,*", "META-INF.services.*", "MET
 
 OsgiKeys.requireCapability := """osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))""""
 
-scalariformSettings
+//scalariformSettings
 
 excludeFilter in unmanagedSources := HiddenFileFilter || "*CompData.java" || "*MouvData.java" || "*MouvGrid.java" || "*TestStabilite.java" || "*TotalTests.java"
 
@@ -59,9 +59,9 @@ resolvers += "Hibernate" at "http://www.hibernatespatial.org/repository"
 val mupcityVersion = "1.2.1-SNAPSHOT"
 val geotoolsVersion = "14.3"
 
-libraryDependencies += "org.thema" % "mupcity" % mupcityVersion excludeAll(
-    ExclusionRule(organization = "javax.media", artifact = "jai*")
-  )
+libraryDependencies += "org.thema" % "mupcity" % mupcityVersion //excludeAll(
+//    ExclusionRule(organization = "javax.media", artifact = "jai*")
+//  )
 
 //libraryDependencies += "org.geotools" % "gt-geotiff" % geotoolsVersion
 
