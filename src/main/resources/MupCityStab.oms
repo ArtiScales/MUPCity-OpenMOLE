@@ -2,7 +2,6 @@ val name = Val[String]
 val nameProjet = Val[String]
 val nameTotal = Val[String]
 val folderIn = Val[File]
-//val dataFiles = ListDirectoriesSource(workDirectory / "data")
 val folderOut = Val[File]
 val projectFile = Val[File]
 val resultFile = Val[File]
@@ -64,14 +63,14 @@ val ProjectCreationTask = ScalaTask("val (projectFile,nameProjet) = (fr.ign.task
   xshift := 0.0,
   yshift := 0.0,
   minSize :=810,
-  maxSize :=1620,
+  maxSize :=43740,
   seuilDensBuild :=0,
   seed := 42L,
-  inputs += (name, folderIn, xmin, ymin, width, height, xshift, yshift, seed, strict,mean, nMax,minSize,maxSize,seuilDensBuild),
-  outputs += (projectFile, nameProjet, seed, strict,mean, nMax, folderIn)
+  inputs += (name, folderIn, xmin, ymin, width, height, xshift, yshift, seed, strict,mean, nMax,minSize,maxSize,seuilDensBuild,resultFolder),
+  outputs += (projectFile, nameProjet, seed, strict,mean, nMax, folderIn,resultFolder)
 )
 
-val SimuTask = ScalaTask("fr.ign.task.SimulTask.run(projectFile, nameProjet, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed)") set (
+val SimuTask = ScalaTask("fr.ign.task.SimulTask.run(projectFile, nameProjet, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed);val nameTotal = fr.ign.task.SimulTask.getName();") set (
   libraries += workDirectory / "mupcity-openMole-0.0.1-SNAPSHOT-shaded.jar",
   ahp0 := 0.111,
   ahp1 := 0.111,
@@ -82,22 +81,23 @@ val SimuTask = ScalaTask("fr.ign.task.SimulTask.run(projectFile, nameProjet, nMa
   ahp6 := 0.111,
   ahp7 := 0.111,
   ahp8 := 0.111,
-  inputs += (projectFile, nameProjet, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, folderIn),
-  outputs += (projectFile,folderIn,seed)
+  inputs += (projectFile, nameProjet, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, folderIn,resultFolder),
+  outputs += (folderIn,resultFolder)
 )
 
-val ResultTask = ScalaTask("val resultFile = fr.ign.task.RasterAnalyseTask.runStab(projectFile, folderIn, fr.ign.task.SimulTask.getTotalName())") set (
+val ResultTask = ScalaTask("val resultFile = fr.ign.task.RasterAnalyseTask.runStab(resultFolder, folderIn);") set (
   libraries += workDirectory / "fracgis-openMole-0.0.1-SNAPSHOT-shaded.jar",
-  inputs += (projectFile, folderIn, nameTotal),
-  outputs += (resultFile, projectFile)
+  inputs += (folderIn,resultFolder),
+  outputs += (resultFile,resultFolder)
 )
 
-val copyProjectHook =  CopyFileHook(projectFile, resultFolder / "${nameProjet}")
-val copySimProjectHook =  CopyFileHook(projectFile, resultFolder / "${nameProjet}_${seed}")
-val copyHook =  CopyFileHook(resultFile, resultFolder / "${projectFile}")
+//val copyProjectHook =  CopyFileHook(projectFile, resultFolder / "${nameProjet}")
+//val copySimProjectHook =  CopyFileHook(projectFile, resultFolder / "${nameProjet}_${seed}")
+val copyHook =  CopyFileHook(resultFolder)
 
 //val env = EGIEnvironment(  "vo.complex-systems.eu",openMOLEMemory = 2048 megabytes)
 
 val env = LocalEnvironment(4)
 
-exploStab -< (ProjectCreationTask on env hook copyProjectHook) -- (SimuTask on env hook copySimProjectHook) //-- (ResultTask on env hook copyHook)
+//exploStab -< (ProjectCreationTask on env hook copyProjectHook) -- (SimuTask on env hook copySimProjectHook) >- (ResultTask on env hook copyHook)
+exploStab -< (ProjectCreationTask on env ) -- (SimuTask on env ) >- (ResultTask on env )
