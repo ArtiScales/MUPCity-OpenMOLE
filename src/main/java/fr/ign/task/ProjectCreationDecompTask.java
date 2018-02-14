@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.geotools.data.DefaultTransaction;
+import org.geotools.data.FeatureWriter;
 import org.geotools.data.Transaction;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.shapefile.ShapefileDataStoreFactory;
@@ -17,19 +18,11 @@ import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.data.simple.SimpleFeatureStore;
 import org.geotools.data.store.ContentFeatureCollection;
-import org.geotools.factory.CommonFactoryFinder;
-import org.geotools.factory.GeoTools;
-import org.geotools.factory.Hints;
 import org.geotools.feature.DefaultFeatureCollection;
-import org.geotools.feature.DefaultFeatureCollections;
-import org.geotools.filter.FilterFactoryImpl;
 import org.geotools.geometry.jts.JTS;
-import org.geotools.referencing.factory.ReferencingObjectFactory;
-import org.geotools.referencing.factory.epsg.FactoryUsingWKT;
-import org.geotools.referencing.operation.DefaultMathTransformFactory;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.referencing.datum.DatumAuthorityFactory;
+import org.opengis.feature.simple.SimpleFeatureType;
 import org.thema.common.swing.TaskMonitor;
 import org.thema.mupcity.Project;
 import org.thema.mupcity.rule.OriginDistance;
@@ -50,8 +43,8 @@ public class ProjectCreationDecompTask {
 	public static void main(String[] args) throws Exception {
 
 		String name = "ProjectLol";
-		File folderIn = new File("./data/");
-		File folderOut = new File("./result/");
+		File folderIn = new File("data");
+		File folderOut = new File("result");
 		double width = 26590;
 		double height = 26590;
 		double xmin = 915948;
@@ -63,7 +56,7 @@ public class ProjectCreationDecompTask {
 		double seuilDensBuild = 0;
 
 		DataSetSelec.predefSet();
-		Map<String, String> dataHTproj = DataSetSelec.get("Data2.2");
+		Map<String, String> dataHTproj = DataSetSelec.get("Data1.2");
 
 		System.out.println(dataHTproj);
 
@@ -99,10 +92,7 @@ public class ProjectCreationDecompTask {
 
 	public static File run(String name, File folderIn, File folderOut, double xmin, double ymin, double width, double height, double shiftX, double shiftY,
 			Map<String, String> dataHT, double maxSize, double minSize, double seuilDensBuild) throws Exception {
-		XStream xml = new XStream(new JDomDriver());
-
 		TaskMonitor mon = new TaskMonitor.EmptyMonitor();
-
 		// Dossier intermédiaire avec les fichiers transformées
 		// File folderTemp = new File(folderIn + "/tmp/");
 		folderOut.mkdirs();
@@ -140,6 +130,7 @@ public class ProjectCreationDecompTask {
 		}
 
 		// Translation des différentes couches
+		long start = System.currentTimeMillis();
 		System.out.println("Translating layers");
 		translateSHP(new File(folderIn, dataHT.get("build")), buildFile, shiftX, shiftY);
 		translateSHP(new File(folderIn, dataHT.get("road")), roadFile, shiftX, shiftY);
@@ -150,6 +141,8 @@ public class ProjectCreationDecompTask {
 		if (useNU) {
 			translateSHP(new File(folderIn, dataHT.get("nU")), restrictFile, shiftX, shiftY);
 		}
+		long end = System.currentTimeMillis();
+		System.out.println("Translation in " + (end-start) + " ms");
 		System.out.println("Creating project");
 		// Creation du projet dans le dossier de données translaté
 		Project project = Project.createProject(nameProj, folderOut, buildFile, xmin, ymin, width, height, mon);
@@ -189,6 +182,7 @@ public class ProjectCreationDecompTask {
 		project.save();
 		System.out.println("Cleanup");
 		cleanProject(project);
+		System.out.println("Finished creation of project " + getName());
 		return new File(folderOut, nameProj);
 	}
 
@@ -208,6 +202,9 @@ public class ProjectCreationDecompTask {
 	}
 
 	private static void translateSHP(File fileIn, File fileOut, double shiftX, double shiftY) throws Exception {
+		translateSHP2(fileIn, fileOut, shiftX, shiftY);
+	}
+	private static void translateSHP1(File fileIn, File fileOut, double shiftX, double shiftY) throws Exception {
 		ShapefileDataStore dataStore = new ShapefileDataStore(fileIn.toURI().toURL());
 		AffineTransform2D translate = new AffineTransform2D(1, 0, 0, 1, shiftX, shiftY);
 		ContentFeatureCollection shpFeatures = dataStore.getFeatureSource().getFeatures();
@@ -257,6 +254,44 @@ public class ProjectCreationDecompTask {
 			System.out.println(typeName + " does not support read/write access");
 			System.exit(1);
 		}
-
+	}
+	private static void translateSHP2(File fileIn, File fileOut, double shiftX, double shiftY) throws Exception {
+		ShapefileDataStore dataStore = new ShapefileDataStore(fileIn.toURI().toURL());
+		AffineTransform2D translate = new AffineTransform2D(1, 0, 0, 1, shiftX, shiftY);
+		ContentFeatureCollection shpFeatures = dataStore.getFeatureSource().getFeatures();
+//		DefaultFeatureCollection newFeatures = new DefaultFeatureCollection();
+//		Object[] nouveaux = new Object[shpFeatures.size()];
+//		int cpt = 0;
+		ShapefileDataStoreFactory dataStoreFactory = new ShapefileDataStoreFactory();
+		Map<String, Serializable> params = new HashMap<>();
+		params.put("url", fileOut.toURI().toURL());
+		params.put("create spatial index", Boolean.TRUE);
+		ShapefileDataStore newDataStore = (ShapefileDataStore) dataStoreFactory.createNewDataStore(params);
+		newDataStore.createSchema(dataStore.getSchema());
+		Transaction transaction = new DefaultTransaction("create");
+        FeatureWriter<SimpleFeatureType, SimpleFeature> writer = newDataStore.getFeatureWriterAppend(dataStore.getSchema().getTypeName(), transaction);
+		SimpleFeatureIterator iterator = shpFeatures.features();
+		try {
+			while (iterator.hasNext()) {
+				SimpleFeature feature = iterator.next();
+				SimpleFeature copy = writer.next();
+                copy.setAttributes(feature.getAttributes());
+                Geometry geometry = (Geometry) feature.getDefaultGeometry();
+                Geometry geometry2 = JTS.transform(geometry, translate);
+                copy.setDefaultGeometry(geometry2);
+                writer.write();
+			}
+            transaction.commit();
+		} catch (Exception problem) {
+            problem.printStackTrace();
+            transaction.rollback();
+            System.out.println("Export to shapefile failed");
+		} finally {
+            writer.close();
+            iterator.close();
+            transaction.close();
+            dataStore.dispose();
+            newDataStore.dispose();
+        }
 	}
 }

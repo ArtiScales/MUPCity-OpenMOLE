@@ -84,7 +84,7 @@ public class SimulTask {
 	}
 
 	public static File run(File projectFile, String name, int nMax, boolean strict, AHP ahp, boolean mean, long seed) throws Exception {
-
+		System.out.println("Simulation of " + name);
 		setName(name);
 		Project project = Project.load(new File(projectFile, name + ".xml"));
 		String nBa = "Ba";
@@ -98,6 +98,7 @@ public class SimulTask {
 		String nameProj = "N" + String.valueOf(nMax) + "_" + nBa + "_" + nYag + "_ahpx" + "_seed_" + String.valueOf(seed);
 		File projOut = new File(projectFile, nameProj);
 		projOut.mkdir();
+		System.out.println("simulation name = " + nameProj);
 
 		boolean useNU = true;
 
@@ -120,6 +121,7 @@ public class SimulTask {
 			scenario.extractEvalAnal(projOut, project);
 			project.getMSGrid().saveRaster(nameProj + "-eval", projOut);
 		}
+		SimulTask.nameProj = nameProj;
 		return projOut;
 
 	}
