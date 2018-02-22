@@ -27,8 +27,6 @@ import org.thema.common.swing.TaskMonitor;
 import org.thema.mupcity.Project;
 import org.thema.mupcity.rule.OriginDistance;
 
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.io.xml.JDomDriver;
 import com.vividsolutions.jts.geom.Geometry;
 
 import fr.ign.exp.DataSetSelec;
@@ -145,7 +143,7 @@ public class ProjectCreationDecompTask {
 		System.out.println("Translation in " + (end-start) + " ms");
 		System.out.println("Creating project");
 		// Creation du projet dans le dossier de données translaté
-		Project project = Project.createProject(nameProj, folderOut, buildFile, xmin, ymin, width, height, mon);
+		Project project = Project.createProject(nameProj, folderOut, buildFile, xmin, ymin, width, height);
 		project.setNetPrecision(0.1);
 		// Définition des layers du projet
 		boolean network = true;

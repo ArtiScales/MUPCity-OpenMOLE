@@ -86,7 +86,7 @@ public class OneSim {
 			}
 
 			// create a new project
-			Project project = Project.createProject(name, dir, buildFile, minX, minY, width, height, mon);
+			Project project = Project.createProject(name, dir, buildFile, minX, minY, width, height);
 			project.setNetPrecision(0); // Le réseau routier apparait peut être un peu moins déformé avec cette contrainte, mais ce n'est pas pour ça qu'il n'y a plus de tache =0 dans fac3
 			// set layers and attributes for the decomposition
 			List<String> roadAttrs = Arrays.asList("Speed");// SPEED(numeric)

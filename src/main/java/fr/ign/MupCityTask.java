@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.geotools.feature.SchemaException;
-import org.thema.mupcity.MupCityCLI;
 
 public class MupCityTask {
 	public static void run(long seed, File data, File results) throws IOException, SchemaException {
@@ -39,7 +38,7 @@ MupCityTask.run(seed, data, results, nMax, strict, mean, ahpIndex);
 		double height = 21019;
 		double minX = 914760;
 		double minY = 6680157;
-		MupCityCLI.run(name, dir, buildFile, exp, minSize, maxSize, nMax, strict, useNoBuild, mean, network, seed, roadFile, facilityFile, leisureFile, busFile, trainFile, restrictFile, minX, minY, width, height, ahpIndex, results);
+//		MupCityCLI.run(name, dir, buildFile, exp, minSize, maxSize, nMax, strict, useNoBuild, mean, network, seed, roadFile, facilityFile, leisureFile, busFile, trainFile, restrictFile, minX, minY, width, height, ahpIndex, results);
 //      MupCityCLI.createProject(name, dir, buildFile, exp, minSize, maxSize, network, roadFile, facilityFile, leisureFile, busFile, trainFile, restrictFile, minX, minY, width, height);
 //      MupCityCLI.performScenario(name, dir, exp, nMax, useNoBuild, strict, mean, seed, ahpIndex, results);
 

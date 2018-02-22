@@ -72,7 +72,7 @@ public class ProjectCreationAndDecompositionTask {
 		translateSHP(new File(folderIn, NAME_FILE_TRAIN), trainFile, shiftX, shiftY);
 		translateSHP(new File(folderIn, NAME_FILE_NON_BUILDABLE), restrictFile, shiftX, shiftY);
 		// Creation du projet dans le dossier de données translaté
-		Project project = Project.createProject(name, folderOut, buildFile, xmin, ymin, width, height, mon);
+		Project project = Project.createProject(name, folderOut, buildFile, xmin, ymin, width, height);
 		project.setNetPrecision(0.1);
 		// Définition des layers du projet
 		boolean network = true;//always true?

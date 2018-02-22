@@ -7,7 +7,7 @@
 	<description>Projet maven type pour produire un jar qui peut être lancé sur OpenMole</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<mupcity.version>1.2.1-SNAPSHOT</mupcity.version>
+		<mupcity.version>1.2.2</mupcity.version>
 		<geotools.version>14.3</geotools.version>
 	</properties>
 	<build>
@@ -82,6 +82,8 @@
 			<groupId>org.thema</groupId>
 			<artifactId>mupcity</artifactId>
 			<version>${mupcity.version}</version>
+		</dependency>
+			
 <!--             <exclusions> -->
 <!--               <exclusion> -->
 <!--                 <groupId>javax.media</groupId> -->
@@ -92,20 +94,27 @@
 <!--                 <artifactId>jai_codec</artifactId> -->
 <!--               </exclusion> -->
 <!--             </exclusions>			 -->
-		</dependency>
+<!--  
 	      <dependency>
 		<groupId>org.geotools</groupId>
 		<artifactId>gt-geotiff</artifactId>
 		<version>${geotools.version}</version>
-	      </dependency>
+	      </dependency>-->
 	</dependencies>
 	<repositories>
+	<!-- 
 	       <repository>
             <id>thema-sf</id>
             <name>ThéMA libs Repository</name>
-            <url>http://themalibs.sourceforge.net/repository/</url>
+            <url>http://sourcesup.renater.fr/nexus/content/repositories/themalibs-releases/</url>
         </repository>
-	
+         -->
+       <repository>
+            <id>mupcity</id>
+            <name>ThéMA libs Repository</name>
+            <url>http://sourcesup.renater.fr/nexus/content/repositories/mupcity-releases/</url>
+        </repository>
+        
 		<repository>
 			<id>ign-snapshots</id>
 			<name>Cogit Snapshots Repository</name>

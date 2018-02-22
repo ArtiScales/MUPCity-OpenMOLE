@@ -76,7 +76,7 @@ public class EffetSeuil {
 			
 			// create a new project
 			dir.mkdirs();
-			Project project = Project.createProject(name, dir, buildFile, minX, minY, width, height, mon);
+			Project project = Project.createProject(name, dir, buildFile, minX, minY, width, height);
 			project.setNetPrecision(0.1); // Le réseau routier apparait peut être un peu moins déformé avec cette contrainte, mais ce n'est pas pour ça qu'il n'y a plus detache =0 dans fac3
 			// set layers and attributes for the decomposition
 			List<String> roadAttrs = Arrays.asList("Speed");// SPEED(numeric)
