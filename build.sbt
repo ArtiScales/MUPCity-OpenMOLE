@@ -56,7 +56,7 @@ resolvers += "Hibernate" at "http://www.hibernatespatial.org/repository"
 
 //libraryDependencies += "org.openmole" %% "org-openmole-plugin-task-scala" % openMOLEVersion
 
-val mupcityVersion = "1.2.1-SNAPSHOT"
+val mupcityVersion = "1.2.2"
 val geotoolsVersion = "14.3"
 
 libraryDependencies += "org.thema" % "mupcity" % mupcityVersion //excludeAll(
