@@ -9,9 +9,8 @@ public class CompositeTask {
 	public static void main(String[] args) throws Exception {
 
 		DataSetSelec.predefSet();
-		Map<String, String> dataHT = DataSetSelec.get("Data1");
-
-		String name = "gridExplo";
+		Map<String, String> dataHT = DataSetSelec.get("Data2");
+		String name = "seuilFac3";
 		File folderIn = new File("./data/");
 		File folderOut = new File("./result/testAgain");
 		File discreteFile = new File("/home/mcolomb/informatique/MUP/explo/dataExtra/admin_typo.shp");
@@ -27,7 +26,6 @@ public class CompositeTask {
 
 		double minSize = 20;
 		double maxSize = 14580;
-		// double maxSize = 1620;
 		double seuilDensBuild = 0;
 
 		int nMax = 6;
@@ -55,10 +53,6 @@ public class CompositeTask {
 
 		boolean mean = true;
 		long seed = 13;
-
-		run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2, ahp3,
-				ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
-		dataHT = DataSetSelec.get("Data2");
 		run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2, ahp3,
 				ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
 	}

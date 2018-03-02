@@ -55,9 +55,6 @@ public class ProjectCreationDecompTask {
 
 		DataSetSelec.predefSet();
 		Map<String, String> dataHTproj = DataSetSelec.get("Data1.2");
-
-		System.out.println(dataHTproj);
-
 		run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHTproj, maxSize, minSize, seuilDensBuild);
 	}
 
@@ -69,24 +66,6 @@ public class ProjectCreationDecompTask {
 		Map<String, String> dataHT = DataSetSelec.dig(folderIn);
 		return run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT, maxSize, minSize, seuilDensBuild);
 	}
-
-	// public static Hints hints = null;
-	//
-	// public static void inits() {
-	//
-	// System.out.println("HINTS ADDED !!!!!");
-	//
-	// hints = GeoTools.getDefaultHints();
-	// hints.put(Hints.FILTER_FACTORY, FilterFactoryImpl.class);
-	// hints.put(Hints.CRS_AUTHORITY_FACTORY, FactoryUsingWKT.class);
-	// hints.put(Hints.CRS_FACTORY, ReferencingObjectFactory.class);
-	// hints.put(Hints.MATH_TRANSFORM_FACTORY, DefaultMathTransformFactory.class);
-	// hints.put(Hints.DATUM_FACTORY, ReferencingObjectFactory.class);
-	// hints.put(Hints.FEATURE_COLLECTIONS, DefaultFeatureCollections.class);
-	//
-	// GeoTools.init(hints);
-	//
-	// }
 
 	public static File run(String name, File folderIn, File folderOut, double xmin, double ymin, double width, double height, double shiftX, double shiftY,
 			Map<String, String> dataHT, double maxSize, double minSize, double seuilDensBuild) throws Exception {
@@ -129,7 +108,7 @@ public class ProjectCreationDecompTask {
 
 		// Translation des différentes couches
 		long start = System.currentTimeMillis();
-		System.out.println("Translating layers");
+		System.out.println("Translating layers in "+folderIn);
 		translateSHP(new File(folderIn, dataHT.get("build")), buildFile, shiftX, shiftY);
 		translateSHP(new File(folderIn, dataHT.get("road")), roadFile, shiftX, shiftY);
 		translateSHP(new File(folderIn, dataHT.get("fac")), facilityFile, shiftX, shiftY);

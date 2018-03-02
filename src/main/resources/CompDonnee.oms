@@ -29,7 +29,6 @@ val maxSize = Val[Double]
 
 //scenar param
 val seed = Val[Long]
-val rangeSeed = (UniformDistribution[Long]() take 2)
 val ahp0 = Val[Double]
 val ahp1 = Val[Double]
 val ahp2 = Val[Double]
@@ -44,11 +43,10 @@ val strict = Val[Boolean]
 val nMax = Val[Int]
 
 val exploStab = ExplorationTask(
-  (seed in rangeSeed) x 
 	(nMax in (6 to 6 by 1)) x 	
 	(mean in List(true)) x
 	(strict in List(true)) x
-	(folderIn in (workDirectory / "data") withName inputName))
+	(folderIn in (workDirectory / "compDonnee") withName inputName))
 
 val ProjectCreationTask = ScalaTask("""
 |import fr.ign.task._
@@ -56,17 +54,20 @@ val ProjectCreationTask = ScalaTask("""
 |val nameProject = ProjectCreationDecompTask.getName()""".stripMargin
 ) set (
   plugins += pluginsOf(mupcityplugin.ProjectCreationDecompTask),
-  name := "Stability",
+  name := "CompDonnee",
   xmin := 915948.0,
   ymin := 6677337.0,
-  width := 26590,
-  height := 26590,
+//  width := 26590,
+//  height := 26590,
+  width := 500,
+  height := 500,
   xshift := 0.0,
   yshift := 0.0,
   minSize :=20,
 //  maxSize :=14580,
-maxSize :=1000,
+maxSize :=500,
   seuilDensBuild :=0,
+  seed := 42L,
   inputs += (name, name,inputName, folderIn, xmin, ymin, width, height, xshift, yshift, seed, strict, mean, nMax, minSize, maxSize, seuilDensBuild),
   outputs += (projectFile, name,inputName, nameProject, seed, strict, mean, nMax, folderIn, minSize, seuilDensBuild, xmin, ymin)
 )
