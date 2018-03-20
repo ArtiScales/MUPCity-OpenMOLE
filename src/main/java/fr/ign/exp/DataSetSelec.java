@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class DataSetSelec {
 
@@ -225,16 +226,22 @@ public class DataSetSelec {
 		return dataHT;
 	}
 
-	public static File[] selectFileAnalyse(File file) {
-		File[] fileSelec = new File[2];
-		for (File f : file.listFiles()) {
-			if (f.getName().startsWith("batiment")) {
-				fileSelec[1] = f;
-			} else if (f.getName().startsWith("admin")) {
-				fileSelec[0] = f;
+	public static File[] selectFileAnalyse(File fileData, File fileResult) {
+		Pattern ech = Pattern.compile("eval_anal-");
+		String[] list = ech.split(fileResult.toString());
+		File[] fileScenar = new File[3];
+		for (File fileProj : fileData.listFiles()) {
+			if (fileProj.toString().equals(list[1])) {
+				for (File f : fileProj.listFiles()) {
+					if (f.getName().startsWith("batiment")) {
+						fileScenar[1] = f;
+					} else if (f.getName().startsWith("discrete")) {
+						fileScenar[0] = f;
+					}
+				}
 			}
 		}
-		return fileSelec;
+		return fileScenar;
 	}
 
 	public static Map<String, Map<String, String>> getAll() throws Exception {

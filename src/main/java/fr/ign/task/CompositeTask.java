@@ -1,7 +1,10 @@
 package fr.ign.task;
 
 import java.io.File;
+import java.util.Hashtable;
 import java.util.Map;
+
+import org.apache.commons.lang3.tuple.MutablePair;
 
 import fr.ign.exp.DataSetSelec;
 
@@ -9,16 +12,16 @@ public class CompositeTask {
 	public static void main(String[] args) throws Exception {
 
 		DataSetSelec.predefSet();
-		Map<String, String> dataHT = DataSetSelec.get("Data2");
-		String name = "seuilFac3";
+		Map<String, String> dataHT = DataSetSelec.get("Data1");
+		String name = "compDonnee";
 		File folderIn = new File("./data/");
-		File folderOut = new File("./result/testAgain");
+		File folderOut = new File("./result/compDonneeTest");
 		File discreteFile = new File("/home/mcolomb/informatique/MUP/explo/dataExtra/admin_typo.shp");
 		File buildFile = new File("/home/mcolomb/donnee/couplage/donneeGeographiques/batiment.shp");
-		double width = 26590;
-		double height = 26590;
-		// double width = 200;
-		// double height = 200;
+		// double width = 26590;
+		// double height = 26590;
+		double width = 200;
+		double height = 200;
 		double xmin = 915948;
 		double ymin = 6677337;
 		double shiftX = 0;
@@ -53,8 +56,15 @@ public class CompositeTask {
 
 		boolean mean = true;
 		long seed = 13;
-		run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2, ahp3,
-				ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
+
+		for (nMax = 5; nMax <= 6; nMax++) {
+			run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2,
+					ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
+			dataHT = DataSetSelec.get("Data3.1");
+			run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2,
+					ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
+		}
+
 	}
 
 	public static File run(String name, File folderIn, File folderOut, File discreteFile, File buildFile, double xmin, double ymin, double width, double height, double shiftX,
@@ -69,11 +79,17 @@ public class CompositeTask {
 	public static File run(String name, File folderIn, File folderOut, File discreteFile, File buildFile, double xmin, double ymin, double width, double height, double shiftX,
 			double shiftY, double minSize, double maxSize, double seuilDensBuild, int nMax, boolean strict, double ahp0, double ahp1, double ahp2, double ahp3, double ahp4,
 			double ahp5, double ahp6, double ahp7, double ahp8, boolean mean, long seed, Map<String, String> dataHT) throws Exception {
+		boolean machineReadable = true;
+
 		System.out.println("----------Project & Decomp creation----------");
-		File projectFile = ProjectCreationDecompTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT, maxSize, minSize, seuilDensBuild);
+		MutablePair<String, File> projectFile = ProjectCreationDecompTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT, maxSize, minSize,
+				seuilDensBuild, machineReadable);
 		System.out.println("----------Simulation task----------");
-		SimulTask.run(projectFile, ProjectCreationDecompTask.getName(), nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed);
+
+		File scenarFile = SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed,
+				machineReadable);
 		System.out.println("----------End task----------");
-		return projectFile;
+		// AnalyseTask.runStab(scenarFile, folderIn, name,machineReadable);
+		return scenarFile;
 	}
 }

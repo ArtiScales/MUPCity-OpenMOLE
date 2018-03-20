@@ -58,7 +58,12 @@ resolvers += "Hibernate" at "http://www.hibernatespatial.org/repository"
 
 val mupcityVersion = "1.2.2"
 val geotoolsVersion = "14.3"
+val geotoolsGridVersion = "12.3"
+val fracgisVersion = "0.6.3"
 
+libraryDependencies += "org.thema" % "fracgis" % fracgisVersion
+libraryDependencies += "org.geotools" % "gt-grid" % geotoolsGridVersion
+libraryDependencies += "org.geotools" % "gt-coverage" % geotoolsGridVersion
 libraryDependencies += "org.thema" % "mupcity" % mupcityVersion //excludeAll(
 //    ExclusionRule(organization = "javax.media", artifact = "jai*")
 //  )

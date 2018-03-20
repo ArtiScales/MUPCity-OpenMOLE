@@ -15,10 +15,11 @@ import org.thema.mupcity.scenario.ScenarioAuto;
 import com.sun.media.jai.imageioimpl.ImageReadWriteSpi;
 
 public class SimulTask {
-    
-    public static ClassLoader getClassLoader() {
-	return SimulTask.class.getClassLoader();
-    }
+
+	public static ClassLoader getClassLoader() {
+		return SimulTask.class.getClassLoader();
+	}
+
 	// static {
 	// IIORegistry.getDefaultInstance().registerServiceProvider(new URLImageInputStreamSpi());
 	// }
@@ -73,20 +74,21 @@ public class SimulTask {
 		int nMax = 5;
 		long seed = 42;
 		// for (long seed = 42; seed <= 1042; seed = seed + 1) {
-		run(projFile, name, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed);
+		run(projFile, name, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, true);
 		// }
 	}
 
 	public static File run(File decompFile, String name, int nMax, boolean strict, double ahp0, double ahp1, double ahp2, double ahp3, double ahp4, double ahp5, double ahp6,
-			double ahp7, double ahp8, boolean mean, long seed) throws Exception {
-		initJAI();
-		return run(decompFile, name, nMax, strict, prepareAHP(ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8), mean, seed);
+			double ahp7, double ahp8, boolean mean, long seed, boolean machineReadable) throws Exception {
+		return run(decompFile, name, nMax, strict, prepareAHP(ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8), mean, seed, machineReadable);
 	}
 
-	public static File run(File projectFile, String name, int nMax, boolean strict, AHP ahp, boolean mean, long seed) throws Exception {
+	public static File run(File projectFile, String name, int nMax, boolean strict, AHP ahp, boolean mean, long seed, boolean machineReadable) throws Exception {
 		System.out.println("Simulation of " + name);
 		setName(name);
+
 		Project project = Project.load(new File(projectFile, name + ".xml"));
+
 		String nBa = "Ba";
 		if (strict) {
 			nBa = "St";
@@ -95,10 +97,16 @@ public class SimulTask {
 		if (mean) {
 			nYag = "Moy";
 		}
-		String nameProj = "N" + String.valueOf(nMax) + "_" + nBa + "_" + nYag + "_ahpx" + "_seed_" + String.valueOf(seed);
-		File projOut = new File(projectFile, nameProj);
-		projOut.mkdir();
-		System.out.println("simulation name = " + nameProj);
+		String nameScenar = "N" + String.valueOf(nMax) + "_" + nBa + "_" + nYag + "_ahpx" + "_seed_" + String.valueOf(seed);
+
+		File scenarOut = new File(projectFile, nameScenar);
+		if (machineReadable) {
+			scenarOut = new File(projectFile.getParentFile(), "ScenarVrac");
+			nameScenar = name + "--" + nameScenar;
+		}
+		scenarOut.mkdir();
+
+		System.out.println("simulation name = " + nameScenar);
 
 		boolean useNU = true;
 
@@ -108,22 +116,21 @@ public class SimulTask {
 		}
 
 		NavigableSet<Double> res = project.getMSGrid().getResolutions();
-		ScenarioAuto scenario = ScenarioAuto.createMultiScaleScenario(nameProj, res.first(), res.last(), nMax, strict, ahp, useNU, mean, 3, seed, false, false);
+		ScenarioAuto scenario = ScenarioAuto.createMultiScaleScenario(nameScenar, res.first(), res.last(), nMax, strict, ahp, useNU, mean, 3, seed, false, false);
 		project.performScenarioAuto(scenario);
-		scenario.extractEvalAnal(projOut, project);
-		project.getMSGrid().saveRaster(nameProj + "-eval", projOut);
+		scenario.extractEvalAnal(scenarOut, project);
+		project.getMSGrid().saveRaster(nameScenar + "-eval", scenarOut);
 
-		setName(ProjectCreationDecompTask.getName() + "_" + nameProj);
+		setName(ProjectCreationDecompTask.getName() + "_" + nameScenar);
 
 		// save the project
 		if (saveWholeProj) {
-			scenario.save(projOut, project);
-			scenario.extractEvalAnal(projOut, project);
-			project.getMSGrid().saveRaster(nameProj + "-eval", projOut);
+			scenario.save(scenarOut, project);
+			scenario.extractEvalAnal(scenarOut, project);
+			project.getMSGrid().saveRaster(nameScenar + "-eval", scenarOut);
 		}
-		SimulTask.nameProj = nameProj;
-		return projOut;
 
+		return scenarOut;
 	}
 
 	private static void setName(String newName) {

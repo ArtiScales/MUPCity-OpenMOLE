@@ -9,6 +9,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<mupcity.version>1.2.2</mupcity.version>
 		<geotools.version>14.3</geotools.version>
+		<fracgis.version>0.6.3</fracgis.version>
 	</properties>
 	<build>
 		<plugins>
@@ -57,11 +58,11 @@
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<manifestEntries>
-										<Specification-Title>${artifactId}</Specification-Title>
-										<Specification-Version>${version}</Specification-Version>
+										<Specification-Title>${project.artifactId}</Specification-Title>
+										<Specification-Version>${project.version}</Specification-Version>
 										<Specification-Vendor>IGN</Specification-Vendor>
-										<Implementation-Title>${artifactId}</Implementation-Title>
-										<Implementation-Version>${version}</Implementation-Version>
+										<Implementation-Title>${project.artifactId}</Implementation-Title>
+										<Implementation-Version>${project.version}</Implementation-Version>
 										<Implementation-Vendor>IGN</Implementation-Vendor>
 										<Export-Package>
 										  org.jdom;fr.ign.task;
@@ -83,7 +84,16 @@
 			<artifactId>mupcity</artifactId>
 			<version>${mupcity.version}</version>
 		</dependency>
-			
+				<dependency>
+			<groupId>org.thema</groupId>
+			<artifactId>fracgis</artifactId>
+			<version>${fracgis.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-grid</artifactId>
+			<version>16.1</version>
+		</dependency>
 <!--             <exclusions> -->
 <!--               <exclusion> -->
 <!--                 <groupId>javax.media</groupId> -->
