@@ -70,7 +70,9 @@ public class ProjectCreationDecompTask {
 
 	public static File run(String name, File folderIn, File folderOut, double xmin, double ymin, double width, double height, double shiftX, double shiftY,
 			Map<String, String> dataHT, double maxSize, double minSize, double seuilDensBuild) throws Exception {
-		return run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT, maxSize, minSize, seuilDensBuild, true).getRight();
+		File result = run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT, maxSize, minSize, seuilDensBuild, true).getRight();
+		System.out.println("project file : "+result);
+				return result;
 	}
 
 	public static MutablePair<String, File> run(String name, File folderIn, File folderOut, double xmin, double ymin, double width, double height, double shiftX, double shiftY,

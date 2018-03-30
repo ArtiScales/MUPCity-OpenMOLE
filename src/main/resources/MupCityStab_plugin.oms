@@ -11,7 +11,10 @@ val folderOut = Val[File]
 val projectFile = Val[File]
 val simulFile = Val[File]
 val resultFile = Val[File]
+val mainFolder = Val[File]
 val resultFolder = workDirectory / "results"
+
+val machineReadable = Val[Boolean]
 
 //project param
 
@@ -29,7 +32,8 @@ val maxSize = Val[Double]
 
 //scenar param
 val seed = Val[Long]
-val rangeSeed = (UniformDistribution[Long]() take 2)
+//val rangeSeed = (UniformDistribution[Long]() take 2)
+val rangeSeed = (UniformDistribution[Long]() take 1000)
 val ahp0 = Val[Double]
 val ahp1 = Val[Double]
 val ahp2 = Val[Double]
@@ -45,10 +49,16 @@ val nMax = Val[Int]
 
 val exploStab = ExplorationTask(
   (seed in rangeSeed) x 
-	(nMax in (6 to 6 by 1)) x 	
-	(mean in List(true)) x
-	(strict in List(true)) x
+	(nMax in (3 to 7 by 1)) x 	
+	(mean in List(true,false)) x
+	(strict in List(true,false)) x
 	(folderIn in (workDirectory / "data") withName inputName))
+//val exploStab = ExplorationTask(
+//  (seed in rangeSeed) x 
+//	(nMax in (6 to 6 by 1)) x 	
+//	(mean in List(true)) x
+//	(strict in List(true)) x
+//	(folderIn in (workDirectory / "data") withName inputName))
 
 val ProjectCreationTask = ScalaTask("""
 |import fr.ign.task._
@@ -61,13 +71,15 @@ val ProjectCreationTask = ScalaTask("""
   ymin := 6677337.0,
   width := 26590,
   height := 26590,
+//  width := 500,
+//  height := 500,
   xshift := 0.0,
   yshift := 0.0,
   minSize :=20,
   maxSize :=14580,
-//maxSize :=1000,
+//maxSize :=500,
   seuilDensBuild :=0,
-  inputs += (name, name,inputName, folderIn, xmin, ymin, width, height, xshift, yshift, seed, strict, mean, nMax, minSize, maxSize, seuilDensBuild),
+  inputs += (name,inputName, folderIn, xmin, ymin, width, height, xshift, yshift, seed, strict, mean, nMax, minSize, maxSize, seuilDensBuild),
   outputs += (projectFile, name,inputName, nameProject, seed, strict, mean, nMax, folderIn, minSize, seuilDensBuild, xmin, ymin)
 )
 val SimuTask = ScalaTask("""
@@ -87,18 +99,18 @@ val SimuTask = ScalaTask("""
   ahp7 := 0.111,
   ahp8 := 0.111,
   inputs += (projectFile, name, inputName, nameProject, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, folderIn, minSize, seuilDensBuild, xmin, ymin),
-  outputs += (simulFile, name, inputName, nameTotal, simulName, minSize, seuilDensBuild, xmin, ymin)
+  outputs += (simulFile, folderIn, name)
 )
-/*
+
 val ResultTask = ScalaTask("""
-|import fracgisplugin._
-|val resultFile = withThreadClassLoader(classLoader(AnalysisTask))(AnalysisTask.apply(input.projectFile, folderIn(0), newDir(), "Stability"))""".stripMargin
-) set (
-  plugins += pluginsOf(fracgisplugin.AnalysisTask),
-  inputs += (projectFile.toArray, folderIn.toArray),
-  outputs += (resultFile)
+|import fr.ign.task._
+|val resultFile=withThreadClassLoader(classLoader(mupcityplugin.StabAnalysisTask))(mupcityplugin.StabAnalysisTask.apply(simulFile, folderIn,mainFolder, name))""".stripMargin) set (
+  plugins += pluginsOf(mupcityplugin.CompDonneeAnalysisTask),
+  mainFolder := workDirectory / "results",
+  inputs += (simulFile.toArray, folderIn.toArray,name.toArray),
+  outputs += (resultFile,name)
 )
-*/
+
 val h = ToStringHook(nameProject)
 val copyProjectHook =  CopyFileHook(projectFile, resultFolder / "${name}-${inputName}-CM${minSize}-S${seuilDensBuild}-GP_${xmin}_${ymin}")
 val copySimProjectHook =  CopyFileHook(simulFile, resultFolder / "${name}-${inputName}-CM${minSize}-S${seuilDensBuild}-GP_${xmin}_${ymin}" / "${simulName}")
@@ -107,5 +119,4 @@ val copyHook =  CopyFileHook(resultFile, resultFolder / "analyse_Stability")
 //val env = EGIEnvironment("vo.complex-systems.eu",openMOLEMemory = 2048 megabytes)
 val env = LocalEnvironment(1)
 
-exploStab  -< (ProjectCreationTask on env hook copyProjectHook hook h) -- (SimuTask on env hook copySimProjectHook)
-// >- (ResultTask on env hook copyHook)
+exploStab  -< (ProjectCreationTask on env ) -< (SimuTask on env ) >- (ResultTask on env hook copyHook)

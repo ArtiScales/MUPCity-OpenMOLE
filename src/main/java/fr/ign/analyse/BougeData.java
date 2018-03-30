@@ -1,8 +1,10 @@
 package fr.ign.analyse;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,7 +48,7 @@ public class BougeData {
 			for (File aCp : aCopier) {
 				File nf = new File(copierVers, aCp.getName());
 				if (aCp.isFile()) {
-					AnalyseTask.copyDirectory(aCp, nf);
+					Files.copy(aCp.toPath(), new FileOutputStream(nf));
 				}
 			}
 			for (int ii = 1; ii <= 8; ii++) {

@@ -30,7 +30,7 @@ public class DataSetSelec {
 		dataHTtemp.put("ptTram", "tramPro.shp");
 		dataHTtemp.put("ptTrain", "trainPro.shp");
 		dataHTtemp.put("nU", "nonUrbaPro.shp");
-		dataHTtemp.put("name", "Data1.0");
+		dataHTtemp.put("name", "Autom");
 		dataHT.put("Data1", dataHTtemp);
 
 		// Data1.1
@@ -134,7 +134,7 @@ public class DataSetSelec {
 		dataHTtemp.put("ptTram", "tramPro.shp");
 		dataHTtemp.put("ptTrain", "trainPro.shp");
 		dataHTtemp.put("nU", "nonUrbaPro.shp");
-		dataHTtemp.put("name", "manuLoisir");
+		dataHTtemp.put("name", "LoisirManu");
 		dataHT.put("Data3.1", dataHTtemp);
 
 		// Data5

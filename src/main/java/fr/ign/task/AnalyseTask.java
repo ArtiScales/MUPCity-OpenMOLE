@@ -1,11 +1,16 @@
 package fr.ign.task;
 
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -32,8 +37,9 @@ public class AnalyseTask {
 		// File file = new File("/home/mcolomb/workspace/mupcity-openMole/result/brandNewStab/ScenarVrac");
 		// System.out.println(runStab(file, new File("/home/mcolomb/workspace/mupcity-openMole/data/"), "stability", true));
 
-		File file = new File("/home/mcolomb/workspace/mupcity-openMole/result/compDonneeTest");
+		File file = new File("/home/mcolomb/workspace/mupcity-openMole/result/compDonneeTest/ScenarVrac");
 		runCompData(file, new File("/home/mcolomb/workspace/mupcity-openMole/data/"), "compDonnee", true);
+
 	}
 
 	public static File runGridSens(File file, File fileDonnee, String name) throws Exception {
@@ -127,14 +133,34 @@ public class AnalyseTask {
 		return batiFile;
 	}
 
+	/**
+	 * overlaoding to use aggregation transition from openMole
+	 * 
+	 * @param file
+	 * @param fileDonnee
+	 * @param name
+	 * @param machineReadable
+	 * @return
+	 * @throws Exception
+	 */
+	public static File runStab(File[] file, File[] fileDonnee, File mainFile, String[] name, boolean machineReadable) throws Exception {
+		return runStab(copyToScenVrac(fileDonnee, mainFile), fileDonnee[0], name[0], machineReadable);
+	}
+
+	
 	public static File runStab(File file, File fileDonnee, String name, boolean machineReadable) throws Exception {
 
 		File discreteFile = getDiscrete(fileDonnee);
 		System.out.println("root " + file);
 		// folder settings
+		
+		
 		File resultFile = new File(file, "result--" + name);
 		resultFile.mkdir();
-
+		if (machineReadable) {
+			resultFile = new File(file.getParentFile(), "result--" + name);
+		}
+		
 		RasterAnalyse.rootFile = file;
 		RasterAnalyse.stabilite = true;
 
@@ -252,7 +278,8 @@ public class AnalyseTask {
 	}
 
 	/**
-	 * overlaoding to use weird aggregation transition from openMole (as it's gon be the same values into the output tabs)
+	 * overlaoding to use aggregation transition from openMole
+	 * 
 	 * @param file
 	 * @param fileDonnee
 	 * @param name
@@ -260,10 +287,11 @@ public class AnalyseTask {
 	 * @return
 	 * @throws Exception
 	 */
-	public static File runCompData(File[] file, File[] fileDonnee, String[] name, boolean machineReadable) throws Exception {
-		return runCompData(file[0], fileDonnee[0], name[0],  machineReadable);
+	public static File runCompData(File[] file, File[] fileDonnee, File mainFile, String[] name, boolean machineReadable) throws Exception {
+
+		return runCompData(copyToScenVrac(fileDonnee, mainFile), fileDonnee[0], name[0], machineReadable);
 	}
-	
+
 	/**
 	 * Fonction permettant de comparer les différents sets de données décris dans la partie 2.6.1 de ma thèse
 	 * 
@@ -275,23 +303,13 @@ public class AnalyseTask {
 	 */
 	public static File runCompData(File file, File fileDonnee, String name, boolean machineReadable) throws Exception {
 
-		// return runCompData(file.listFiles(), fileDonnee, name);
-		// }
-		//
-		// public static File runCompData(File[] file, File fileDonnee, String name) throws Exception {
-		//
-		// RasterAnalyse.rootFile = file[0].getParentFile();
-		//
-		// File resultFile = new File(file[0].getParentFile(), "result--" + name);
-
-		if (machineReadable) {
-			file = new File(file, "ScenarVrac");
-		}
-
 		RasterAnalyse.rootFile = file;
 
 		File resultFile = new File(file, "result--" + name);
-
+		if (machineReadable) {
+			resultFile = new File(file.getParentFile(), "result--" + name);
+		}
+		resultFile.mkdir();
 		File discreteFile = getDiscrete(fileDonnee);
 		Analyse compDonnee = new Analyse();
 		if (machineReadable) {
@@ -332,15 +350,10 @@ public class AnalyseTask {
 					}
 				}
 			}
-
 			try {
 				for (ScenarAnalyse f : firstSc) {
 					for (ScenarAnalyse ff : secSc) {
-
-						System.out.println(f.getProjFile());
-						System.out.println(ff.getProjFile());
 						int minSizeCell = Integer.valueOf(f.getSizeCell());
-
 						// for each scale
 						for (int ech = minSizeCell; ech <= minSizeCell * 9; ech = ech * 3) {
 
@@ -366,9 +379,7 @@ public class AnalyseTask {
 						}
 					}
 				}
-
 			} catch (NullPointerException n) {
-
 			}
 		}
 		return resultFile;
@@ -383,6 +394,33 @@ public class AnalyseTask {
 		throw new FileNotFoundException("Example file not found");
 	}
 
+	private static File copyToScenVrac (File[] file, File mainFile) throws IOException{
+		File fileVrac = new File(mainFile, "ScenarVrac");
+		if (!fileVrac.isDirectory()) { // si le fichier n’existe pas on le cree
+			try {
+				Files.createDirectory(fileVrac.toPath());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		List<Path> vreListFiles = new ArrayList<Path>();
+		for (int i = 0; i < file.length; i++) {
+			for (File f : file[i].listFiles()) {
+				if (f.toString().endsWith(".tif")) {
+					vreListFiles.add(Paths.get(f.toString()));
+				}
+			}
+		}
+		for (Path p : vreListFiles) {
+			OutputStream out = new FileOutputStream(new File(fileVrac, p.getFileName().toString()));
+			Files.copy(p, out);
+			out.close();
+		}
+		return fileVrac;
+	}
+	
+	
 	/**
 	 * select a scaled sample of an eval-anal type output
 	 * 
@@ -459,35 +497,24 @@ public class AnalyseTask {
 	}
 
 	public static File copyExample(File resultFile, ScenarAnalyse sC) throws IOException {
-		File exampleFile = new File(resultFile, "SortieExemple");
-		exampleFile.mkdir();
-		File folderToCopy = sC.getFolderName();
-		if (folderToCopy.getName().startsWith("N")) {
-
-			copyDirectory(folderToCopy, exampleFile);
-		}
-		return exampleFile;
+		List<File> list = new ArrayList<File>();
+		list.add(sC.getFolderName());
+		return copyExample(resultFile, list);
 	}
 
-	public static void copyDirectory(File copDir, File destinationDir) throws IOException {
-		destinationDir.mkdirs();
-		FileInputStream in = null;
-		FileOutputStream out = null;
-		try {
-			in = new FileInputStream(copDir);
-			out = new FileOutputStream(destinationDir);
+	public static void copyFolder(Path logFile) {
 
-			int c;
-			while ((c = in.read()) != -1) {
-				out.write(c);
+		try (BufferedWriter writer = Files.newBufferedWriter(logFile, StandardCharsets.UTF_8, StandardOpenOption.WRITE)) { // buffer en ecriture (ecrase l’existant), encodage UTF8
+
+			writer.write("Hello World!\n");
+			for (int i = 100; i > 0; --i) {
+
+				String n = "" + i + "\n";
+				writer.write(n);
+
 			}
-		} finally {
-			if (in != null) {
-				in.close();
-			}
-			if (out != null) {
-				out.close();
-			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 

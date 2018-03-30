@@ -1,7 +1,6 @@
 package fr.ign.task;
 
 import java.io.File;
-import java.util.Hashtable;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -56,15 +55,17 @@ public class CompositeTask {
 
 		boolean mean = true;
 		long seed = 13;
-
-		for (nMax = 5; nMax <= 6; nMax++) {
-			run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2,
-					ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
-			dataHT = DataSetSelec.get("Data3.1");
-			run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2,
-					ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
-		}
-
+		File[] file = new File[2];
+		File[] fileDonnee = { folderIn };
+		String[] names = { name };
+		// for (nMax = 5; nMax <= 6; nMax++) {
+		file[0] = run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1,
+				ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
+		dataHT = DataSetSelec.get("Data3.1");
+		file[1] = run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1,
+				ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
+		// }
+		AnalyseTask.runCompData(file, fileDonnee, folderOut, names, true);
 	}
 
 	public static File run(String name, File folderIn, File folderOut, File discreteFile, File buildFile, double xmin, double ymin, double width, double height, double shiftX,
@@ -88,8 +89,8 @@ public class CompositeTask {
 
 		File scenarFile = SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed,
 				machineReadable);
+		System.out.println("scenar file : "+scenarFile);
 		System.out.println("----------End task----------");
-		// AnalyseTask.runStab(scenarFile, folderIn, name,machineReadable);
 		return scenarFile;
 	}
 }

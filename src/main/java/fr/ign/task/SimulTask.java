@@ -101,7 +101,7 @@ public class SimulTask {
 
 		File scenarOut = new File(projectFile, nameScenar);
 		if (machineReadable) {
-			scenarOut = new File(projectFile.getParentFile(), "ScenarVrac");
+		//	scenarOut = new File(projectFile.getParentFile(), "ScenarVrac");
 			nameScenar = name + "--" + nameScenar;
 		}
 		scenarOut.mkdir();
@@ -129,7 +129,7 @@ public class SimulTask {
 			scenario.extractEvalAnal(scenarOut, project);
 			project.getMSGrid().saveRaster(nameScenar + "-eval", scenarOut);
 		}
-
+		System.out.println("scenar simu out : "+scenarOut);
 		return scenarOut;
 	}
 
