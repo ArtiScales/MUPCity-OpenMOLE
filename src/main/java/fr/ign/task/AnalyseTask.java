@@ -396,14 +396,7 @@ public class AnalyseTask {
 
 	private static File copyToScenVrac (File[] file, File mainFile) throws IOException{
 		File fileVrac = new File(mainFile, "ScenarVrac");
-		if (!fileVrac.isDirectory()) { // si le fichier n’existe pas on le cree
-			try {
-				Files.createDirectory(fileVrac.toPath());
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-
+		fileVrac.mkdirs();
 		List<Path> vreListFiles = new ArrayList<Path>();
 		for (int i = 0; i < file.length; i++) {
 			for (File f : file[i].listFiles()) {
