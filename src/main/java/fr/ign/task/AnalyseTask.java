@@ -288,8 +288,7 @@ public class AnalyseTask {
 	 * @throws Exception
 	 */
 	public static File runCompData(File[] file, File[] fileDonnee, File mainFile, String[] name, boolean machineReadable) throws Exception {
-
-		return runCompData(copyToScenVrac(fileDonnee, mainFile), fileDonnee[0], name[0], machineReadable);
+		return runCompData(copyToScenVrac(file, mainFile), fileDonnee[0], name[0], machineReadable);
 	}
 
 	/**
