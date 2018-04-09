@@ -24,7 +24,6 @@ import fr.ign.analyse.RasterMerge;
 import fr.ign.analyse.RasterMergeResult;
 import fr.ign.analyse.obj.Analyse;
 import fr.ign.analyse.obj.ScenarAnalyse;
-import fr.ign.exp.DataSetSelec;
 
 public class AnalyseTask {
 
@@ -42,12 +41,9 @@ public class AnalyseTask {
 
 	}
 
-	public static File runGridSens(File file, File fileDonnee, String name) throws Exception {
-		File[] fileAnalyse = DataSetSelec.selectFileAnalyse(fileDonnee, file);
-		File discreteFile = fileAnalyse[0];
-		File batiFile = fileAnalyse[1];
-		File morphoFile = fileAnalyse[2];
-		return runGridSens(file, discreteFile, batiFile, morphoFile, name);
+	public static File runGridSens(File[] file, File[] fileDonnee, File mainFile, String[] name, boolean machineReadable) throws Exception {
+
+		return runGridSens(copyToScenVrac(fileDonnee, mainFile), fileDonnee[0], name[0], machineReadable);
 	}
 
 	/**
@@ -66,18 +62,29 @@ public class AnalyseTask {
 	 * @return le dossier où sont contenus les fichiers produits
 	 * @throws Exception
 	 */
-	public static File runGridSens(File file, File discreteFile, File batiFile, File morphoFile, String name) throws Exception {
+	public static File runGridSens(File file, File fileDonnee, String name, boolean machineReadable) throws Exception {
 
 		RasterAnalyse.rootFile = file;
 		RasterAnalyse.cutBorder = true;
 
+		File discreteFile = getDiscrete(fileDonnee);
+
 		File resultFile = new File(file, "result-" + name);
+		if (machineReadable) {
+			resultFile = new File(file.getParentFile(), "result--" + name);
+		}
+
 		File rastFile = new File(resultFile, "raster");
 
-		Analyse gridSens = new Analyse(file, name);
+		Analyse anal = new Analyse();
+		if (machineReadable) {
+			anal = new Analyse(file, name, machineReadable);
+		} else {
+			anal = new Analyse(file, name);
+		}
 
 		// compare the effect of the minimal sizes of the cells
-		List<List<ScenarAnalyse>> listCellMin = gridSens.getScenars(gridSens.getProjetByCellmin());
+		List<List<ScenarAnalyse>> listCellMin = anal.getScenars(anal.getProjetByCellmin());
 
 		for (List<ScenarAnalyse> list : listCellMin) {
 			File statFile = new File(resultFile, "stat-" + list.get(0).getProjFile().getName() + "-" + list.get(0).getScenarName());
@@ -90,7 +97,7 @@ public class AnalyseTask {
 
 		// compare les réplication entre les seuils
 
-		List<List<ScenarAnalyse>> listsSeuil = gridSens.getProjetBySeuil();
+		List<List<ScenarAnalyse>> listsSeuil = anal.getProjetBySeuil();
 
 		for (List<ScenarAnalyse> listSeuil : listsSeuil) {
 			File statFile = new File(resultFile, "stat-" + listSeuil.get(0).getSeuil() + "-" + listSeuil.get(0).getGrid() + "-" + listSeuil.get(0).getScenarName());
@@ -111,7 +118,7 @@ public class AnalyseTask {
 		// compare les réplication entre les grilles
 
 		System.out.println("------------(((Grid)))------------");
-		List<List<ScenarAnalyse>> listsGrid = gridSens.getProjetByGrid();
+		List<List<ScenarAnalyse>> listsGrid = anal.getProjetByGrid();
 
 		for (List<ScenarAnalyse> listGrid : listsGrid) {
 			File statFile = new File(resultFile, "stat-" + listGrid.get(0).getSizeCell() + "-" + listGrid.get(0).getSeuil() + "-" + listGrid.get(0).getScenarName());
@@ -130,7 +137,7 @@ public class AnalyseTask {
 
 		// test the effect of grid - compare les réplication entre les seuils et les différentes grilles
 
-		return batiFile;
+		return resultFile;
 	}
 
 	/**
@@ -147,20 +154,18 @@ public class AnalyseTask {
 		return runStab(copyToScenVrac(fileDonnee, mainFile), fileDonnee[0], name[0], machineReadable);
 	}
 
-	
 	public static File runStab(File file, File fileDonnee, String name, boolean machineReadable) throws Exception {
 
 		File discreteFile = getDiscrete(fileDonnee);
 		System.out.println("root " + file);
 		// folder settings
-		
-		
+
 		File resultFile = new File(file, "result--" + name);
 		resultFile.mkdir();
 		if (machineReadable) {
 			resultFile = new File(file.getParentFile(), "result--" + name);
 		}
-		
+
 		RasterAnalyse.rootFile = file;
 		RasterAnalyse.stabilite = true;
 
@@ -394,7 +399,7 @@ public class AnalyseTask {
 		throw new FileNotFoundException("Example file not found");
 	}
 
-	private static File copyToScenVrac (File[] file, File mainFile) throws IOException{
+	private static File copyToScenVrac(File[] file, File mainFile) throws IOException {
 		File fileVrac = new File(mainFile, "ScenarVrac");
 		if (!fileVrac.isDirectory()) { // si le fichier n’existe pas on le cree
 			try {
@@ -419,8 +424,7 @@ public class AnalyseTask {
 		}
 		return fileVrac;
 	}
-	
-	
+
 	/**
 	 * select a scaled sample of an eval-anal type output
 	 * 
