@@ -125,18 +125,21 @@ public class ProjectCreationDecompTask {
 		// Translation des différentes couches
 		long start = System.currentTimeMillis();
 		System.out.println("Translating layers in " + folderIn);
-
 		translateSHP(new File(folderIn, dataHT.get("build")), buildFile, shiftX, shiftY);
+		System.out.println("Translating roads");
 		translateSHP(new File(folderIn, dataHT.get("road")), roadFile, shiftX, shiftY);
+		System.out.println("Translating facilities");
 		translateSHP(new File(folderIn, dataHT.get("fac")), facilityFile, shiftX, shiftY);
+		System.out.println("Translating leisure");
 		translateSHP(new File(folderIn, dataHT.get("lei")), leisureFile, shiftX, shiftY);
+		System.out.println("Translating tram");
 		translateSHP(new File(folderIn, dataHT.get("ptTram")), busFile, shiftX, shiftY);
+		System.out.println("Translating trains");
 		translateSHP(new File(folderIn, dataHT.get("ptTrain")), trainFile, shiftX, shiftY);
-
 		if (useNU) {
+			System.out.println("Translating nu");
 			translateSHP(new File(folderIn, dataHT.get("nU")), restrictFile, shiftX, shiftY);
 		}
-
 		long end = System.currentTimeMillis();
 		System.out.println("Translation in " + (end - start) + " ms");
 		System.out.println("Creating project");
@@ -269,8 +272,8 @@ public class ProjectCreationDecompTask {
 		params.put("create spatial index", Boolean.TRUE);
 		ShapefileDataStore newDataStore = (ShapefileDataStore) dataStoreFactory.createNewDataStore(params);
 		newDataStore.createSchema(dataStore.getSchema());
-		Transaction transaction = new DefaultTransaction("create");
-		FeatureWriter<SimpleFeatureType, SimpleFeature> writer = newDataStore.getFeatureWriterAppend(dataStore.getSchema().getTypeName(), transaction);
+		//Transaction transaction = new DefaultTransaction("create");
+		FeatureWriter<SimpleFeatureType, SimpleFeature> writer = newDataStore.getFeatureWriterAppend(dataStore.getSchema().getTypeName(), Transaction.AUTO_COMMIT);//transaction);
 		SimpleFeatureIterator iterator = shpFeatures.features();
 		try {
 			while (iterator.hasNext()) {
@@ -282,15 +285,15 @@ public class ProjectCreationDecompTask {
 				copy.setDefaultGeometry(geometry2);
 				writer.write();
 			}
-			transaction.commit();
+			//transaction.commit();
 		} catch (Exception problem) {
 			problem.printStackTrace();
-			transaction.rollback();
+			//transaction.rollback();
 			System.out.println("Export to shapefile failed");
 		} finally {
 			writer.close();
 			iterator.close();
-			transaction.close();
+			//transaction.close();
 			dataStore.dispose();
 			newDataStore.dispose();
 		}

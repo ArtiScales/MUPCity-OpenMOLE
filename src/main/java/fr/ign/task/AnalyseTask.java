@@ -293,8 +293,7 @@ public class AnalyseTask {
 	 * @throws Exception
 	 */
 	public static File runCompData(File[] file, File[] fileDonnee, File mainFile, String[] name, boolean machineReadable) throws Exception {
-
-		return runCompData(copyToScenVrac(fileDonnee, mainFile), fileDonnee[0], name[0], machineReadable);
+		return runCompData(copyToScenVrac(file, mainFile), fileDonnee[0], name[0], machineReadable);
 	}
 
 	/**
@@ -401,14 +400,7 @@ public class AnalyseTask {
 
 	private static File copyToScenVrac(File[] file, File mainFile) throws IOException {
 		File fileVrac = new File(mainFile, "ScenarVrac");
-		if (!fileVrac.isDirectory()) { // si le fichier n’existe pas on le cree
-			try {
-				Files.createDirectory(fileVrac.toPath());
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-
+		fileVrac.mkdirs();
 		List<Path> vreListFiles = new ArrayList<Path>();
 		for (int i = 0; i < file.length; i++) {
 			for (File f : file[i].listFiles()) {
