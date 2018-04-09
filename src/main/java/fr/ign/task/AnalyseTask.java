@@ -398,7 +398,7 @@ public class AnalyseTask {
 		throw new FileNotFoundException("Example file not found");
 	}
 
-	private static File copyToScenVrac(File[] file, File mainFile) throws IOException {
+	public static File copyToScenVrac(File[] file, File mainFile) throws IOException {
 		File fileVrac = new File(mainFile, "ScenarVrac");
 		fileVrac.mkdirs();
 		List<Path> vreListFiles = new ArrayList<Path>();
