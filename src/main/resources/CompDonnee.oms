@@ -77,7 +77,7 @@ val ProjectCreationTask = ScalaTask("""
  // maxSize :=14580.0,
   seuilDensBuild := 0.0,
   inputs += (name, inputName, folderIn,xmin, ymin, width, height, xshift, yshift, minSize, maxSize, seuilDensBuild),
-  outputs += (projectFile, name, nameProject, folderIn)
+  outputs += (projectFile, name, nameProject, folderIn, inputName, folderIn,xmin, ymin, width, height, xshift, yshift, minSize, maxSize, seuilDensBuild)
 )
 
 val exploScenario = ExplorationTask(
@@ -95,7 +95,7 @@ val exploScenario = ExplorationTask(
   seed := 42L,
   machineReadable := true,
   mean :=true,
-	  (inputs,outputs) += (projectFile, name, nameProject, folderIn, seed,mean),
+	  (inputs,outputs) += (projectFile, name, nameProject, folderIn, seed,mean, inputName, folderIn,xmin, ymin, width, height, xshift, yshift, minSize, maxSize, seuilDensBuild),
 	  (inputs,outputs) += (ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8)
 	)
 
@@ -104,8 +104,8 @@ val SimuTask = ScalaTask("""
 |val simulFile = withThreadClassLoader(classLoader(mupcityplugin.SimulTask))(mupcityplugin.SimulTask.apply(projectFile, nameProject, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed))""".stripMargin
 ) set (
   plugins += pluginsOf(mupcityplugin.SimulTask),
-  inputs += (projectFile, name, nameProject, nMax, strict, mean, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, seed, folderIn),
-  outputs += (simulFile, folderIn, name)
+  inputs += (projectFile, name, nameProject, nMax, strict, mean, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, seed, folderIn, inputName, folderIn,xmin, ymin, width, height, xshift, yshift, minSize, maxSize, seuilDensBuild),
+  outputs += (simulFile, folderIn, name, inputName,nMax, strict, mean,seed, folderIn,xmin, ymin, width, height, xshift, yshift, minSize, maxSize, seuilDensBuild)
 )
 
 val aggregateTask = ScalaTask("val (arraySimulFile, arrayFolderIn, arrayName) = (input.simulFile, input.folderIn, input.name)") set (
@@ -116,6 +116,8 @@ val aggregateTask = ScalaTask("val (arraySimulFile, arrayFolderIn, arrayName) = 
 val ResultTask = ScalaTask("""
 |import fr.ign.task._
 |val name = arrayName.flatten.head
+|println(name + input.arraySimulFile.length)
+|input.arraySimulFile.foreach{println}
 |val tmpDir = mkDir()
 |val resultFile=withThreadClassLoader(classLoader(mupcityplugin.CompDonneeAnalysisTask))(mupcityplugin.CompDonneeAnalysisTask.apply(input.arraySimulFile.flatten, input.arrayFolderIn.flatten, tmpDir, input.arrayName.flatten))""".stripMargin) set (
   plugins += pluginsOf(mupcityplugin.CompDonneeAnalysisTask),
@@ -125,11 +127,10 @@ val ResultTask = ScalaTask("""
 
 val h = ToStringHook(nameProject)
 val copyProjectHook =  CopyFileHook(projectFile, resultFolder / "${name}-${inputName}-CM${minSize}-S${seuilDensBuild}-GP_${xmin}_${ymin}")
-val copySimProjectHook =  CopyFileHook(simulFile, resultFolder / "${name}-${inputName}-CM${minSize}-S${seuilDensBuild}-GP_${xmin}_${ymin}" / "${simulName}")
-val copyVracHook =  CopyFileHook(simulFile, resultFolder / "ScenarVrac")
+val copySimProjectHook =  CopyFileHook(simulFile, resultFolder / "${name}-${inputName}-CM${minSize}-S${seuilDensBuild}-GP_${xmin}_${ymin}--${nMax}_${strict}_${mean}_${seed} " )
 val copyHook =  CopyFileHook(resultFile, resultFolder / "result_${name}")
 
 //val env = EGIEnvironment("vo.complex-systems.eu",openMOLEMemory = 2048 megabytes)
-val env = LocalEnvironment(1)
+val env = LocalEnvironment(4)
 
-(exploProject source sourceDirectories)  -< ((ProjectCreationTask on env hook ToStringHook(inputName)) -- ((exploScenario hook ToStringHook(nMax, strict)) -< (SimuTask on env hook ToStringHook(simulFile)) >-  aggregateTask hook ToStringHook(arrayName)) >- (ResultTask on env hook copyHook))
+(exploProject source sourceDirectories)  -< ((ProjectCreationTask on env hook ToStringHook(inputName)) -- ((exploScenario) -< (SimuTask on env hook copySimProjectHook) >-  aggregateTask)) >- (ResultTask on env hook copyHook)
