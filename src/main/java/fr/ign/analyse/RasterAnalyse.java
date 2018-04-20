@@ -50,7 +50,9 @@ import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 
+import fr.ign.analyse.obj.Analyse;
 import fr.ign.analyse.obj.ScenarAnalyse;
+import fr.ign.analyse.obj.ScenarAnalyseFile;
 
 public class RasterAnalyse {
 
@@ -87,7 +89,7 @@ public class RasterAnalyse {
 		ArrayList<File> listFile = new ArrayList<File>();
 		if (in == null) {
 			for (File fil : rootFile.listFiles()) {
-				Pattern ech = Pattern.compile("eval_anal-");
+				Pattern ech = Pattern.compile("evalAnal-");
 				String[] list = ech.split(fil.toString());
 				if (fil.toString().contains(with) && list.length > 1 && list[1].equals(echelle + ".0.tif")) {
 					listFile.add(fil);
@@ -96,7 +98,7 @@ public class RasterAnalyse {
 			}
 		} else {
 			for (File fil : in) {
-				Pattern ech = Pattern.compile("eval_anal-");
+				Pattern ech = Pattern.compile("evalAnal-");
 				String[] list = ech.split(fil.toString());
 				if (fil.toString().contains(with) && list[1].equals(echelle + ".0.tif")) {
 					listFile.add(fil);
@@ -313,7 +315,7 @@ public class RasterAnalyse {
 	 * @return
 	 * @throws Exception
 	 */
-	public static void compareDiffSizedCell(List<ScenarAnalyse> listfile, String name, File discreteFile) throws Exception {
+	public static void compareDiffSizedCell(List<ScenarAnalyse> listfile, Analyse anal, String name, File discreteFile) throws Exception {
 
 		// with the other parameters
 		// with the topological spaces
@@ -343,11 +345,12 @@ public class RasterAnalyse {
 			for (ScenarAnalyse sA : listfile) {
 
 				echelle = sA.getSizeCell();
+				File file2Anal = anal.getSimuFile(sA, echelle, "eval-anal");
 				firstCol[scenar] = "echelle - " + echelle;
 				scenar = scenar + 2;
 				int size = Integer.valueOf(echelle);
 
-				SimpleFeatureCollection output = createMupOutput(importRaster(sA.getSimuFile(echelle)), size);
+				SimpleFeatureCollection output = createMupOutput(importRaster(file2Anal), size);
 				Hashtable<String, Double> entitySurf = new Hashtable<String, Double>();
 				Hashtable<String, Double> entityNumber = new Hashtable<String, Double>();
 				SimpleFeatureIterator discreteIt2 = discrete.features();
@@ -413,10 +416,14 @@ public class RasterAnalyse {
 		}
 	}
 
-	public static RasterMergeResult mergeRasters(List<ScenarAnalyse> listSA, ScenarAnalyse justToOverload) throws Exception {
+	public static RasterMergeResult mergeRasters(List<ScenarAnalyse> listSA, Analyse anal, ScenarAnalyse justToOverload) throws Exception {
 		List<File> inList = new ArrayList<File>();
-		for (ScenarAnalyse sA : listSA) {
-			inList.add(sA.getSimuFile());
+		for (ScenarAnalyseFile sAf : anal.fileCollec) {
+			for (ScenarAnalyse sA : listSA) {
+				if (sAf.equals(sA) && sAf.getEchelle().equals("20") && sAf.getMeaning().equals("eval-anal")) {
+					inList.add(sAf.getFileFile());
+				}
+			}
 		}
 		return mergeRasters(inList);
 	}
@@ -473,7 +480,6 @@ public class RasterAnalyse {
 
 		// loop on the different cells
 		for (File f : listRepliFile) {
-			System.out.println("import " + f);
 			GridCoverage2D coverage = importRaster(f);
 
 			if (env == null) {
@@ -574,7 +580,7 @@ public class RasterAnalyse {
 		for (String[] differentObject : tabDifferentObjects.values()) {
 
 			String[] nameLineFabric = new String[5];
-			nameLineFabric[0] = differentObject[0] + " name - echelle " + echelle;
+			nameLineFabric[0] = differentObject[0] + " name - echelle " + echelle+"scenar"+ nameScenar;
 			nameLineFabric[1] = "Total Cells";
 			nameLineFabric[2] = "Stable cells";
 			nameLineFabric[3] = "Unstable cells";
@@ -656,7 +662,7 @@ public class RasterAnalyse {
 				cellByFabric.put(fabricName, finalle);
 			}
 
-			generateCsvFile(cellByFabric, statFile, ("cellBy" + differentObject[0] + "For-" + nameScenar), nameLineFabric);
+			generateCsvFile(cellByFabric, statFile, ("cellBy" + differentObject[0]), nameLineFabric);
 			fabricSDS.dispose();
 		}
 		return statFile;
@@ -679,7 +685,7 @@ public class RasterAnalyse {
 	 * Toutes les évaluations moyennes des scénarios
 	 *
 	 */
-	public static void createStatEvals(Hashtable<DirectPosition2D, Float> cellEvalFinal, File evalTotal) throws Exception {
+	public static void createStatEvals(Hashtable<DirectPosition2D, Float> cellEvalFinal) throws Exception {
 		Hashtable<String, double[]> deuForme = new Hashtable<String, double[]>();
 		double[] distrib = new double[cellEvalFinal.size()];
 		int cpt = 0;
@@ -689,17 +695,16 @@ public class RasterAnalyse {
 			distrib[cpt] = cellEvalFinal.get(it);
 			cpt++;
 		}
-		if (evalTotal.exists()) {
 
-			int cptTot = 0;
-			Hashtable<DirectPosition2D, Float> evalTot = (Hashtable<DirectPosition2D, Float>) mergeRasters(evalTotale).getCellEval();
-			double[] distribEvalTot = new double[evalTot.size()];
-			for (DirectPosition2D it : evalTot.keySet()) {
-				distribEvalTot[cptTot] = evalTot.get(it);
-				cptTot++;
-			}
-			deuForme.put("Évaluations générales du projet", distribEvalTot);
+		int cptTot = 0;
+		Hashtable<DirectPosition2D, Float> evalTot = (Hashtable<DirectPosition2D, Float>) mergeRasters(evalTotale).getCellEval();
+		double[] distribEvalTot = new double[evalTot.size()];
+		for (DirectPosition2D it : evalTot.keySet()) {
+			distribEvalTot[cptTot] = evalTot.get(it);
+			cptTot++;
 		}
+		deuForme.put("Évaluations générales du projet", distribEvalTot);
+
 		deuForme.put("Évaluations du scénario", distrib);
 		generateCsvFileCol(deuForme, statFile, "evaluation_comportment-" + echelle);
 	}

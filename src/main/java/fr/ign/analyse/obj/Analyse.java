@@ -3,11 +3,19 @@ package fr.ign.analyse.obj;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 public class Analyse {
+
+	// general colelctions
+	public Set<ProjetAnalyse> projetCollec = new HashSet<ProjetAnalyse>();
+	public Set<ScenarAnalyse> scenarCollec = new HashSet<ScenarAnalyse>();
+	public Set<ScenarAnalyseFile> fileCollec = new HashSet<ScenarAnalyseFile>();
 
 	// project collections
 	public List<String> cellMinCollec = new ArrayList<String>();
@@ -22,12 +30,14 @@ public class Analyse {
 	public List<String> ahpCollec = new ArrayList<String>();
 	public List<String> seedCollec = new ArrayList<String>();
 
-	public List<ProjetAnalyse> projetCollec = new ArrayList<ProjetAnalyse>();
-	public List<ScenarAnalyse> scenarCollec = new ArrayList<ScenarAnalyse>();
+	// files collection
+	public List<String> echelleCollec = new ArrayList<String>();
+	public List<String> meanCollec = new ArrayList<String>();
 
 	// gen attrib
 	public String nameExplo = null;
 
+	// machine readable constructor
 	public Analyse(File files, String name, boolean machineReadable) {
 		Pattern dbTiret = Pattern.compile("--");
 		Pattern tiret = Pattern.compile("-");
@@ -38,52 +48,65 @@ public class Analyse {
 				makeProjCollection(decompNameProj[0]);
 				String[] decompNameScProj = tiret.split(decompNameProj[1]);
 				makeScenCollection(decompNameScProj[0]);
+				makeFileCollection(decompNameScProj[1], decompNameScProj[2]);
 			}
 		}
-		// la montagne russe
 		for (File file : files.listFiles()) {
-			for (String size : cellMinCollec) {
-				for (String grid : gridCollec) {
-					for (String seuil : seuilCollec) {
-						for (String data : dataCollec) {
-							if (file.getName().contains("CM" + size) && file.getName().contains("GP_" + grid) && file.getName().contains("S" + seuil)
-									&& file.getName().contains(data)) {
-								ProjetAnalyse proj = new ProjetAnalyse(file, size, grid, seuil, data);
-								projetCollec.add(proj);
-								for (String nMax : nMaxCollec) {
-									for (String strict : strictCollec) {
-										for (String yag : yagCollec) {
-											for (String ahp : ahpCollec) {
-												for (String seed : seedCollec) {
-													if (file.getName().contains(nMax.toString()) && file.getName().contains(strict) && file.getName().contains(yag)
-															&& file.getName().contains(ahp) && file.getName().contains(seed.toString())) {
-
-														String[] decompNameProj = tiret.split(file.getName());
-														String echelle = decompNameProj[decompNameProj.length - 1].replace(".0.tif", "");
-														String meaning = decompNameProj[decompNameProj.length - 2];
-														ScenarAnalyse sC = new ScenarAnalyse(size, grid, seuil, data, nMax, ahp, strict, yag, file, seed, echelle, meaning);
-														scenarCollec.add(sC);
-														
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
+			String[] decompName = dbTiret.split(file.getName());
+			String[] decompNameProj = tiret.split(decompName[0]);
+			// nom de l'explo
+			// String nameExplo = decompNameProj[0];
+			// Set les différents jeux de données
+			String data = decompNameProj[1];
+			// Set les différentes tailles minimales de cellules
+			String size = decompNameProj[2].replace(".0", "").replace("CM", "");
+			// Set les differents seuils et grilles
+			String seuil = null;
+			String grid = null;
+			if (decompNameProj[3].startsWith("S0")) {
+				seuil = decompNameProj[3].replace("S", "");
+				grid = decompNameProj[4].replace("GP_", "");
+			} else {
+				seuil = decompNameProj[3].replace("S", "") + "-" + decompNameProj[4];
+				grid = decompNameProj[5].replace("GP_", "");
 			}
+			String[] decompScenarEval = tiret.split(decompName[1]);
+			Pattern underscore = Pattern.compile("_");
+			String[] decompScenar = underscore.split(decompScenarEval[0]);
+			String nMax = decompScenar[0];
+			String strict = decompScenar[1];
+			String yag = decompScenar[2];
+			String ahp = decompScenar[3];
+			String seed = decompScenar[5];
+			//
+			String meaning = decompScenarEval[1];
+			String echelle = decompScenarEval[2].replace(".0.tif", "");
+			ProjetAnalyse proj = new ProjetAnalyse(true, file, size, grid, seuil, data);
+			projetCollec.add(proj);
+			ScenarAnalyse sC = new ScenarAnalyse(true, file, file, size, grid, seuil, data, nMax, ahp, strict, yag, seed);
+			scenarCollec.add(sC);
+			ScenarAnalyseFile sCf = new ScenarAnalyseFile(true, file, file, size, grid, seuil, data, nMax, ahp, strict, yag, seed, echelle, meaning);
+			fileCollec.add(sCf);
+			System.out.println(sCf);
 		}
 	}
 
+	/*
+	 * private void DeleteDoubleProj() { for (int i = 0; i < projetCollec.size(); i++) { for (int j = i + 1; j < projetCollec.size(); j++) { if
+	 * (projetCollec.get(i).equals(projetCollec.get(j))) { projetCollec.remove(j); j--; } } } }
+	 * 
+	 * private void DeleteDoubleScen() { for (int i = 0; i < scenarCollec.size(); i++) { for (int j = i + 1; j < scenarCollec.size(); j++) { if
+	 * (scenarCollec.get(i).equals(scenarCollec.get(j))) { scenarCollec.remove(j); j--; } } } }
+	 */
+
+	// human readable - not re-tested
 	public Analyse(File file, String name) {
 		this(file.listFiles(), name);
 	}
 
 	public Analyse(File[] files, String name) {
 		// get the different project parameters
+		Pattern tiret = Pattern.compile("-");
 		for (File folderProjet : files) {
 			if (folderProjet.isDirectory() && folderProjet.getName().startsWith(name)) {
 				String nameProj = folderProjet.getName();
@@ -91,7 +114,9 @@ public class Analyse {
 				// set scenar
 				for (File scenarFile : folderProjet.listFiles()) {
 					if (scenarFile.getName().startsWith("N")) {
-						makeScenCollection(scenarFile.getName());
+						String[] decompNameScProj = tiret.split(scenarFile.getName());
+						makeScenCollection(decompNameScProj[0]);
+						makeFileCollection(decompNameScProj[1], decompNameScProj[2]);
 					}
 				}
 			}
@@ -105,7 +130,7 @@ public class Analyse {
 						for (String data : dataCollec) {
 							if (fileProjet.getName().contains("CM" + size) && fileProjet.getName().contains("GP_" + grid) && fileProjet.getName().contains("S" + seuil)
 									&& fileProjet.getName().contains(data)) {
-								ProjetAnalyse proj = new ProjetAnalyse(fileProjet, size, grid, seuil, data);
+								ProjetAnalyse proj = new ProjetAnalyse(false, fileProjet, size, grid, seuil, data);
 								projetCollec.add(proj);
 								for (File fileScenar : fileProjet.listFiles()) {
 									for (String nMax : nMaxCollec) {
@@ -116,8 +141,16 @@ public class Analyse {
 														if (fileScenar.getName().contains(nMax.toString()) && fileScenar.getName().contains(strict)
 																&& fileScenar.getName().contains(yag) && fileScenar.getName().contains(ahp)
 																&& fileScenar.getName().contains(seed.toString())) {
-															ScenarAnalyse sC = new ScenarAnalyse(fileProjet, size, grid, seuil, data, nMax, ahp, strict, yag, fileScenar, seed);
+															ScenarAnalyse sC = new ScenarAnalyse(false, fileProjet, fileScenar, size, grid, seuil, data, nMax, ahp, strict, yag,
+																	seed);
 															scenarCollec.add(sC);
+															for (String echelle : echelleCollec) {
+																for (String mean : meanCollec) {
+																	ScenarAnalyseFile sCf = new ScenarAnalyseFile(false, fileProjet, fileScenar, size, grid, seuil, data, nMax, ahp,
+																			strict, yag, seed, echelle, mean);
+																	fileCollec.add(sCf);
+																}
+															}
 														}
 													}
 												}
@@ -190,24 +223,59 @@ public class Analyse {
 		}
 	}
 
+	public void makeFileCollection(String mean, String ech) {
+		if (!meanCollec.contains(mean)) {
+			meanCollec.add(mean);
+		}
+		String echelle = ech.replace(".0.tif", "");
+		if (!echelleCollec.contains(echelle)) {
+			echelleCollec.add(echelle);
+		}
+	}
+
+	public List<String> getEchelleRange() {
+		return echelleCollec;
+	}
+
+	/**
+	 * retourne les échelles d'un projet dans l'ordre croissant, limité par un nombre "limit"
+	 * 
+	 * @param int
+	 *            limit : le nombre limite d'échelles renvoyés
+	 * @return ArrayList<String> une liste d'échelles
+	 */
+	public List<String> getEchelleRange(int limit) {
+		List<Integer> echelleCollecLimitedtemp = new ArrayList<Integer>();
+		for (int i = 0; i < echelleCollec.size(); i++) {
+			echelleCollecLimitedtemp.add(Integer.valueOf(echelleCollec.get(i)));
+		}
+		Collections.sort(echelleCollecLimitedtemp);
+		List<String> echelleCollecLimited = new ArrayList<String>();
+		for (int i = 0; i < limit; i++) {
+			echelleCollecLimited.add(String.valueOf(echelleCollecLimitedtemp.get(i)));
+		}
+
+		return echelleCollecLimited;
+	}
+
 	public int getNumberProject() {
 		return projetCollec.size();
 	}
 
-	public List<ProjetAnalyse> getProjectCollec() {
+	public Set<ProjetAnalyse> getProjectCollec() {
 		return projetCollec;
 	}
 
-	public List<ScenarAnalyse> getScenarCollec() {
+	public Set<ScenarAnalyse> getScenarCollec() {
 		return scenarCollec;
 	}
 
-	public List<List<ScenarAnalyse>> getProjetBySeuil() throws FileNotFoundException {
-		List<List<ProjetAnalyse>> listGen = new ArrayList<List<ProjetAnalyse>>();
+	public List<Set<ScenarAnalyse>> getProjetBySeuil() throws FileNotFoundException {
+		List<Set<ProjetAnalyse>> listGen = new ArrayList<Set<ProjetAnalyse>>();
 		for (String cellMin : cellMinCollec)
 			for (String grid : gridCollec) {
 				for (String data : dataCollec) {
-					List<ProjetAnalyse> particularList = new ArrayList<ProjetAnalyse>();
+					Set<ProjetAnalyse> particularList = new HashSet<ProjetAnalyse>();
 					for (ProjetAnalyse pa : projetCollec) {
 						if (pa.getSizeCell().equals(cellMin) && pa.getData().equals(data) && pa.getGrid().equals(grid)) {
 							particularList.add(pa);
@@ -219,12 +287,12 @@ public class Analyse {
 		return getScenars(listGen);
 	}
 
-	public List<List<ScenarAnalyse>> getProjetByGrid() throws FileNotFoundException {
-		List<List<ProjetAnalyse>> listGen = new ArrayList<List<ProjetAnalyse>>();
+	public List<Set<ScenarAnalyse>> getProjetByGrid() throws FileNotFoundException {
+		List<Set<ProjetAnalyse>> listGen = new ArrayList<Set<ProjetAnalyse>>();
 		for (String cellMin : cellMinCollec)
 			for (String seuil : seuilCollec) {
 				for (String data : dataCollec) {
-					List<ProjetAnalyse> particularList = new ArrayList<ProjetAnalyse>();
+					Set<ProjetAnalyse> particularList = new HashSet<ProjetAnalyse>();
 					for (ProjetAnalyse pa : projetCollec) {
 						if (pa.getSizeCell().equals(cellMin) && pa.getData().equals(data) && pa.getSeuil().equals(seuil)) {
 							particularList.add(pa);
@@ -236,12 +304,12 @@ public class Analyse {
 		return getScenars(listGen);
 	}
 
-	public List<List<ProjetAnalyse>> getProjetByCellmin() {
-		List<List<ProjetAnalyse>> listGen = new ArrayList<List<ProjetAnalyse>>();
+	public List<Set<ProjetAnalyse>> getProjetByCellmin() {
+		List<Set<ProjetAnalyse>> listGen = new ArrayList<Set<ProjetAnalyse>>();
 		for (String seuil : seuilCollec) {
 			for (String grid : gridCollec) {
 				for (String data : dataCollec) {
-					List<ProjetAnalyse> particularList = new ArrayList<ProjetAnalyse>();
+					Set<ProjetAnalyse> particularList = new HashSet<ProjetAnalyse>();
 					for (ProjetAnalyse pa : projetCollec) {
 						if (pa.getSeuil().equals(seuil) && pa.getData().equals(data) && pa.getGrid().equals(grid)) {
 							particularList.add(pa);
@@ -286,14 +354,24 @@ public class Analyse {
 		return result;
 	}
 
+	public List<ScenarAnalyseFile> getFilesPerScenar(ScenarAnalyse sA) {
+		List<ScenarAnalyseFile> result = new ArrayList<>();
+		for (ScenarAnalyseFile sAf : fileCollec) {
+			if (sAf.getScenarName().equals(sA.getScenarName())) {
+				result.add(sAf);
+			}
+		}
+		return result;
+	}
+
 	/**
 	 * Méthode qui retourne les ScenarAnalyses classées selon les scénarios, pour tout types de projets
 	 * 
 	 * @return
 	 * @throws FileNotFoundException
 	 */
-	public List<List<ScenarAnalyse>> getScenars() throws FileNotFoundException {
-		List<List<ProjetAnalyse>> uniList = new ArrayList<List<ProjetAnalyse>>();
+	public List<Set<ScenarAnalyse>> getScenars() throws FileNotFoundException {
+		List<Set<ProjetAnalyse>> uniList = new ArrayList<Set<ProjetAnalyse>>();
 		uniList.add(projetCollec);
 		return getScenars(uniList);
 	}
@@ -304,28 +382,28 @@ public class Analyse {
 	 * @return
 	 * @throws FileNotFoundException
 	 */
-	public List<List<ScenarAnalyse>> getScenars(List<List<ProjetAnalyse>> listProjets) throws FileNotFoundException {
+	public List<Set<ScenarAnalyse>> getScenars(List<Set<ProjetAnalyse>> listProjets) throws FileNotFoundException {
 
-		List<List<ScenarAnalyse>> listScenars = new ArrayList<List<ScenarAnalyse>>();
+		List<Set<ScenarAnalyse>> listScenars = new ArrayList<Set<ScenarAnalyse>>();
 
-		for (List<ProjetAnalyse> listProjet : listProjets) {
-			Hashtable<String, List<ScenarAnalyse>> collec = new Hashtable<String, List<ScenarAnalyse>>();
+		for (Set<ProjetAnalyse> listProjet : listProjets) {
+			Hashtable<String, Set<ScenarAnalyse>> collec = new Hashtable<String, Set<ScenarAnalyse>>();
 			for (ProjetAnalyse pA : listProjet) {
 				for (ScenarAnalyse scenar : scenarCollec) {
 					if (scenar.getProjFile().equals(pA.getProjFile())) {
-						if (collec.containsKey(scenar.getFolderName().getName())) {
-							List<ScenarAnalyse> listTemp = collec.get(scenar.getFolderName().getName());
+						if (collec.containsKey(scenar.getScenarName())) {
+							Set<ScenarAnalyse> listTemp = collec.get(scenar.getScenarName());
 							listTemp.add(scenar);
-							collec.put(scenar.getFolderName().getName(), listTemp);
+							collec.put(scenar.getScenarName(), listTemp);
 						} else {
-							List<ScenarAnalyse> resultTemp = new ArrayList<ScenarAnalyse>();
+							Set<ScenarAnalyse> resultTemp = new HashSet<ScenarAnalyse>();
 							resultTemp.add(scenar);
-							collec.put(scenar.getFolderName().getName(), resultTemp);
+							collec.put(scenar.getScenarName(), resultTemp);
 						}
 					}
 				}
 			}
-			for (List<ScenarAnalyse> lists : collec.values()) {
+			for (Set<ScenarAnalyse> lists : collec.values()) {
 				listScenars.add(lists);
 			}
 		}
@@ -372,6 +450,27 @@ public class Analyse {
 			}
 		}
 		return lFinale;
-
 	}
+
+	public File getSimuFile(ScenarAnalyse sA) throws FileNotFoundException {
+		return getSimuFile(sA, "20", "evalAnal");
+	}
+
+	public File getSimuFile(ScenarAnalyse sA, String ech, String mean) throws FileNotFoundException {
+		for (ScenarAnalyseFile sCf : fileCollec) {
+			if (((ScenarAnalyse) sCf).sameScenario(sA)) {
+				System.out.println(sCf.getFileFile());
+				System.out.println(sCf.getEchelle());
+				if (sCf.getEchelle().equals(ech)) {
+					if (sCf.getMeaning().equals(mean)) {
+						System.out.println("returned scale : " + sCf.getEchelle());
+						System.out.println("returned file : " + sCf.getFileFile());
+						return sCf.getFileFile();
+					}
+				}
+			}
+		}
+		throw new FileNotFoundException();
+	}
+
 }

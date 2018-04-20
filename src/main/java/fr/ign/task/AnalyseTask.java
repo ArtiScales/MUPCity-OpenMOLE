@@ -14,6 +14,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.geotools.geometry.DirectPosition2D;
@@ -36,15 +37,26 @@ public class AnalyseTask {
 		// File file = new File("/home/mcolomb/workspace/mupcity-openMole/result/brandNewStab/ScenarVrac");
 		// System.out.println(runStab(file, new File("/home/mcolomb/workspace/mupcity-openMole/data/"), "stability", true));
 
-		File file = new File("/home/mcolomb/workspace/mupcity-openMole/result/compDonneeTest/ScenarVrac");
-		runCompData(file, new File("/home/mcolomb/workspace/mupcity-openMole/data/"), "compDonnee", true);
+		File totFile = new File("/media/mcolomb/Data_2/resultFinal/results");
+		File[] totFiles = new File[totFile.listFiles().length];
+		String[] names = { "CompDonneeLight" };
+		int i = 0;
+		for (File f : totFile.listFiles()) {
+			if (f.getName().startsWith(names[0])) {
+				totFiles[i] = f;
+				i++;
+			}
+		}
+		File[] totInFile = { new File("/home/mcolomb/workspace/mupcity-openMole/data/") };
+		// File file = new File("/home/mcolomb/workspace/mupcity-openMole/result/compDonneeTest/ScenarVrac");
+		runCompData(totFiles, totInFile, new File("/home/mcolomb/tmp"), names, true);
 
 	}
 
-	public static File runGridSens(File[] file, File[] fileDonnee, File mainFile, String[] name, boolean machineReadable) throws Exception {
-
-		return runGridSens(copyToScenVrac(fileDonnee, mainFile), fileDonnee[0], name[0], machineReadable);
-	}
+//	public static File runGridSens(File[] file, File[] fileDonnee, File mainFile, String[] name, boolean machineReadable) throws Exception {
+//
+//		return runGridSens(copyToScenVrac(fileDonnee, mainFile), fileDonnee[0], name[0], machineReadable);
+//	}
 
 	/**
 	 * Analyse automatique des explorations faites avec le script MupCityGridExplo.oms
@@ -62,83 +74,83 @@ public class AnalyseTask {
 	 * @return le dossier où sont contenus les fichiers produits
 	 * @throws Exception
 	 */
-	public static File runGridSens(File file, File fileDonnee, String name, boolean machineReadable) throws Exception {
-
-		RasterAnalyse.rootFile = file;
-		RasterAnalyse.cutBorder = true;
-
-		File discreteFile = getDiscrete(fileDonnee);
-
-		File resultFile = new File(file, "result-" + name);
-		if (machineReadable) {
-			resultFile = new File(file.getParentFile(), "result--" + name);
-		}
-
-		File rastFile = new File(resultFile, "raster");
-
-		Analyse anal = new Analyse();
-		if (machineReadable) {
-			anal = new Analyse(file, name, machineReadable);
-		} else {
-			anal = new Analyse(file, name);
-		}
-
-		// compare the effect of the minimal sizes of the cells
-		List<List<ScenarAnalyse>> listCellMin = anal.getScenars(anal.getProjetByCellmin());
-
-		for (List<ScenarAnalyse> list : listCellMin) {
-			File statFile = new File(resultFile, "stat-" + list.get(0).getProjFile().getName() + "-" + list.get(0).getScenarName());
-			statFile.mkdirs();
-			RasterAnalyse.statFile = statFile;
-
-			// create analysis of different parameter setting regarding to different size of cells
-			RasterAnalyse.compareDiffSizedCell(list, name, discreteFile);
-		}
-
-		// compare les réplication entre les seuils
-
-		List<List<ScenarAnalyse>> listsSeuil = anal.getProjetBySeuil();
-
-		for (List<ScenarAnalyse> listSeuil : listsSeuil) {
-			File statFile = new File(resultFile, "stat-" + listSeuil.get(0).getSeuil() + "-" + listSeuil.get(0).getGrid() + "-" + listSeuil.get(0).getScenarName());
-			statFile.mkdirs();
-			RasterAnalyse.statFile = statFile;
-
-			RasterMergeResult resultMergedSeuil = RasterAnalyse.mergeRasters(listSeuil, listSeuil.get(0));
-			RasterAnalyse.createStatsDescriptive(name + ("SeuilComparison"), resultMergedSeuil);
-			// don't know why this one crashes coz of a lock
-			RasterAnalyse.createStatsDiscrete(name + ("SeuilComparisonDiscrete"), resultMergedSeuil, discreteFile);
-			rastFile.mkdirs();
-			RasterMerge.merge(listSeuil,
-					new File(rastFile,
-							"rasterMerged-SeuilComp" + listSeuil.get(0).getSizeCell() + "-" + listSeuil.get(0).getSeuil() + "-" + listSeuil.get(0).getScenarName() + ".tif"),
-					RasterAnalyse.cutBorder);
-		}
-
-		// compare les réplication entre les grilles
-
-		System.out.println("------------(((Grid)))------------");
-		List<List<ScenarAnalyse>> listsGrid = anal.getProjetByGrid();
-
-		for (List<ScenarAnalyse> listGrid : listsGrid) {
-			File statFile = new File(resultFile, "stat-" + listGrid.get(0).getSizeCell() + "-" + listGrid.get(0).getSeuil() + "-" + listGrid.get(0).getScenarName());
-			statFile.mkdirs();
-			RasterAnalyse.statFile = statFile;
-
-			RasterMergeResult resultMergedSeuil = RasterAnalyse.mergeRasters(listGrid, listGrid.get(0));
-			RasterAnalyse.createStatsDescriptive(name + ("GridComparison"), resultMergedSeuil);
-			RasterAnalyse.createStatsDiscrete(name + ("GridComparisonDiscrete"), resultMergedSeuil, discreteFile);
-			rastFile.mkdirs();
-			RasterMerge.merge(listGrid,
-					new File(rastFile,
-							"rasterMerged-SeuilComp" + listGrid.get(0).getSizeCell() + "-" + listGrid.get(0).getSeuil() + "-" + listGrid.get(0).getScenarName() + ".tif"),
-					RasterAnalyse.cutBorder);
-		}
-
-		// test the effect of grid - compare les réplication entre les seuils et les différentes grilles
-
-		return resultFile;
-	}
+//	public static File runGridSens(File file, File fileDonnee, String name, boolean machineReadable) throws Exception {
+//
+//		RasterAnalyse.rootFile = file;
+//		RasterAnalyse.cutBorder = true;
+//
+//		File discreteFile = getDiscrete(fileDonnee);
+//
+//		File resultFile = new File(file, "result-" + name);
+//		if (machineReadable) {
+//			resultFile = new File(file.getParentFile(), "result--" + name);
+//		}
+//
+//		File rastFile = new File(resultFile, "raster");
+//
+//		Analyse anal = new Analyse();
+//		if (machineReadable) {
+//			anal = new Analyse(file, name, machineReadable);
+//		} else {
+//			anal = new Analyse(file, name);
+//		}
+//
+//		// compare the effect of the minimal sizes of the cells
+//		List<Set<ScenarAnalyse>> listCellMin = anal.getScenars(anal.getProjetByCellmin());
+//
+//		for (Set<ScenarAnalyse> list : listCellMin) {
+//			File statFile = new File(resultFile, "stat-" + list.get(0).getProjFile().getName() + "-" + list.get(0).getScenarName());
+//			statFile.mkdirs();
+//			RasterAnalyse.statFile = statFile;
+//
+//			// create analysis of different parameter setting regarding to different size of cells
+//			RasterAnalyse.compareDiffSizedCell(list, anal, name, discreteFile);
+//		}
+//
+//		// compare les réplication entre les seuils
+//
+//		List<List<ScenarAnalyse>> listsSeuil = anal.getProjetBySeuil();
+//
+//		for (List<ScenarAnalyse> listSeuil : listsSeuil) {
+//			File statFile = new File(resultFile, "stat-" + listSeuil.get(0).getSeuil() + "-" + listSeuil.get(0).getGrid() + "-" + listSeuil.get(0).getScenarName());
+//			statFile.mkdirs();
+//			RasterAnalyse.statFile = statFile;
+//
+//			RasterMergeResult resultMergedSeuil = RasterAnalyse.mergeRasters(listSeuil, anal, listSeuil.get(0));
+//			RasterAnalyse.createStatsDescriptive(name + ("SeuilComparison"), resultMergedSeuil);
+//			// don't know why this one crashes coz of a lock
+//			RasterAnalyse.createStatsDiscrete(name + ("SeuilComparisonDiscrete"), resultMergedSeuil, discreteFile);
+//			rastFile.mkdirs();
+//			RasterMerge.merge(listSeuil, anal,
+//					new File(rastFile,
+//							"rasterMerged-SeuilComp" + listSeuil.get(0).getSizeCell() + "-" + listSeuil.get(0).getSeuil() + "-" + listSeuil.get(0).getScenarName() + ".tif"),
+//					RasterAnalyse.cutBorder);
+//		}
+//
+//		// compare les réplication entre les grilles
+//
+//		System.out.println("------------(((Grid)))------------");
+//		List<List<ScenarAnalyse>> listsGrid = anal.getProjetByGrid();
+//
+//		for (List<ScenarAnalyse> listGrid : listsGrid) {
+//			File statFile = new File(resultFile, "stat-" + listGrid.get(0).getSizeCell() + "-" + listGrid.get(0).getSeuil() + "-" + listGrid.get(0).getScenarName());
+//			statFile.mkdirs();
+//			RasterAnalyse.statFile = statFile;
+//
+//			RasterMergeResult resultMergedSeuil = RasterAnalyse.mergeRasters(listGrid, anal, listGrid.get(0));
+//			RasterAnalyse.createStatsDescriptive(name + ("GridComparison"), resultMergedSeuil);
+//			RasterAnalyse.createStatsDiscrete(name + ("GridComparisonDiscrete"), resultMergedSeuil, discreteFile);
+//			rastFile.mkdirs();
+//			RasterMerge.merge(listGrid, anal,
+//					new File(rastFile,
+//							"rasterMerged-SeuilComp" + listGrid.get(0).getSizeCell() + "-" + listGrid.get(0).getSeuil() + "-" + listGrid.get(0).getScenarName() + ".tif"),
+//					RasterAnalyse.cutBorder);
+//		}
+//
+//		// test the effect of grid - compare les réplication entre les seuils et les différentes grilles
+//
+//		return resultFile;
+//	}
 
 	/**
 	 * overlaoding to use aggregation transition from openMole
@@ -177,119 +189,111 @@ public class AnalyseTask {
 			anal = new Analyse(file, name);
 		}
 
+		// sélectionne des listes de scénario ayant pour différence la seed
 		for (List<ScenarAnalyse> arL : anal.getScenarDiffSeed()) {
 
-			if (arL.get(0).getMeaning().equals("eval_anal")) {
+			// pour tous les fichiers de ces listes
 
-				int minSizeCell = Integer.valueOf(arL.get(0).getSizeCell());
+			// pour les trois premières échelles
+			for (String echelle : anal.getEchelleRange(3)) {
 
-				for (ScenarAnalyse scen : arL) {
-					if (minSizeCell > Integer.valueOf(scen.getSizeCell())) {
-						minSizeCell = Integer.valueOf(scen.getSizeCell());
-					}
+				int ech = Integer.valueOf(echelle);
+
+				// convert Scenar to File
+				String nameTest = arL.get(0).getProjFile().getName() + "_" + arL.get(0).getnMax() + "_" + arL.get(0).isStrict() + "_" + arL.get(0).isYag() + "_"
+						+ arL.get(0).getAhp();
+
+				if (machineReadable) {
+					nameTest = new String(arL.get(0).getNiceName());
 				}
 
-				for (int ech = minSizeCell; ech <= minSizeCell * 9; ech = ech * 3) {
+				//
+				File eachResultFile = new File(resultFile, nameTest);
+				eachResultFile.mkdirs();
 
-					String echelle = String.valueOf(ech);
+				File statFile = new File(eachResultFile, "stat");
+				RasterAnalyse.statFile = statFile;
+				File rastFile = new File(eachResultFile, "raster");
+				rastFile.mkdir();
 
-					if (!(echelle.equals(arL.get(0).getEchelle()) && arL.get(0).getMeaning().equals("eval_anal"))) {
-						break;
-					}
+				File exampleFolder = new File("");
 
-					// convert Scenar to File
-					String nameTest = arL.get(0).getProjFile().getName() + "_" + arL.get(0).getnMax() + "_" + arL.get(0).isStrict() + "_" + arL.get(0).isYag() + "_"
-							+ arL.get(0).getAhp();
-
-					if (machineReadable) {
-						nameTest = new String(arL.get(0).getNiceName());
-					}
-
-					File eachResultFile = new File(resultFile, nameTest);
-					eachResultFile.mkdirs();
-
-					File statFile = new File(eachResultFile, "stat");
-					RasterAnalyse.statFile = statFile;
-					File rastFile = new File(eachResultFile, "raster");
-					rastFile.mkdir();
-
-					File exampleFolder = new File("");
-					if (machineReadable) {
-						exampleFolder = copyExample(eachResultFile, anal.getSimuFiles(arL.get(0)));
-					} else {
-						exampleFolder = copyExample(eachResultFile, arL.get(0));
-					}
-					RasterAnalyse.echelle = echelle;
-					List<File> fileToTest = new ArrayList<File>();
-
-					// get the set of files to test
-					for (ScenarAnalyse sc : arL) {
-						fileToTest.add(sc.getSimuFile(echelle));
-					}
-					fileToTest.remove(null);
-
-					// merge the different input rasters
-					RasterMergeResult mergedResult = RasterAnalyse.mergeRasters(fileToTest);
-
-					// statistics for the simple task with those objects
-					RasterAnalyse.createStatsDescriptive(nameTest, mergedResult);
-					RasterAnalyse.createStatsEvol(mergedResult.getHisto(), echelle);
-
-					File evalTotal = new File("");
-
-					// get eval total
-					for (File f : eachResultFile.listFiles()) {
-						if (f.getName().endsWith("eval-" + echelle + ".0.tif")) {
-							evalTotal = f;
-						}
-					}
-
-					RasterAnalyse.createStatEvals(mergedResult.getCellEval(), evalTotal);
-
-					// discrete statistics
-
-					RasterAnalyse.createStatsDiscrete(nameTest, mergedResult, discreteFile);
-
-					// create a merged raster
-					RasterMerge.merge(fileToTest, new File(rastFile, nameTest + "-rasterMerged-" + echelle + ".tif"), Integer.parseInt(echelle));
-
-					// cells contained
-					// reference simulation
-					File concernedFile = getOutputExample(exampleFolder, ech);
-					// Count how much 20m cells are contained into parent cells
-					Hashtable<DirectPosition2D, Float> SvgCellEval20 = new Hashtable<DirectPosition2D, Float>();
-					Hashtable<DirectPosition2D, Integer> SvgCellRepet20 = new Hashtable<DirectPosition2D, Integer>();
-					if (ech == minSizeCell) {
-						SvgCellEval20 = RasterAnalyse.mergeRasters(concernedFile).getCellEval();
-						SvgCellRepet20 = RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
-					} else if (ech == minSizeCell * 3) {
-						Hashtable<DirectPosition2D, Float> cellEval60 = (Hashtable<DirectPosition2D, Float>) RasterAnalyse.mergeRasters(concernedFile).getCellEval();
-						Hashtable<DirectPosition2D, Integer> cellRepet60 = (Hashtable<DirectPosition2D, Integer>) RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
-						RasterAnalyse.compareInclusionSizeCell(SvgCellRepet20, SvgCellEval20, cellRepet60, cellEval60, nameTest, ech);
-					} else if (ech == minSizeCell * 9) {
-						Hashtable<DirectPosition2D, Float> cellEval180 = (Hashtable<DirectPosition2D, Float>) RasterAnalyse.mergeRasters(concernedFile).getCellEval();
-						Hashtable<DirectPosition2D, Integer> cellRepet180 = (Hashtable<DirectPosition2D, Integer>) RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
-						RasterAnalyse.compareInclusionSizeCell(SvgCellRepet20, SvgCellEval20, cellRepet180, cellEval180, nameTest, ech);
-					}
-
-					// fractal dimention calculation
-					int resolution = 4;
-					FractalDimention.getCorrFracDimfromSimu(getBuild(fileDonnee, arL), file, statFile, echelle, resolution);
-
+				// copy d'un exemple
+				if (machineReadable) {
+					exampleFolder = copyExample(eachResultFile, anal.getSimuFiles(arL.get(0)));
+				} else {
+					exampleFolder = copyExample(eachResultFile, arL.get(0));
 				}
+
+				RasterAnalyse.echelle = echelle;
+				List<File> fileToTest = new ArrayList<File>();
+
+				// get the set of files to test
+
+				for (ScenarAnalyse sC : arL) {
+					fileToTest.add(anal.getSimuFile(sC, echelle, "eval-anal"));
+				}
+
+				// merge the different input rasters
+				RasterMergeResult mergedResult = RasterAnalyse.mergeRasters(fileToTest);
+
+				// statistics for the simple task with those objects
+				RasterAnalyse.createStatsDescriptive(nameTest, mergedResult);
+				RasterAnalyse.createStatsEvol(mergedResult.getHisto(), echelle);
+
+				// get the average evaluation of cells in a .csv
+				if (!mergedResult.getCellEval().isEmpty()) {
+					RasterAnalyse.createStatEvals(mergedResult.getCellEval());
+				}
+				// discrete statistics
+				RasterAnalyse.createStatsDiscrete(nameTest, mergedResult, discreteFile);
+
+				// create a merged raster
+				RasterMerge.merge(fileToTest, new File(rastFile, nameTest + "-rasterMerged-" + echelle + ".tif"), Integer.parseInt(echelle));
+
+				Integer minSizeCell = Integer.valueOf(arL.get(0).getSizeCell());
+				// cells contained
+				// reference simulation
+				File concernedFile = getOutputExample(exampleFolder, ech);
+				// Count how much minimal sized cells are contained into parent cells
+				Hashtable<DirectPosition2D, Float> SvgCellEval20 = new Hashtable<DirectPosition2D, Float>();
+				Hashtable<DirectPosition2D, Integer> SvgCellRepet20 = new Hashtable<DirectPosition2D, Integer>();
+				if (ech == minSizeCell) {
+					SvgCellEval20 = RasterAnalyse.mergeRasters(concernedFile).getCellEval();
+					SvgCellRepet20 = RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
+				} else if (ech == minSizeCell * 3) {
+					Hashtable<DirectPosition2D, Float> cellEval60 = (Hashtable<DirectPosition2D, Float>) RasterAnalyse.mergeRasters(concernedFile).getCellEval();
+					Hashtable<DirectPosition2D, Integer> cellRepet60 = (Hashtable<DirectPosition2D, Integer>) RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
+					RasterAnalyse.compareInclusionSizeCell(SvgCellRepet20, SvgCellEval20, cellRepet60, cellEval60, nameTest, ech);
+				} else if (ech == minSizeCell * 9) {
+					Hashtable<DirectPosition2D, Float> cellEval180 = (Hashtable<DirectPosition2D, Float>) RasterAnalyse.mergeRasters(concernedFile).getCellEval();
+					Hashtable<DirectPosition2D, Integer> cellRepet180 = (Hashtable<DirectPosition2D, Integer>) RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
+					RasterAnalyse.compareInclusionSizeCell(SvgCellRepet20, SvgCellEval20, cellRepet180, cellEval180, nameTest, ech);
+				}
+
+				// fractal dimention calculation
+				int resolution = 4;
+				FractalDimention.getCorrFracDimfromSimu(getBuild(fileDonnee, arL), file, statFile, echelle, resolution);
+
 			}
+
 		}
 		return resultFile;
 	}
 
 	/**
-	 * overlaoding to use aggregation transition from openMole
+	 * Overlaoding to use aggregation transition from openMole Creates a new directory <i>mainFile</i> with the use of <i>copyToScenVrac</i> and puts all of the incoming
+	 * <i>file[]</i> in it
 	 * 
 	 * @param file
+	 *            : the array file contaning the different scenarios
 	 * @param fileDonnee
+	 *            : file containing the root data
 	 * @param name
+	 *            : name of the explo
 	 * @param machineReadable
-	 * @return
+	 *            : if it's set to be launch by the machine (openmole)
+	 * @return File : the result file
 	 * @throws Exception
 	 */
 	public static File runCompData(File[] file, File[] fileDonnee, File mainFile, String[] name, boolean machineReadable) throws Exception {
@@ -322,6 +326,7 @@ public class AnalyseTask {
 			compDonnee = new Analyse(file, name);
 		}
 
+		// définition des pairs que l'on veut analyser
 		List<MutablePair<String, String>> listPair = new ArrayList<>();
 		MutablePair<String, String> pair = new MutablePair<String, String>("Manuel", "RouteAutom");
 		listPair.add(pair);
@@ -342,48 +347,58 @@ public class AnalyseTask {
 		pair = new MutablePair<String, String>("Autom", "LoisirServiceManu");
 		listPair.add(pair);
 
+		// pour toutes ces pairs
 		for (MutablePair<String, String> zePair : listPair) {
+			System.out.println("pair " +zePair.left + " - " + zePair.right);
+
+			// on créée des listes de scénarios
 			List<ScenarAnalyse> firstSc = new ArrayList<>();
 			List<ScenarAnalyse> secSc = new ArrayList<>();
-			for (List<ScenarAnalyse> scenars : compDonnee.getScenars()) {
-				for (ScenarAnalyse scenar : scenars) {
-					if (scenar.getData().equals(zePair.getLeft())) {
-						firstSc.add(scenar);
-					} else if (scenar.getData().equals(zePair.getRight())) {
-						secSc.add(scenar);
-					}
+			for (ScenarAnalyse scenar : compDonnee.scenarCollec) {
+				if (scenar.getData().equals(zePair.getLeft())) {
+					firstSc.add(scenar);
+				} else if (scenar.getData().equals(zePair.getRight())) {
+					secSc.add(scenar);
 				}
 			}
+
 			try {
-				for (ScenarAnalyse f : firstSc) {
-					for (ScenarAnalyse ff : secSc) {
-						int minSizeCell = Integer.valueOf(f.getSizeCell());
-						// for each scale
-						for (int ech = minSizeCell; ech <= minSizeCell * 9; ech = ech * 3) {
-
-							if (f.getMeaning().equals("eval_anal") && f.getEchelle().equals(String.valueOf(ech)) && ff.getMeaning().equals("eval_anal")
-									&& ff.getEchelle().equals(String.valueOf(ech))) {
-								String echelle = String.valueOf(ech);
-								RasterAnalyse.echelle = echelle;
-
+				for (ScenarAnalyse fSc : firstSc) {
+					System.out.println("left : " + fSc.getShortScenarName());
+					for (ScenarAnalyse sSc : secSc) {
+						System.out.println("right : " + sSc.getShortScenarName());
+						
+						if (fSc.getShortScenarName().equals(sSc.getShortScenarName())) {
+							for (String echelle : compDonnee.getEchelleRange(3)) {
+								System.out.println("comparaison des données " + zePair.right + " et " + zePair.left +" pour l'échelle "+echelle);
 								List<File> fileToTest = new ArrayList<>();
-								fileToTest.add(f.getSimuFile(echelle));
-								fileToTest.add(ff.getSimuFile(echelle));
-								RasterMergeResult result = RasterAnalyse.mergeRasters(fileToTest);
 
-								String nameComp = f.getData() + "-CompareTo-" + ff.getData();
+								System.out.println(sSc.getScenarFile());
+								System.out.println(fSc.getScenarFile());
+
+								// get the file from the first scenar selected with the right echelle and meaning
+								fileToTest.add(compDonnee.getSimuFile(sSc, echelle, "evalAnal"));
+
+								// get the file from the second scenar selected with the right echelle and meaning
+								fileToTest.add(compDonnee.getSimuFile(fSc, echelle, "evalAnal"));
+
+								System.out.println("les fichiers comparés sont "+fileToTest);
+								RasterAnalyse.echelle=echelle;
+								RasterMergeResult result = RasterAnalyse.mergeRasters(fileToTest);
+								System.out.println("zob");
+								String nameComp = fSc.getData() + "-CompareTo-" + sSc.getData();
 								// statistics
 								File statFile = new File(resultFile, "stat-" + nameComp);
 								RasterAnalyse.statFile = statFile;
-
-								RasterAnalyse.createStatsDescriptive(name + "-" + echelle, result);
-								RasterMerge.merge(fileToTest, new File(resultFile, nameComp + "-rasterMerged-" + ech + ".0.tif"), ech);
-								RasterAnalyse.createStatsDiscrete(name + "-" + echelle, result, discreteFile);
+								RasterAnalyse.createStatsDescriptive(name + "-" + echelle +sSc.getShortScenarName() , result);
+								RasterMerge.merge(fileToTest, new File(resultFile, nameComp +"-Scenar"+sSc.getShortScenarName() +"-rasterMerged-" + echelle + ".0.tif"), Integer.valueOf(echelle));
+								RasterAnalyse.createStatsDiscrete(name + "-" +echelle+"-Scenar"+sSc.getShortScenarName() , result, discreteFile);
 							}
 						}
 					}
 				}
-			} catch (NullPointerException n) {
+			} catch (
+			NullPointerException n) {
 			}
 		}
 		return resultFile;
@@ -430,7 +445,7 @@ public class AnalyseTask {
 	public static File getOutputExample(File exampleFolder, int ech) throws IOException {
 		// copy an example of output
 		for (File f : exampleFolder.listFiles()) {
-			if (f.getName().endsWith("eval_anal-" + ech + ".0.tif")) {
+			if (f.getName().endsWith("evalAnal-" + ech + ".0.tif")) {
 				return f;
 			}
 		}
@@ -494,7 +509,7 @@ public class AnalyseTask {
 
 	public static File copyExample(File resultFile, ScenarAnalyse sC) throws IOException {
 		List<File> list = new ArrayList<File>();
-		list.add(sC.getFolderName());
+		list.add(sC.getScenarFile());
 		return copyExample(resultFile, list);
 	}
 

@@ -18,6 +18,7 @@ import org.opengis.parameter.GeneralParameterValue;
 import org.opengis.parameter.ParameterValue;
 import org.opengis.parameter.ParameterValueGroup;
 
+import fr.ign.analyse.obj.Analyse;
 import fr.ign.analyse.obj.ScenarAnalyse;
 
 public class RasterMerge {
@@ -78,13 +79,13 @@ public class RasterMerge {
  * @return
  * @throws Exception
  */
-	public static File merge(List<ScenarAnalyse> folderIn, File fileOut,boolean crop) throws Exception {
+	public static File merge(List<ScenarAnalyse> ScenarsIn, Analyse anal, File fileOut,boolean crop) throws Exception {
 		List<File> inList = new ArrayList<File>();
-		for (ScenarAnalyse sA : folderIn){
-			inList.add(sA.getSimuFile());
+		for (ScenarAnalyse sA : ScenarsIn){
+			inList.add(anal.getSimuFile(sA));
 		}
 		
-		return merge(inList, fileOut, Integer.valueOf(folderIn.get(0).getSizeCell()), crop);
+		return merge(inList, fileOut, Integer.valueOf(ScenarsIn.get(0).getSizeCell()), crop);
 	}
 	
 	public static File merge(List<File> folderIn, File fileOut, int echelle) throws Exception {
