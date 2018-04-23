@@ -87,7 +87,6 @@ public class Analyse {
 			scenarCollec.add(sC);
 			ScenarAnalyseFile sCf = new ScenarAnalyseFile(true, file, file, size, grid, seuil, data, nMax, ahp, strict, yag, seed, echelle, meaning);
 			fileCollec.add(sCf);
-			System.out.println(sCf);
 		}
 	}
 
@@ -345,7 +344,7 @@ public class Analyse {
 		for (ProjetAnalyse proj : projetCollec) {
 			List<ScenarAnalyse> scenars = new ArrayList<ScenarAnalyse>();
 			for (ScenarAnalyse scenar : scenarCollec) {
-				if (scenar.getProjFile().equals(proj.getProjFile())) {
+				if (proj.sameProjet(scenar)) {
 					scenars.add(scenar);
 				}
 			}
@@ -458,13 +457,9 @@ public class Analyse {
 
 	public File getSimuFile(ScenarAnalyse sA, String ech, String mean) throws FileNotFoundException {
 		for (ScenarAnalyseFile sCf : fileCollec) {
-			if (((ScenarAnalyse) sCf).sameScenario(sA)) {
-				System.out.println(sCf.getFileFile());
-				System.out.println(sCf.getEchelle());
+			if (((ScenarAnalyse) sCf).sameScenario(sA) && ((ProjetAnalyse) sCf).sameProjet(sA)) {
 				if (sCf.getEchelle().equals(ech)) {
 					if (sCf.getMeaning().equals(mean)) {
-						System.out.println("returned scale : " + sCf.getEchelle());
-						System.out.println("returned file : " + sCf.getFileFile());
 						return sCf.getFileFile();
 					}
 				}

@@ -4,6 +4,9 @@ val nameProject = Val[String]
 val nameTotal = Val[String]
 val simulName = Val[String]
 val inputName = Val[String]
+val arraySimulFile = Val[Array[File]]
+val arrayFolderIn = Val[Array[File]]
+val arrayName = Val[Array[String]]
 
 //files & folders
 val folderIn = Val[File]
@@ -17,7 +20,6 @@ val resultFolder = workDirectory / "results"
 val machineReadable = Val[Boolean]
 
 //project param
-
 val xmin = Val[Double]
 val ymin = Val[Double]
 val width = Val[Double]
@@ -51,8 +53,7 @@ val dirs = Val[Array[File]]
 System.setProperty("java.awt.headless", "true")
 System.setProperty("java.awt.toolkit", "sun.awt.HToolkit")
 
-//val sourceDirectories = ListDirectoriesSource(workDirectory / "dataOpenMole" / "compDonnee", dirs, "(^BatiAutom|^Manuel)")
-val sourceDirectories = ListDirectoriesSource(workDirectory / "dataOpenMole" / "Stability", dirs, "(?!compDonnee).*")
+val sourceDirectories = ListDirectoriesSource(workDirectory / "dataOpenMole" / "stabilite", dirs)
 
 val exploProject = ExplorationTask(folderIn in (workDirectory / "data") withName inputName)
 
@@ -105,6 +106,11 @@ val SimuTask = ScalaTask("""
   outputs += (simulFile, folderIn, name)
 )
 
+val aggregateTask = ScalaTask("val (arraySimulFile, arrayFolderIn, arrayName) = (input.simulFile, input.folderIn, input.name)") set (
+  inputs += (simulFile.toArray, folderIn.toArray, name.toArray),
+  outputs += (arraySimulFile, arrayFolderIn, arrayName)
+)
+
 val ResultTask = ScalaTask("""
 |import fr.ign.task._
 |val name = arrayName.flatten.head
@@ -115,18 +121,13 @@ val ResultTask = ScalaTask("""
   outputs += (resultFile, name)
 )
 
-val aggregateTask = ScalaTask("val (arraySimulFile, arrayFolderIn, arrayName) = (input.simulFile, input.folderIn, input.name)") set (
-  inputs += (simulFile.toArray, folderIn.toArray, name.toArray),
-  outputs += (arraySimulFile, arrayFolderIn, arrayName)
-)
-
 val h = ToStringHook(nameProject)
 val copyProjectHook =  CopyFileHook(projectFile, resultFolder / "${name}-${inputName}-CM${minSize}-S${seuilDensBuild}-GP_${xmin}_${ymin}")
 val copySimProjectHook =  CopyFileHook(simulFile, resultFolder / "${name}-${inputName}-CM${minSize}-S${seuilDensBuild}-GP_${xmin}_${ymin}" / "${simulName}")
 val copyVracHook =  CopyFileHook(simulFile, resultFolder / "ScenarVrac")
 val copyHook =  CopyFileHook(resultFile, resultFolder / "analyse_${name}")
 
-val env = EGIEnvironment("vo.complex-systems.eu",openMOLEMemory = 2048 megabytes)
-//val env = LocalEnvironment(1)
+//val env = EGIEnvironment("vo.complex-systems.eu",openMOLEMemory = 2048 megabytes)
+val env = LocalEnvironment(1)
 
-(exploProject source sourceDirectories) -< ((ProjectCreationTask on env hook ToStringHook(inputName)) -- ((exploScenario hook ToStringHook(nMax, strict)) -< (SimuTask on env hook ToStringHook(simulFile)) >- aggregateTask)) >- (ResultTask on env hook copyHook))
+(exploProject source sourceDirectories) -< ((ProjectCreationTask on env hook ToStringHook(inputName)) -- ((exploScenario) -< (SimuTask on env) >- aggregateTask)) >- (ResultTask on env hook copyHook)

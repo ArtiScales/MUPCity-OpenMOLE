@@ -102,6 +102,12 @@ public class ProjetAnalyse {
 		return data+"-CM"+sizeCell+".0-S"+seuil+"-GP_"+grid;
 	}
 
+
+	public boolean sameProjet(ScenarAnalyse sA) {
+
+		return seuil.equals(sA.getSeuil()) && data.equals(sA.getData()) && sizeCell.equals(sA.getSizeCell()) && grid.equals(sA.getGrid()) ;
+	}
+
 //	public boolean equals(ProjetAnalyse pA) {
 //		return grid.equals(pA.getGrid()) && seuil.equals(pA.getSeuil())
 //		boolean isEq = false;

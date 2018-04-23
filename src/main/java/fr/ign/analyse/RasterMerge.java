@@ -71,37 +71,37 @@ public class RasterMerge {
 		return merge(select, fileOut, echelle);
 
 	}
-/**
- * overload if the enveloppe needs a crop (in case of a changing grid)
- * @param folderIn
- * @param fileOut
- * @param echelle
- * @return
- * @throws Exception
- */
-	public static File merge(List<ScenarAnalyse> ScenarsIn, Analyse anal, File fileOut,boolean crop) throws Exception {
+
+	/**
+	 * overload if the enveloppe needs a crop (in case of a changing grid)
+	 * 
+	 * @param folderIn
+	 * @param fileOut
+	 * @param echelle
+	 * @return
+	 * @throws Exception
+	 */
+	public static File merge(List<ScenarAnalyse> ScenarsIn, Analyse anal, File fileOut, boolean crop) throws Exception {
 		List<File> inList = new ArrayList<File>();
-		for (ScenarAnalyse sA : ScenarsIn){
+		for (ScenarAnalyse sA : ScenarsIn) {
 			inList.add(anal.getSimuFile(sA));
 		}
-		
+
 		return merge(inList, fileOut, Integer.valueOf(ScenarsIn.get(0).getSizeCell()), crop);
 	}
-	
+
 	public static File merge(List<File> folderIn, File fileOut, int echelle) throws Exception {
 		return merge(folderIn, fileOut, echelle, false);
 	}
 
-	
-	
 	public static File merge(List<File> folderIn, File fileOut, int echelle, boolean crop) throws Exception {
 
-//just to make sure
-		if (!fileOut.getName().endsWith(".tif")){
-			fileOut = new File(fileOut+".tif");
+		// just to make sure
+		if (!fileOut.getName().endsWith(".tif")) {
+			fileOut = new File(fileOut + ".tif");
 			System.out.println("stupeeds");
 		}
-		
+
 		// setting of useless parameters
 		ParameterValue<OverviewPolicy> policy = AbstractGridFormat.OVERVIEW_POLICY.createValue();
 		policy.setValue(OverviewPolicy.IGNORE);
@@ -142,7 +142,6 @@ public class RasterMerge {
 
 			GeoTiffReader reader = new GeoTiffReader(folderIn.get(fInd));
 			GridCoverage2D coverage = reader.read(params);
-			System.out.println(folderIn.get(fInd));
 			for (int i = 0; i < longueur; ++i) {
 				for (int j = 0; j < largeur; ++j) {
 					DirectPosition2D pt = new DirectPosition2D(xMin + (2 * i + 1) * echelle / 2, yMin + (2 * j + 1) * echelle / 2);

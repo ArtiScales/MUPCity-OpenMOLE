@@ -12,9 +12,9 @@ public class CompositeTask {
 
 		DataSetSelec.predefSet();
 		Map<String, String> dataHT = DataSetSelec.get("Data1");
-		String name = "compDonnee";
+		String name = "Stabilite";
 		File folderIn = new File("./data/");
-		File folderOut = new File("./result/compDonneeTest");
+		File folderOut = new File("/media/mcolomb/Data_2/resultFinal/stab");
 		File discreteFile = new File("/home/mcolomb/informatique/MUP/explo/dataExtra/admin_typo.shp");
 		File buildFile = new File("/home/mcolomb/donnee/couplage/donneeGeographiques/batiment.shp");
 		// double width = 26590;
@@ -27,7 +27,8 @@ public class CompositeTask {
 		double shiftY = 0;
 
 		double minSize = 20;
-		double maxSize = 14580;
+		//double maxSize = 14580;
+		double maxSize = 200;
 		double seuilDensBuild = 0;
 
 		int nMax = 6;
@@ -55,17 +56,20 @@ public class CompositeTask {
 
 		boolean mean = true;
 		long seed = 13;
-		File[] file = new File[2];
+		File[] file = new File[3];
 		File[] fileDonnee = { folderIn };
 		String[] names = { name };
-		// for (nMax = 5; nMax <= 6; nMax++) {
+		
 		file[0] = run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1,
 				ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
 		dataHT = DataSetSelec.get("Data3.1");
 		file[1] = run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1,
 				ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
-		// }
-		AnalyseTask.runCompData(file, fileDonnee, folderOut, names, true);
+		seed= 14;
+		file[2] = run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1,
+				ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
+		
+		AnalyseTask.runStab(file, fileDonnee, folderOut, names, true);
 	}
 
 	public static File run(String name, File folderIn, File folderOut, File discreteFile, File buildFile, double xmin, double ymin, double width, double height, double shiftX,

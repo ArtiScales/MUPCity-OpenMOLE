@@ -524,7 +524,7 @@ public class RasterAnalyse {
 				}
 			}
 			System.out.println("il y a " + cellRepetCentroid.size() + " cellules sur " + compteurNombre + " dans la réplication " + nbDeScenar);
-
+			System.out.println();
 			// Historique de l'évolution du nombre de cellules sélectionnées dans toutes les simulations
 			statNb.addValue(compteurNombre);
 			histo[iter] = (double) cellRepetCentroid.size();
