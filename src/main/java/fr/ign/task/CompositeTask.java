@@ -14,21 +14,21 @@ public class CompositeTask {
 		Map<String, String> dataHT = DataSetSelec.get("Data1");
 		String name = "Stabilite";
 		File folderIn = new File("./data/");
-		File folderOut = new File("/media/mcolomb/Data_2/resultFinal/stab");
+		File folderOut = new File("/home/mcolomb/tmp/fracExperi");
 		File discreteFile = new File("/home/mcolomb/informatique/MUP/explo/dataExtra/admin_typo.shp");
 		File buildFile = new File("/home/mcolomb/donnee/couplage/donneeGeographiques/batiment.shp");
-		// double width = 26590;
-		// double height = 26590;
-		double width = 200;
-		double height = 200;
+		double width = 26590;
+		double height = 26590;
+//		double width = 200;
+//		double height = 200;
 		double xmin = 915948;
 		double ymin = 6677337;
 		double shiftX = 0;
 		double shiftY = 0;
 
 		double minSize = 20;
-		//double maxSize = 14580;
-		double maxSize = 200;
+		double maxSize = 14580;
+		//double maxSize = 200;
 		double seuilDensBuild = 0;
 
 		int nMax = 6;
@@ -62,7 +62,7 @@ public class CompositeTask {
 		
 		file[0] = run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1,
 				ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
-		dataHT = DataSetSelec.get("Data3.1");
+		seed= 15;
 		file[1] = run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1,
 				ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
 		seed= 14;
@@ -71,14 +71,16 @@ public class CompositeTask {
 		
 		AnalyseTask.runStab(file, fileDonnee, folderOut, names, true);
 	}
-
+/**
+ * Method used if no dataSet is provided. The folderIn is dug to find matches with the wanted format
+ * @throws Exception
+ */
 	public static File run(String name, File folderIn, File folderOut, File discreteFile, File buildFile, double xmin, double ymin, double width, double height, double shiftX,
 			double shiftY, double minSize, double maxSize, double seuilDensBuild, int nMax, boolean strict, double ahp0, double ahp1, double ahp2, double ahp3, double ahp4,
 			double ahp5, double ahp6, double ahp7, double ahp8, boolean mean, long seed) throws Exception {
 
 		return run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2,
 				ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, DataSetSelec.dig(folderIn));
-
 	}
 
 	public static File run(String name, File folderIn, File folderOut, File discreteFile, File buildFile, double xmin, double ymin, double width, double height, double shiftX,

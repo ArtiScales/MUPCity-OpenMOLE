@@ -35,18 +35,12 @@ public class AnalyseTask {
 		// File file = new File("/home/mcolomb/workspace/mupcity-openMole/result/gridExploProjets2");
 		// runGridSens(file, new File("/home/mcolomb/workspace/mupcity-openMole/data/"), "gridExplo");
 
-		File totFile = new File("/media/mcolomb/Data_2/resultFinal/stab");
+		File totFile = new File("/home/mcolomb/tmp/fracExperi/ScenarVrac");
 		File[] totFiles = new File[totFile.listFiles().length];
-		String[] names = { "Stabilite" };
+		String names = "Stabilite" ;
 		int i = 0;
-		for (File f : totFile.listFiles()) {
-			if (f.getName().startsWith(names[0])) {
-				totFiles[i] = f;
-				i++;
-			}
-		}
-		File[] totInFile = { new File("/home/mcolomb/workspace/mupcity-openMole/data/") };
-		System.out.println(runStab(totFiles, totInFile, new File("/home/mcolomb/tmp/stab"), names, true));
+		File totInFile = new File("/home/mcolomb/.openmole/RKS1409W205-Ubuntu/webui/projects/dataOpenMole/stabilite");
+		System.out.println(runStab(totFile, totInFile, names, true));
 
 		// File totFile = new File("/media/mcolomb/Data_2/resultFinal/compData");
 		// File[] totFiles = new File[totFile.listFiles().length];
@@ -164,7 +158,7 @@ public class AnalyseTask {
 	// }
 
 	/**
-	 * overlaoding to use aggregation transition from openMole
+	 * overlaoding to use aggregation transition from openMole. It copies all the files into a mainFile folder calles 'ScenarVrac'
 	 * 
 	 * @param file
 	 * @param fileDonnee
@@ -252,6 +246,7 @@ public class AnalyseTask {
 
 				// get the average evaluation of cells in a .csv
 				if (!mergedResult.getCellEval().isEmpty()) {
+					System.out.println(mergedResult.getCellEval().size());
 					RasterAnalyse.createStatEvals(mergedResult.getCellEval());
 				}
 				// discrete statistics
@@ -283,7 +278,11 @@ public class AnalyseTask {
 
 				// fractal dimention calculation
 				int resolution = 4;
-				FractalDimention.getCorrFracDimfromSimu(getBuild(fileDonnee, arL), file, statFile, echelle, resolution);
+				// pour seulement 20 valeures
+				for (File f : anal.getRandomSeedScenars(arL.get(0), echelle, 20) ){
+					System.out.println(getBuild(fileDonnee, arL));
+					FractalDimention.getCorrFracDim(getBuild(fileDonnee, arL), f, statFile, resolution, arL.get(0).getNiceName()+echelle);
+				}
 			}
 		}
 		return resultFile;
@@ -474,9 +473,9 @@ public class AnalyseTask {
 	public static File getBuild(File fileDonnee, List<ScenarAnalyse> arL) {
 		File batiFile = new File("");
 		for (File filesDonnee : fileDonnee.listFiles()) {
-			if (filesDonnee.toString().equals(arL.get(0).getData())) {
+			if (filesDonnee.getName().equals(arL.get(0).getData())) {
 				for (File fileShp : filesDonnee.listFiles()) {
-					if (fileShp.toString().startsWith("batiment")) {
+					if (fileShp.getName().startsWith("batiment")&&fileShp.toString().endsWith(".shp")) {
 						batiFile = fileShp;
 					}
 				}

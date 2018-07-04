@@ -12,25 +12,25 @@ import java.util.regex.Pattern;
 
 public class Analyse {
 
-	// general colelctions
+	// general collections
 	public Set<ProjetAnalyse> projetCollec = new HashSet<ProjetAnalyse>();
 	public Set<ScenarAnalyse> scenarCollec = new HashSet<ScenarAnalyse>();
 	public Set<ScenarAnalyseFile> fileCollec = new HashSet<ScenarAnalyseFile>();
 
-	// project collections
+	// project parameters collections
 	public List<String> cellMinCollec = new ArrayList<String>();
 	public List<String> seuilCollec = new ArrayList<String>();
 	public List<String> gridCollec = new ArrayList<String>();
 	public List<String> dataCollec = new ArrayList<String>();
 
-	// scenar collections
+	// scenar parameters collections
 	public List<String> nMaxCollec = new ArrayList<String>();
 	public List<String> strictCollec = new ArrayList<String>();
 	public List<String> yagCollec = new ArrayList<String>();
 	public List<String> ahpCollec = new ArrayList<String>();
 	public List<String> seedCollec = new ArrayList<String>();
 
-	// files collection
+	// files parameters collection
 	public List<String> echelleCollec = new ArrayList<String>();
 	public List<String> meanCollec = new ArrayList<String>();
 
@@ -44,6 +44,7 @@ public class Analyse {
 
 		for (File scenar : files.listFiles()) {
 			if (scenar.getName().startsWith(name)) {
+				System.out.println(scenar.getName());
 				String[] decompNameProj = dbTiret.split(scenar.getName());
 				makeProjCollection(decompNameProj[0]);
 				String[] decompNameScProj = tiret.split(decompNameProj[1]);
@@ -466,6 +467,41 @@ public class Analyse {
 			}
 		}
 		throw new FileNotFoundException();
+	}
+
+	/**
+	 * Get a predefined number of scenario's file with a random seed
+	 * 
+	 * @param sAref
+	 *            : the scenario that'll be alike the result
+	 * @param ech
+	 *            : Scale of the wanted scenarios
+	 * @param nb
+	 *            : Numer of wanted scenarios
+	 * @return an arrayList containing the File
+	 * @throws FileNotFoundException
+	 */
+	public List<File> getRandomSeedScenars(ScenarAnalyse sAref, String ech, int nb) throws FileNotFoundException {
+		int i = 0;
+		List<String> seedSent = new ArrayList<String>();
+		List<File> resultList = new ArrayList<File>();
+
+		while (i < nb) {
+			for (ScenarAnalyse sA : scenarCollec) {
+				if (sA.ahp.equals(sAref.ahp) && sA.ahp.equals(sAref.ahp) && sA.data.equals(sAref.data) && sA.grid.equals(sAref.grid) && sA.nMax.equals(sAref.nMax)
+						&& sA.seuil.equals(sAref.seuil) && sA.sizeCell.equals(sAref.sizeCell) && sA.strict.equals(sAref.strict)) {
+					String seed = sA.getSeed();
+					if (!seedSent.contains(seed)) {
+						resultList.add(getSimuFile(sA, ech, "evalAnal"));
+						seedSent.add(seed);
+						i++;
+						break;
+					}
+				}
+			}
+		}
+
+		return resultList;
 	}
 
 }

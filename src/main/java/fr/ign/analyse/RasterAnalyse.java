@@ -71,7 +71,6 @@ public class RasterAnalyse {
 	public static boolean cutBorder = false;
 	public static String echelle;
 	public static boolean firstline = true;
-	public static File evalTotale;
 
 	/**
 	 * Select a list of file with the argument "with" in its name from the rootFile
@@ -428,6 +427,20 @@ public class RasterAnalyse {
 		return mergeRasters(inList);
 	}
 
+	public static GridCoverage2D importRaster(File f) throws IOException {
+		// setting of useless parameters
+		ParameterValue<OverviewPolicy> policy = AbstractGridFormat.OVERVIEW_POLICY.createValue();
+		policy.setValue(OverviewPolicy.IGNORE);
+		ParameterValue<String> gridsize = AbstractGridFormat.SUGGESTED_TILE_SIZE.createValue();
+		ParameterValue<Boolean> useJaiRead = AbstractGridFormat.USE_JAI_IMAGEREAD.createValue();
+		useJaiRead.setValue(false);
+		GeneralParameterValue[] params = new GeneralParameterValue[] { policy, gridsize, useJaiRead };
+
+		GridCoverage2DReader reader = new GeoTiffReader(f);
+		return reader.read(params);
+	}
+
+	
 	/**
 	 * mergeRaster Merge the given Array of Files regarding to a grid. Return a list with different objects The cells are taken in a general geographic environment
 	 * 
@@ -445,20 +458,7 @@ public class RasterAnalyse {
 		singleList.add(f);
 		return mergeRasters(singleList);
 	}
-
-	public static GridCoverage2D importRaster(File f) throws IOException {
-		// setting of useless parameters
-		ParameterValue<OverviewPolicy> policy = AbstractGridFormat.OVERVIEW_POLICY.createValue();
-		policy.setValue(OverviewPolicy.IGNORE);
-		ParameterValue<String> gridsize = AbstractGridFormat.SUGGESTED_TILE_SIZE.createValue();
-		ParameterValue<Boolean> useJaiRead = AbstractGridFormat.USE_JAI_IMAGEREAD.createValue();
-		useJaiRead.setValue(false);
-		GeneralParameterValue[] params = new GeneralParameterValue[] { policy, gridsize, useJaiRead };
-
-		GridCoverage2DReader reader = new GeoTiffReader(f);
-		return reader.read(params);
-	}
-
+	
 	public static RasterMergeResult mergeRasters(List<File> listRepliFile) throws Exception {
 		System.out.println("merging " + listRepliFile.size() + " rasters");
 		// variables to create statistics
@@ -686,6 +686,8 @@ public class RasterAnalyse {
 	 *
 	 */
 	public static void createStatEvals(Hashtable<DirectPosition2D, Float> cellEvalFinal) throws Exception {
+		
+		//fichier final
 		Hashtable<String, double[]> deuForme = new Hashtable<String, double[]>();
 		double[] distrib = new double[cellEvalFinal.size()];
 		int cpt = 0;
@@ -696,14 +698,15 @@ public class RasterAnalyse {
 			cpt++;
 		}
 
-		int cptTot = 0;
-		Hashtable<DirectPosition2D, Float> evalTot = (Hashtable<DirectPosition2D, Float>) mergeRasters(evalTotale).getCellEval();
-		double[] distribEvalTot = new double[evalTot.size()];
-		for (DirectPosition2D it : evalTot.keySet()) {
-			distribEvalTot[cptTot] = evalTot.get(it);
-			cptTot++;
-		}
-		deuForme.put("Évaluations générales du projet", distribEvalTot);
+//		int cptTot = 0;
+//		//
+//		Hashtable<DirectPosition2D, Float> evalTot = (Hashtable<DirectPosition2D, Float>) mergeRasters(new File (statFile,"EvalMoyenne")).getCellEval();
+//		double[] distribEvalTot = new double[evalTot.size()];
+//		for (DirectPosition2D it : evalTot.keySet()) {
+//			distribEvalTot[cptTot] = evalTot.get(it);
+//			cptTot++;
+//		}
+//		deuForme.put("Évaluations générales du projet", distribEvalTot);
 
 		deuForme.put("Évaluations du scénario", distrib);
 		generateCsvFileCol(deuForme, statFile, "evaluation_comportment-" + echelle);
