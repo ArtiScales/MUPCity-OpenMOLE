@@ -472,31 +472,31 @@ public class Analyse {
 	/**
 	 * Get a predefined number of scenario's file with a random seed
 	 * 
-	 * @param sAref
-	 *            : the scenario that'll be alike the result
-	 * @param ech
-	 *            : Scale of the wanted scenarios
-	 * @param nb
-	 *            : Numer of wanted scenarios
-	 * @return an arrayList containing the File
+	 * @param sAref:
+	 *            the scenario that'll be alike the result
+	 * @param ech:
+	 *            Scale of the wanted scenarios
+	 * @param nb:
+	 *            Numer of wanted scenarios
+	 * @return an arrayList containing the File of the scenarAnalyseFile
 	 * @throws FileNotFoundException
 	 */
 	public List<File> getRandomSeedScenars(ScenarAnalyse sAref, String ech, int nb) throws FileNotFoundException {
-		int i = 0;
+		int cpt = 0;
 		List<String> seedSent = new ArrayList<String>();
 		List<File> resultList = new ArrayList<File>();
 
-		while (i < nb) {
-			for (ScenarAnalyse sA : scenarCollec) {
-				if (sA.ahp.equals(sAref.ahp) && sA.ahp.equals(sAref.ahp) && sA.data.equals(sAref.data) && sA.grid.equals(sAref.grid) && sA.nMax.equals(sAref.nMax)
-						&& sA.seuil.equals(sAref.seuil) && sA.sizeCell.equals(sAref.sizeCell) && sA.strict.equals(sAref.strict)) {
-					String seed = sA.getSeed();
-					if (!seedSent.contains(seed)) {
-						resultList.add(getSimuFile(sA, ech, "evalAnal"));
-						seedSent.add(seed);
-						i++;
-						break;
-					}
+		for (ScenarAnalyse sA : scenarCollec) {
+			if (cpt >= nb) {
+				break;
+			}
+			if (sA.ahp.equals(sAref.ahp) && sA.ahp.equals(sAref.ahp) && sA.data.equals(sAref.data) && sA.grid.equals(sAref.grid) && sA.nMax.equals(sAref.nMax)
+					&& sA.seuil.equals(sAref.seuil) && sA.sizeCell.equals(sAref.sizeCell) && sA.strict.equals(sAref.strict)) {
+				String seed = sA.getSeed();
+				if (!seedSent.contains(seed)) {
+					resultList.add(getSimuFile(sA, ech, "evalAnal"));
+					seedSent.add(seed);
+					cpt++;
 				}
 			}
 		}

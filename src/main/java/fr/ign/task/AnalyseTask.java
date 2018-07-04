@@ -37,7 +37,7 @@ public class AnalyseTask {
 
 		File totFile = new File("/home/mcolomb/tmp/fracExperi/ScenarVrac");
 		File[] totFiles = new File[totFile.listFiles().length];
-		String names = "Stabilite" ;
+		String names = "Stabilite";
 		int i = 0;
 		File totInFile = new File("/home/mcolomb/.openmole/RKS1409W205-Ubuntu/webui/projects/dataOpenMole/stabilite");
 		System.out.println(runStab(totFile, totInFile, names, true));
@@ -234,7 +234,6 @@ public class AnalyseTask {
 				// get the set of files to test
 				for (ScenarAnalyse sC : arL) {
 					fileToTest.add(anal.getSimuFile(sC, echelle, "evalAnal"));
-					System.out.println("on analyse à la fois : " + anal.getSimuFile(sC, echelle, "evalAnal"));
 				}
 
 				// merge the different input rasters
@@ -246,7 +245,6 @@ public class AnalyseTask {
 
 				// get the average evaluation of cells in a .csv
 				if (!mergedResult.getCellEval().isEmpty()) {
-					System.out.println(mergedResult.getCellEval().size());
 					RasterAnalyse.createStatEvals(mergedResult.getCellEval());
 				}
 				// discrete statistics
@@ -256,7 +254,7 @@ public class AnalyseTask {
 				RasterMerge.merge(fileToTest, new File(rastFile, nameTest + "-rasterMerged-" + echelle + ".tif"), Integer.parseInt(echelle));
 
 				Integer minSizeCell = Integer.valueOf(arL.get(0).getSizeCell());
-				// cells contained
+				// cells contained in superior scaled cells
 				// reference simulation
 				File concernedFile = getOutputExample(exampleFolder, ech);
 				// Count how much minimal sized cells are contained into parent cells
@@ -275,13 +273,12 @@ public class AnalyseTask {
 					Hashtable<DirectPosition2D, Integer> cellRepet180 = (Hashtable<DirectPosition2D, Integer>) RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
 					RasterAnalyse.compareInclusionSizeCell(SvgCellRepet20, SvgCellEval20, cellRepet180, cellEval180, nameTest, ech);
 				}
-
 				// fractal dimention calculation
 				int resolution = 4;
 				// pour seulement 20 valeures
-				for (File f : anal.getRandomSeedScenars(arL.get(0), echelle, 20) ){
-					System.out.println(getBuild(fileDonnee, arL));
-					FractalDimention.getCorrFracDim(getBuild(fileDonnee, arL), f, statFile, resolution, arL.get(0).getNiceName()+echelle);
+				for (File f : anal.getRandomSeedScenars(arL.get(0), echelle, 20)) {
+					System.out.println("Start DimFrac calculation");
+					FractalDimention.getCorrFracDim(getBuild(fileDonnee, arL), f, statFile, resolution, arL.get(0).getNiceName() + echelle);
 				}
 			}
 		}
@@ -473,9 +470,9 @@ public class AnalyseTask {
 	public static File getBuild(File fileDonnee, List<ScenarAnalyse> arL) {
 		File batiFile = new File("");
 		for (File filesDonnee : fileDonnee.listFiles()) {
-			if (filesDonnee.getName().equals(arL.get(0).getData())) {
+			if (filesDonnee.getName().endsWith(arL.get(0).getData())) {
 				for (File fileShp : filesDonnee.listFiles()) {
-					if (fileShp.getName().startsWith("batiment")&&fileShp.toString().endsWith(".shp")) {
+					if (fileShp.getName().startsWith("batiment") && fileShp.toString().endsWith(".shp")) {
 						batiFile = fileShp;
 					}
 				}

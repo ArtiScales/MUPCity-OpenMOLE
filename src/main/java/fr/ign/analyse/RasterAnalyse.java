@@ -682,7 +682,7 @@ public class RasterAnalyse {
 	}
 
 	/**
-	 * Toutes les évaluations moyennes des scénarios
+	 * Évaluations moyennes des scénarios
 	 *
 	 */
 	public static void createStatEvals(Hashtable<DirectPosition2D, Float> cellEvalFinal) throws Exception {
@@ -691,25 +691,12 @@ public class RasterAnalyse {
 		Hashtable<String, double[]> deuForme = new Hashtable<String, double[]>();
 		double[] distrib = new double[cellEvalFinal.size()];
 		int cpt = 0;
-
-		//
 		for (DirectPosition2D it : cellEvalFinal.keySet()) {
 			distrib[cpt] = cellEvalFinal.get(it);
 			cpt++;
 		}
-
-//		int cptTot = 0;
-//		//
-//		Hashtable<DirectPosition2D, Float> evalTot = (Hashtable<DirectPosition2D, Float>) mergeRasters(new File (statFile,"EvalMoyenne")).getCellEval();
-//		double[] distribEvalTot = new double[evalTot.size()];
-//		for (DirectPosition2D it : evalTot.keySet()) {
-//			distribEvalTot[cptTot] = evalTot.get(it);
-//			cptTot++;
-//		}
-//		deuForme.put("Évaluations générales du projet", distribEvalTot);
-
 		deuForme.put("Évaluations du scénario", distrib);
-		generateCsvFileCol(deuForme, statFile, "evaluation_comportment-" + echelle);
+		generateCsvFileCol(deuForme, statFile, "evaluation_moyenne-" + echelle);
 	}
 
 	private static Hashtable<DirectPosition2D, Float> moyenneEvals(Hashtable<DirectPosition2D, ArrayList<Float>> cellEval) {

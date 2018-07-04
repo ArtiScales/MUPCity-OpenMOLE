@@ -94,6 +94,41 @@
 			<artifactId>gt-grid</artifactId>
 			<version>${geotools.version}</version>
 		</dependency>
+				<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-graph</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+				<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-shapefile</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+				<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-arcgrid</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+				<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-coverage</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+				<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-geotiff</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+				<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-image</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+				<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-epsg-hsql</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
 <!--             <exclusions> -->
 <!--               <exclusion> -->
 <!--                 <groupId>javax.media</groupId> -->
