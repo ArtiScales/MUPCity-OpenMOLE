@@ -2,7 +2,9 @@ name := "mupcity-openmole"
 
 version := "1.0"
 
-scalaVersion := "2.12.4"
+scalaVersion := "2.12.6"
+
+javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint")
 
 enablePlugins(SbtOsgi)
 
@@ -10,7 +12,7 @@ enablePlugins(SbtOsgi)
 
 //spiFlySettings   // import settings for spifly plugin
 
-OsgiKeys.exportPackage := Seq("fr.ign.*,fr.ign.task.*,mupcityplugin.*")
+OsgiKeys.exportPackage := Seq("fr.ign.*;-split-package:=merge-first,fr.ign.task.*;-split-package:=merge-first,mupcityplugin.*;-split-package:=merge-first")
 
 OsgiKeys.importPackage := Seq("*;resolution:=optional")
 
@@ -57,8 +59,8 @@ resolvers += "Hibernate" at "http://www.hibernatespatial.org/repository"
 //libraryDependencies += "org.openmole" %% "org-openmole-plugin-task-scala" % openMOLEVersion
 
 val mupcityVersion = "1.2.2"
-val geotoolsVersion = "14.3"
-val geotoolsGridVersion = "12.3"
+val geotoolsVersion = "19.1"
+val geotoolsGridVersion = "19.1"
 val fracgisVersion = "0.6.3"
 
 libraryDependencies += "org.thema" % "fracgis" % fracgisVersion
