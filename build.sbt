@@ -5,6 +5,7 @@ version := "1.0"
 scalaVersion := "2.12.6"
 
 javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint")
+scalacOptions += "-target:jvm-1.8"
 
 enablePlugins(SbtOsgi)
 
@@ -63,12 +64,18 @@ val geotoolsVersion = "19.1"
 val geotoolsGridVersion = "19.1"
 val fracgisVersion = "0.6.3"
 
-libraryDependencies += "org.thema" % "fracgis" % fracgisVersion
+libraryDependencies += "org.thema" % "fracgis" % fracgisVersion excludeAll(
+  ExclusionRule(organization = "org.geotools"),
+  ExclusionRule(organization = "com.vividsolutions"),
+  ExclusionRule(organization = "org.apache.batik")
+)
+libraryDependencies += "org.thema" % "mupcity" % mupcityVersion excludeAll(
+  ExclusionRule(organization = "org.geotools"),
+  ExclusionRule(organization = "com.vividsolutions"),
+  ExclusionRule(organization = "org.apache.batik")
+)
 libraryDependencies += "org.geotools" % "gt-grid" % geotoolsGridVersion
 libraryDependencies += "org.geotools" % "gt-coverage" % geotoolsGridVersion
-libraryDependencies += "org.thema" % "mupcity" % mupcityVersion //excludeAll(
-//    ExclusionRule(organization = "javax.media", artifact = "jai*")
-//  )
 
 //libraryDependencies += "org.geotools" % "gt-geotiff" % geotoolsVersion
 

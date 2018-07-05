@@ -34,7 +34,7 @@ val maxSize = Val[Double]
 
 //scenar param
 val seed = Val[Long]
-val rangeSeed = (UniformDistribution[Long]() take 100)
+val rangeSeed = (UniformDistribution[Long]() take 10)
 val ahp0 = Val[Double]
 val ahp1 = Val[Double]
 val ahp2 = Val[Double]
@@ -53,8 +53,8 @@ val dirs = Val[Array[File]]
 System.setProperty("java.awt.headless", "true")
 System.setProperty("java.awt.toolkit", "sun.awt.HToolkit")
 
-//val sourceDirectories = ListDirectoriesSource(workDirectory / "dataOpenMole" / "stabilite", dirs)
-val sourceDirectories = ListDirectoriesSource(workDirectory / "dataOpenMole" / "stabilite", dirs, "(?!stabilite).*")
+//val sourceDirectories = ListDirectoriesSource(workDirectory / "dataOpenMole" / "stabilite", dirs, "(?!stabilite).*")
+val sourceDirectories = ListDirectoriesSource(workDirectory / "dataOpenMole" / "stabilite", dirs, "dataAutom")
 
 val exploProject = ExplorationTask(folderIn in dirs withName inputName)
 
@@ -114,11 +114,11 @@ val aggregateTask = ScalaTask("val (arraySimulFile, arrayFolderIn, arrayName) = 
 
 val ResultTask = ScalaTask("""
 |import fr.ign.task._
-|val name = arrayName.flatten.head
+|val name = input.name.head
 |val tmpDir = mkDir()
-|val resultFile=withThreadClassLoader(classLoader(mupcityplugin.StabAnalysisTask))(mupcityplugin.StabAnalysisTask.apply(input.arraySimulFile.flatten, input.arrayFolderIn.flatten, tmpDir, input.arrayName.flatten))""".stripMargin) set (
+|val resultFile=withThreadClassLoader(classLoader(mupcityplugin.StabAnalysisTask))(mupcityplugin.StabAnalysisTask.apply(input.simulFile, input.folderIn, tmpDir, input.name))""".stripMargin) set (
   plugins += pluginsOf(mupcityplugin.StabAnalysisTask),
-  inputs += (arraySimulFile.toArray, arrayFolderIn.toArray, arrayName.toArray),
+  inputs += (simulFile.toArray, folderIn.toArray, name.toArray),
   outputs += (resultFile, name)
 )
 
@@ -128,7 +128,7 @@ val copySimProjectHook =  CopyFileHook(simulFile, resultFolder / "${name}-${inpu
 val copyVracHook =  CopyFileHook(simulFile, resultFolder / "ScenarVrac")
 val copyHook =  CopyFileHook(resultFile, resultFolder / "analyse_${name}")
 
-val env = EGIEnvironment("vo.complex-systems.eu",openMOLEMemory = 2500 megabytes)
+val env = EGIEnvironment("vo.complex-systems.eu", openMOLEMemory = 2500 megabytes)
 val localEnv = LocalEnvironment(4)
 
-(exploProject source sourceDirectories) -< ((ProjectCreationTask on env hook ToStringHook(inputName)) -- ((exploScenario) -< (SimuTask on env) >- aggregateTask)) >- (ResultTask on env hook copyHook)
+(exploProject source sourceDirectories) -< ((ProjectCreationTask on localEnv hook ToStringHook(inputName)) -- ((exploScenario) -< (SimuTask on env by 2) >- (ResultTask on localEnv hook copyHook)))
