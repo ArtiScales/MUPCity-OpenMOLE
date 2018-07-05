@@ -42,44 +42,49 @@ import com.vividsolutions.jts.geom.Geometry;
 public class FractalDimention {
 	public static void main(String[] args) throws Exception {
 		int resolution = 4;
-		File fileOut = new File("/home/mcolomb/tmp/rasterGoode.tif");
+		File fileOut = new File("/home/mcolomb/tmp/");
 		File batiFile = new File("/home/mcolomb/donnee/couplage/donneeGeographiques/batiment.shp");
-		File rootFile = new File("/media/mcolomb/Data_2/resultExplo/dimFract/tmp/dimFract");
+		File rootFile = new File("/media/mcolomb/Data_2/resultExplo/Stability/N5MoySt");
 		// getCorrFracDimfromSimu(batiFile, rootFile, fileOut, resolution);
-		getCorrFracDim(batiFile, new File("/home/mcolomb/tmp/simuVide.tif"), fileOut, resolution, "sansSimu");
-	}
-
-	public static void getCorrFracDimfromSimu(File batiFile, File rootFile, File fileOut, String echelle, int resolution) throws IOException {
-		Hashtable<String, Hashtable<String, Double>> results = new Hashtable<String, Hashtable<String, Double>>();
-		for (File f : rootFile.listFiles()) {
-			if (f.toString().contains("_Moy_ahpx_seed_42")) {
-				for (File ff : f.listFiles()) {
-					if (ff.toString().endsWith("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif")) {
-						String name = ff.getName().replaceAll("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif", "-" + echelle);
-						System.out.println("calculé pour " + name);
-						results = getCorrFracDim(batiFile, ff, fileOut, resolution, name);
-					}
-				}
+		File newFile = new File("/media/mcolomb/Data_2/resultExplo/Stability/N5MoySt");
+		for (File f : newFile.listFiles()) {
+			if (f.getName().endsWith("eval_anal-20.0.tif")) {
+				getCorrFracDim(batiFile, f, fileOut, resolution, "sansSimu");
 			}
 		}
-		System.out.println(results);
 	}
 
-	public static void getCorrFracDimfromSimu(File batiFile, File[] files, File fileOut, String echelle, int resolution) throws IOException {
-		Hashtable<String, Hashtable<String, Double>> results = new Hashtable<String, Hashtable<String, Double>>();
-		for (File f : files) {
-			if (f.toString().contains("_Moy_ahpx_seed_42")) {
-				for (File ff : f.listFiles()) {
-					if (ff.toString().endsWith("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif")) {
-						String name = ff.getName().replaceAll("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif", "-" + echelle);
-						System.out.println("calculé pour " + name);
-						results = getCorrFracDim(batiFile, ff, fileOut, resolution, name);
-					}
-				}
-			}
-		}
-		System.out.println(results);
-	}
+//	public static void getCorrFracDimfromSimu(File batiFile, File rootFile, File fileOut, String echelle, int resolution) throws IOException {
+//		Hashtable<String, Hashtable<String, Double>> results = new Hashtable<String, Hashtable<String, Double>>();
+//		for (File f : rootFile.listFiles()) {
+//			if (f.toString().contains("_Moy_ahpx_seed_42")) {
+//				for (File ff : f.listFiles()) {
+//					if (ff.toString().endsWith("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif")) {
+//						String name = ff.getName().replaceAll("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif", "-" + echelle);
+//						System.out.println("calculé pour " + name);
+//						results = getCorrFracDim(batiFile, ff, fileOut, resolution, name);
+//					}
+//				}
+//			}
+//		}
+//		System.out.println(results);
+//	}
+//
+//	public static void getCorrFracDimfromSimu(File batiFile, File[] files, File fileOut, String echelle, int resolution) throws IOException {
+//		Hashtable<String, Hashtable<String, Double>> results = new Hashtable<String, Hashtable<String, Double>>();
+//		for (File f : files) {
+//			if (f.toString().contains("_Moy_ahpx_seed_42")) {
+//				for (File ff : f.listFiles()) {
+//					if (ff.toString().endsWith("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif")) {
+//						String name = ff.getName().replaceAll("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif", "-" + echelle);
+//						System.out.println("calculé pour " + name);
+//						results = getCorrFracDim(batiFile, ff, fileOut, resolution, name);
+//					}
+//				}
+//			}
+//		}
+//		System.out.println(results);
+//	}
 
 	public static Hashtable<String, Hashtable<String, Double>> getCorrFracDim(File batiFile, File mupFile, File fileOut, int resolution, String name) throws IOException {
 		Hashtable<String, Hashtable<String, Double>> results = new Hashtable<String, Hashtable<String, Double>>();
