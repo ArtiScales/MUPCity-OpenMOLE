@@ -42,7 +42,15 @@ public class Analyse {
 		Pattern dbTiret = Pattern.compile("--");
 		Pattern tiret = Pattern.compile("-");
 
+		System.out.println("Analyse " + name + " (" + machineReadable + ")");
 		for (File scenar : files.listFiles()) {
+			System.out.println("Analyse FILE " + scenar + " (" + scenar.getName() + ")");
+		}
+		File[] tiffFiles = files.listFiles((dir, fileName) -> fileName.toLowerCase().endsWith(".tif"));
+		for (File scenar : tiffFiles) {
+			System.out.println("Analyse TIFF " + scenar);
+		}
+		for (File scenar : tiffFiles) {
 			if (scenar.getName().startsWith(name)) {
 				String[] decompNameProj = dbTiret.split(scenar.getName());
 				makeProjCollection(decompNameProj[0]);
@@ -51,7 +59,7 @@ public class Analyse {
 				makeFileCollection(decompNameScProj[1], decompNameScProj[2]);
 			}
 		}
-		for (File file : files.listFiles()) {
+		for (File file : tiffFiles) {
 			String[] decompName = dbTiret.split(file.getName());
 			String[] decompNameProj = tiret.split(decompName[0]);
 			// nom de l'explo
@@ -204,6 +212,7 @@ public class Analyse {
 
 	public void makeScenCollection(String scenar) {
 		Pattern underscore = Pattern.compile("_");
+		System.out.println("scenar = " + scenar);
 		String[] decompScenar = underscore.split(scenar);
 		if (!nMaxCollec.contains(decompScenar[0])) {
 			nMaxCollec.add(decompScenar[0]);
@@ -223,6 +232,7 @@ public class Analyse {
 	}
 
 	public void makeFileCollection(String mean, String ech) {
+		System.out.println("makeFileCollection " + mean + " (" + ech + ")");
 		if (!meanCollec.contains(mean)) {
 			meanCollec.add(mean);
 		}

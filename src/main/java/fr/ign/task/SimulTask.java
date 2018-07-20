@@ -5,14 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NavigableSet;
 
-import javax.media.jai.JAI;
-import javax.media.jai.OperationRegistry;
+//import javax.media.jai.JAI;
+//import javax.media.jai.OperationRegistry;
 
 import org.thema.mupcity.AHP;
 import org.thema.mupcity.Project;
 import org.thema.mupcity.scenario.ScenarioAuto;
 
-import com.sun.media.jai.imageioimpl.ImageReadWriteSpi;
+//import com.sun.media.jai.imageioimpl.ImageReadWriteSpi;
 
 public class SimulTask {
 
@@ -21,31 +21,31 @@ public class SimulTask {
 	}
 
 	// static {
-	// IIORegistry.getDefaultInstance().registerServiceProvider(new URLImageInputStreamSpi());
+	// registry.registerServiceProvider(new URLImageInputStreamSpi());
 	// }
-	protected static void initJAI() {
-
-		// See [URL]http://docs.oracle.com/cd/E17802_01/products/products/java-media/jai/forDevelopers/jai-apidocs/javax/media/jai/OperationRegistry.html[/URL]
-		OperationRegistry registry = JAI.getDefaultInstance().getOperationRegistry();
-		if (registry == null) {
-			System.out.println("Error with JAI initialization (needed for GeoTools).");
-		} else {
-			try {
-				new ImageReadWriteSpi().updateRegistry(registry);
-			} catch (IllegalArgumentException e) {
-				// Probably indicates it was already registered.
-			}
-		}
-	}
+//	protected static void initJAI() {
+//
+//		// See [URL]http://docs.oracle.com/cd/E17802_01/products/products/java-media/jai/forDevelopers/jai-apidocs/javax/media/jai/OperationRegistry.html[/URL]
+//		OperationRegistry registry = JAI.getDefaultInstance().getOperationRegistry();
+//		if (registry == null) {
+//			System.out.println("Error with JAI initialization (needed for GeoTools).");
+//		} else {
+//			try {
+//				new ImageReadWriteSpi().updateRegistry(registry);
+//			} catch (IllegalArgumentException e) {
+//				// Probably indicates it was already registered.
+//			}
+//		}
+//	}
 
 	public static boolean saveWholeProj = false;
 	public static String nameTot;
 	public static String nameProj;
 
 	public static void main(String[] args) throws Exception {
-		File projFile = new File("/home/mcolomb/workspace/mupcity-openMole/result/emprise/emprise-Data1.0-20.0-0.0");
+		File projFile = new File("/tmp/output2/Stability-dataAutom-CM20.0-S0.0-GP_915948.0_6677337.0");
 
-		String name = "emprise-Data1.0-20.0-0.0";
+		String name = "Stability-dataAutom-CM20.0-S0.0-GP_915948.0_6677337.0";
 
 		// for yager
 		double ahp0 = 0.111;
@@ -84,9 +84,10 @@ public class SimulTask {
 	}
 
 	public static File run(File projectFile, String name, int nMax, boolean strict, AHP ahp, boolean mean, long seed, boolean machineReadable) throws Exception {
+        System.out.println("Initialization of " + projectFile);
+		Initialize.init();
 		System.out.println("Simulation of " + name);
 		setName(name);
-
 		Project project = Project.load(new File(projectFile, name + ".xml"));
 
 		String nBa = "Ba";

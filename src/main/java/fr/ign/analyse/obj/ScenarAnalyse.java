@@ -63,6 +63,10 @@ public class ScenarAnalyse extends ProjetAnalyse {
 		return super.getNiceName() + "--" + nMax + "_" + strict + "_" + yag + "_" + ahp + "_seed_" + seed;
 	}
 
+	public String getNiceNameWthSeed() {
+		return super.getNiceName() + "--" + nMax + "_" + strict + "_" + yag + "_" + ahp ;
+	}
+	
 	public String getnMax() {
 		return nMax;
 	}

@@ -181,11 +181,11 @@ public class RasterAnalyse {
 		String[] firstLine = new String[6];
 
 		firstLine[0] = "Nombre totale de cellules";
-		firstLine[1] = "Évaluation moyenne de toutes les cellules";
+		firstLine[1] = "evaluation moyenne de toutes les cellules";
 		firstLine[2] = "Cellules de 20m non inclues dans les cellules de " + echelle + "m";
-		firstLine[3] = "Évaluation moyenne des cellules de 20m non inclues dans les cellules de " + echelle + "m";
+		firstLine[3] = "evaluation moyenne des cellules de 20m non inclues dans les cellules de " + echelle + "m";
 		firstLine[4] = "Cellules de 20m inclues dans les cellules de " + echelle + "m";
-		firstLine[5] = "Évaluation moyenne des cellules de 20m incluses dans les cellules de " + echelle + "m";
+		firstLine[5] = "evaluation moyenne des cellules de 20m incluses dans les cellules de " + echelle + "m";
 
 		resultStats[0] = cellTotal;
 		resultStats[1] = averageValTot;
@@ -342,8 +342,8 @@ public class RasterAnalyse {
 			} finally {
 				discreteIt.close();
 			}
-			
-			//pour tous les scénarios de la liste - comprenant les mêmes scenarios et projets mais avec des tailles de cellules différentes 
+
+			// pour tous les scénarios de la liste - comprenant les mêmes scenarios et projets mais avec des tailles de cellules différentes
 			for (ScenarAnalyse sA : listfile) {
 
 				echelle = sA.getSizeCell();
@@ -438,12 +438,11 @@ public class RasterAnalyse {
 		ParameterValue<Boolean> useJaiRead = AbstractGridFormat.USE_JAI_IMAGEREAD.createValue();
 		useJaiRead.setValue(false);
 		GeneralParameterValue[] params = new GeneralParameterValue[] { policy, gridsize, useJaiRead };
-
+		System.out.println("importing " + f);
 		GridCoverage2DReader reader = new GeoTiffReader(f);
 		return reader.read(params);
 	}
 
-	
 	/**
 	 * mergeRaster Merge the given Array of Files regarding to a grid. Return a list with different objects The cells are taken in a general geographic environment
 	 * 
@@ -461,7 +460,16 @@ public class RasterAnalyse {
 		singleList.add(f);
 		return mergeRasters(singleList);
 	}
-	
+
+	/**
+	 * Merge all the input raster on the RasterMergeResult format
+	 * 
+	 * @param listRepliFile
+	 *            : list of raster to merge
+	 * @return the object RasterMergeResult containing different infos about
+	 * @throws Exception
+	 */
+
 	public static RasterMergeResult mergeRasters(List<File> listRepliFile) throws Exception {
 		System.out.println("merging " + listRepliFile.size() + " rasters");
 		// variables to create statistics
@@ -511,7 +519,7 @@ public class RasterAnalyse {
 					DirectPosition2D coordCentre = new DirectPosition2D(r, t);
 					float[] yo = (float[]) coverage.evaluate(coordCentre);
 					if (yo[0] > 0) {
-						compteurNombre = compteurNombre + 1;
+						compteurNombre++;
 						if (cellRepetCentroid.containsKey(coordCentre)) { // si la cellule a déja été sélectionné lors de réplications
 							cellRepetCentroid.put(coordCentre, cellRepetCentroid.get(coordCentre) + 1);
 							ArrayList<Float> temp = cellEvalCentroid.get(coordCentre); // on mets les valeurs d'évaluation dans un tableau
@@ -526,7 +534,7 @@ public class RasterAnalyse {
 					}
 				}
 			}
-			System.out.println("il y a " + cellRepetCentroid.size() + " cellules sur " + compteurNombre + " dans la réplication " + nbDeScenar);
+			System.out.println("il y a " + compteurNombre + " cellules sur " + cellRepetCentroid.size() + " dans la réplication " + nbDeScenar);
 			System.out.println();
 			// Historique de l'évolution du nombre de cellules sélectionnées dans toutes les simulations
 			statNb.addValue(compteurNombre);
@@ -583,7 +591,7 @@ public class RasterAnalyse {
 		for (String[] differentObject : tabDifferentObjects.values()) {
 
 			String[] nameLineFabric = new String[5];
-			nameLineFabric[0] = differentObject[0] + " name - echelle " + echelle+"scenar"+ nameScenar;
+			nameLineFabric[0] = differentObject[0] + " name - echelle " + echelle + "scenar" + nameScenar;
 			nameLineFabric[1] = "Total Cells";
 			nameLineFabric[2] = "Stable cells";
 			nameLineFabric[3] = "Unstable cells";
@@ -639,13 +647,16 @@ public class RasterAnalyse {
 								cellByFabric.put(fabricName, resultFabric);
 							}
 							// pour calculer les évaluations
+							//on fait une liste vide
 							List<Double> salut = new ArrayList<>();
+							//si l'entité possède déjà une liste d'évaluations, on la récupère à la place
 							if (evals.contains(fabricName)) {
 								salut = evals.get(fabricName);
 							}
+							// on ajoute cette nouvelle évaluation
 							salut.add((double) result.getCellEval().get(coordCell));
+							//on la remet dans notre collection
 							evals.put(fabricName, salut);
-
 						}
 					}
 				}
@@ -657,11 +668,13 @@ public class RasterAnalyse {
 			// put the evals in
 			for (String fabricName : evals.keySet()) {
 				double sum = 0;
+				int tot = 0;
 				for (double db : evals.get(fabricName)) {
-					sum = +db;
+					sum =+ db;
+					tot++;
 				}
 				double[] finalle = cellByFabric.get(fabricName);
-				finalle[3] = sum / evals.size();
+				finalle[3] = sum / tot;
 				cellByFabric.put(fabricName, finalle);
 			}
 
@@ -689,8 +702,8 @@ public class RasterAnalyse {
 	 *
 	 */
 	public static void createStatEvals(Hashtable<DirectPosition2D, Float> cellEvalFinal) throws Exception {
-		
-		//fichier final
+
+		// fichier final
 		Hashtable<String, double[]> deuForme = new Hashtable<String, double[]>();
 		double[] distrib = new double[cellEvalFinal.size()];
 		int cpt = 0;
@@ -724,8 +737,8 @@ public class RasterAnalyse {
 		Hashtable<DirectPosition2D, Float> cellEval = result.getCellEval();
 		DescriptiveStatistics statNb = result.getHistoDS();
 
-		double[] tableauFinal = new double[22];
-		String[] premiereCol = new String[22];
+		double[] tableauFinal = new double[(int) (12 + result.getNbScenar())];
+		String[] premiereCol = new String[(int) (12 + result.getNbScenar())];
 
 		DescriptiveStatistics statInstable = new DescriptiveStatistics();
 		DescriptiveStatistics statStable = new DescriptiveStatistics();
@@ -736,11 +749,11 @@ public class RasterAnalyse {
 		tableauFinal[0] = Double.parseDouble(echelle);
 		premiereCol[0] = "echelle";
 		tableauFinal[1] = statNb.getMean();
-		premiereCol[1] = "nombre moyen de cellules sélectionnées par simulations";
+		premiereCol[1] = "nombre moyen de cellules selectionnees par simulations";
 		tableauFinal[2] = statNb.getStandardDeviation();
 		premiereCol[2] = "ecart-type du nombre des cellules sélectionnées par simulations";
 		tableauFinal[3] = tableauFinal[2] / tableauFinal[1];
-		premiereCol[3] = "coeff de variation du nombre de cellules sélectionnées par simulations";
+		premiereCol[3] = "coeff de variation du nombre de cellules selectionnees par simulations";
 
 		// tableaux servant à calculer les coefficients de correlations
 		double[] tableauMoy = new double[cellEval.size()];
@@ -762,133 +775,45 @@ public class RasterAnalyse {
 		// calcul de la correlation entre les réplis et les évals
 		if (tableauMoy.length > 1 && stabilite == false) { // si il n'y a pas de cellules, la covariance fait planter
 			double correlationCoefficient = new Covariance().covariance(tableauMoy, tableauRepl);
-			tableauFinal[14] = correlationCoefficient;
-			premiereCol[14] = ("coefficient de correlation entre le nombre de réplication et les évaluations des cellules");
+			tableauFinal[4] = correlationCoefficient;
+			premiereCol[4] = ("coefficient de correlation entre le nombre de replication et les evaluations des cellules");
 		} else {
 			if (tableauMoy.length > 1) {
 				double correlationCoefficient = new Covariance().covariance(tableauMoy, tableauRepl);
-				tableauFinal[21] = correlationCoefficient;
-				premiereCol[21] = ("coefficient de correlation entre le nombre de réplication et les évaluations des cellules");
+				tableauFinal[5] = correlationCoefficient;
+				premiereCol[5] = ("coefficient de correlation entre le nombre de replication et les evaluations des cellules");
 			} else {
-				tableauFinal[21] = 99;
+				tableauFinal[5] = 99;
 			}
 		}
 
-		premiereCol[15] = ("moyenne evaluation des cellules instables");
-		premiereCol[16] = ("ecart type des cellules instables");
-		premiereCol[17] = ("coefficient de variation des cellules instables");
-		premiereCol[18] = ("moyenne evaluation des cellules stables");
-		premiereCol[19] = ("ecart type des cellules stables");
-		premiereCol[20] = ("coefficient de variation des cellules stables");
-
-		// distribution
-		if (stabilite == false) {
-			premiereCol[4] = ("repet 1");
-			premiereCol[5] = ("repet 2");
-			premiereCol[6] = ("repet 3");
-			premiereCol[7] = ("repet 4");
-			premiereCol[8] = ("repet 5");
-			premiereCol[9] = ("repet 6");
-			premiereCol[10] = ("repet 7");
-			premiereCol[11] = ("repet 8");
-			premiereCol[12] = ("repet 9");
-			premiereCol[13] = ("repet 10");
-
+		for (int ii = 1; ii <= result.getNbScenar(); ii++) {
+			premiereCol[ii + 11] = ("repet " + ii);
 			for (DirectPosition2D key : cellRepet.keySet()) {
-				switch (cellRepet.get(key)) {
-				case 1:
-					tableauFinal[4]++;
-					break;
-				case 2:
-					tableauFinal[5]++;
-					break;
-				case 3:
-					tableauFinal[6]++;
-					break;
-				case 4:
-					tableauFinal[7]++;
-					break;
-				case 5:
-					tableauFinal[8]++;
-					break;
-				case 6:
-					tableauFinal[9]++;
-					break;
-				case 7:
-					tableauFinal[10]++;
-					break;
-				case 8:
-					tableauFinal[11]++;
-					break;
-				case 9:
-					tableauFinal[12]++;
-					break;
-				case 10:
-					tableauFinal[13]++;
-					break;
+				if (cellRepet.get(key) == ii) {
+					tableauFinal[ii + 11]++;
+					if (ii != result.getNbScenar()) {
+						statInstable.addValue(cellEval.get(key));
+					} else {
+						statStable.addValue(cellEval.get(key));
+					}
 				}
 			}
-			tableauFinal[15] = statInstable.getMean();
-			tableauFinal[16] = statInstable.getStandardDeviation();
-			tableauFinal[17] = tableauFinal[16] / tableauFinal[15];
-			tableauFinal[18] = statStable.getMean();
-			tableauFinal[19] = statStable.getStandardDeviation();
-			tableauFinal[20] = tableauFinal[19] / tableauFinal[18];
-
-		} else if (stabilite == true) {
-			premiereCol[4] = ("repet de 0 a 100");
-			premiereCol[5] = ("repet de 100 a 200");
-			premiereCol[6] = ("de 200 a 300");
-			premiereCol[7] = ("de 300 a 400");
-			premiereCol[8] = ("de 400 a 500");
-			premiereCol[9] = ("de 500 a 600");
-			premiereCol[10] = ("de 600 a 700");
-			premiereCol[11] = ("de 700 a 800");
-			premiereCol[12] = ("de 800 a 900");
-			premiereCol[13] = ("de 900 a 999");
-			premiereCol[14] = ("1000 repet (allstar)");
-			for (DirectPosition2D key : cellRepet.keySet()) {
-				if (0 < cellRepet.get(key) && cellRepet.get(key) <= 100) {
-					tableauFinal[4]++;
-				} else if (100 < cellRepet.get(key) && cellRepet.get(key) <= 200) {
-					tableauFinal[5]++;
-				} else if (200 < cellRepet.get(key) && cellRepet.get(key) <= 300) {
-					tableauFinal[6]++;
-				} else if (300 < cellRepet.get(key) && cellRepet.get(key) <= 400) {
-					tableauFinal[7]++;
-				} else if (400 < cellRepet.get(key) && cellRepet.get(key) <= 500) {
-					tableauFinal[8]++;
-				} else if (500 < cellRepet.get(key) && cellRepet.get(key) <= 600) {
-					tableauFinal[9]++;
-				} else if (600 < cellRepet.get(key) && cellRepet.get(key) <= 700) {
-					tableauFinal[10]++;
-				} else if (700 < cellRepet.get(key) && cellRepet.get(key) <= 800) {
-					tableauFinal[11]++;
-				} else if (800 < cellRepet.get(key) && cellRepet.get(key) <= 900) {
-					tableauFinal[12]++;
-				} else if (900 < cellRepet.get(key) && cellRepet.get(key) < 1000) {
-					tableauFinal[13]++;
-				} else if (cellRepet.get(key) == 1000) {
-					tableauFinal[14]++;
-				}
-				if (cellRepet.get(key) < 1000) {
-					statInstable.addValue(cellEval.get(key));
-				}
-				if (cellRepet.get(key) == 1000) {
-					statStable.addValue(cellEval.get(key));
-				}
-			}
-
-			tableauFinal[15] = statInstable.getMean();
-			tableauFinal[16] = statInstable.getStandardDeviation();
-			tableauFinal[17] = tableauFinal[16] / tableauFinal[15];
-			tableauFinal[18] = statStable.getMean();
-			tableauFinal[19] = statStable.getStandardDeviation();
-			tableauFinal[20] = tableauFinal[19] / tableauFinal[18];
-
 		}
 
-		// moyenne des évaluations pour les cellules instables
+		premiereCol[6] = ("moyenne evaluation des cellules instables");
+		premiereCol[7] = ("ecart type des cellules instables");
+		premiereCol[8] = ("coefficient de variation des cellules instables");
+		premiereCol[9] = ("moyenne evaluation des cellules stables");
+		premiereCol[10] = ("ecart type des cellules stables");
+		premiereCol[11] = ("coefficient de variation des cellules stables");
+
+		tableauFinal[6] = statInstable.getMean();
+		tableauFinal[7] = statInstable.getStandardDeviation();
+		tableauFinal[8] = tableauFinal[6] / tableauFinal[7];
+		tableauFinal[9] = statStable.getMean();
+		tableauFinal[10] = statStable.getStandardDeviation();
+		tableauFinal[11] = tableauFinal[10] / tableauFinal[9];
 
 		StatTab tableauStat = new StatTab("descriptive_statistics", nameScenar, tableauFinal, premiereCol);
 		tableauStat.toCsv(statFile, firstline);
