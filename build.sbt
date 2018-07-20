@@ -13,13 +13,48 @@ enablePlugins(SbtOsgi)
 
 //spiFlySettings   // import settings for spifly plugin
 
-OsgiKeys.exportPackage := Seq("fr.ign.*;-split-package:=merge-first,fr.ign.task.*;-split-package:=merge-first,mupcityplugin.*;-split-package:=merge-first")
+OsgiKeys.exportPackage := Seq("fr.ign,fr.ign.task,mupcityplugin")
 
-OsgiKeys.importPackage := Seq("*;resolution:=optional")
+//OsgiKeys.exportPackage := Seq(
+//  "fr.ign.*;-split-package:=merge-first",
+//  "fr.ign.task.*;-split-package:=merge-first",
+//  "mupcityplugin.*;-split-package:=merge-first")
+//"sun.awt","com.sun.imageio.spi","javax.imageio.spi"
 
-OsgiKeys.privatePackage := Seq("!scala.*,!java.*,META-INF.services.*,META-INF.*,*")
+//OsgiKeys.exportPackage := Seq("mupcityplugin;-split-package:=merge-first")
 
-OsgiKeys.requireCapability := """osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))""""
+OsgiKeys.importPackage := Seq("*;resolution:=optional")//,com.sun.media.imageioimpl.plugins.tiff;resolution:=optional
+
+OsgiKeys.privatePackage := Seq("""
+|!scala.*,!java.*,META-INF.*;-split-package:=merge-first,
+|*;-split-package:=merge-first
+|""".stripMargin)
+
+//!org.geotools.*,!com.sun.media.*,!javax.media.*,!it.geosolutions.*,!scala.*,!java.*,
+//!META-INF.*.org.geotools.*,META-INF.*;-split-package:=merge-first,
+//!META-INF.services.org.geotools.*,!META-INF.services.javax.media.jai.*,!META-INF.services.javax.imageio.spi.*,META-INF.services.*;-split-package:=merge-first,
+
+//OsgiKeys.privatePackage := Seq(
+//  "!scala.*",
+//  "!java.*",
+//  "META-INF.services.*;-split-package:=merge-first",
+//  "META-INF.*;-split-package:=merge-first",
+//  "*;-split-package:=merge-first")
+
+OsgiKeys.requireCapability := """osgi.ee; osgi.ee="JavaSE";version:List="1.8,1.9"""""
+
+//OsgiKeys.requireBundle := Seq(
+//  "org.geotools.api;bundle-version=19.1",
+//  "org.geotools.main;bundle-version=19.1",
+//  "org.geotools.shapefile;bundle-version=19.1",
+//  "org.geotools.geotiff;bundle-version=19.1",
+//  "org.geotools.metadata;bundle-version=19.1",
+//  "org.geotools.referencing;bundle-version=19.1",
+//  "org.geotools.epsg-hsql;bundle-version=19.1",
+//  "org.geotools.image;bundle-version=19.1"
+//)
+
+//OsgiKeys.bundleRequiredExecutionEnvironment := Seq("JavaSE-1.8")
 
 //scalariformSettings
 
@@ -59,23 +94,75 @@ resolvers += "Hibernate" at "http://www.hibernatespatial.org/repository"
 
 //libraryDependencies += "org.openmole" %% "org-openmole-plugin-task-scala" % openMOLEVersion
 
-val mupcityVersion = "1.2.2"
-val geotoolsVersion = "19.1"
-val geotoolsGridVersion = "19.1"
-val fracgisVersion = "0.6.3"
+val mupcityVersion = "1.2.3"
+//val geotoolsVersion = "19.1"
+val geotoolsGridVersion = "18.4"
+val fracgisVersion = "0.7.1"
 
-libraryDependencies += "org.thema" % "fracgis" % fracgisVersion excludeAll(
-  ExclusionRule(organization = "org.geotools"),
-  ExclusionRule(organization = "com.vividsolutions"),
-  ExclusionRule(organization = "org.apache.batik")
-)
-libraryDependencies += "org.thema" % "mupcity" % mupcityVersion excludeAll(
-  ExclusionRule(organization = "org.geotools"),
-  ExclusionRule(organization = "com.vividsolutions"),
-  ExclusionRule(organization = "org.apache.batik")
-)
 libraryDependencies += "org.geotools" % "gt-grid" % geotoolsGridVersion
 libraryDependencies += "org.geotools" % "gt-coverage" % geotoolsGridVersion
+libraryDependencies += "org.geotools" % "gt-geotiff" % geotoolsGridVersion
+libraryDependencies += "org.geotools" % "gt-image" % geotoolsGridVersion
+//
+libraryDependencies += "org.geotools" % "gt-referencing" % geotoolsGridVersion
+libraryDependencies += "org.geotools" % "gt-epsg-hsql" % geotoolsGridVersion
+//libraryDependencies += "org.geotools" % "gt-epsg-extension" % geotoolsGridVersion
+libraryDependencies += "org.geotools" % "gt-shapefile" % geotoolsGridVersion
+libraryDependencies += "org.geotools" % "gt-graph" % geotoolsGridVersion
+//
+libraryDependencies += "org.geotools" % "gt-metadata" % geotoolsGridVersion
+libraryDependencies += "org.geotools" % "gt-opengis" % geotoolsGridVersion
+libraryDependencies += "org.geotools" % "gt-main" % geotoolsGridVersion
+libraryDependencies += "org.geotools" % "gt-api" % geotoolsGridVersion
+
+libraryDependencies += "org.thema" % "fracgis" % fracgisVersion excludeAll(
+    ExclusionRule(organization = "org.geotools"),
+  )
+//excludeAll(
+//  ExclusionRule(organization = "org.geotools"),
+//  ExclusionRule(organization = "com.vividsolutions  ")
+//  )
+
+//excludeAll(
+//  ExclusionRule(organization = "org.geotools"),
+//  ExclusionRule(organization = "org.jdom"),
+//  ExclusionRule(organization = "it.geosolutions.*"),
+//  ExclusionRule(organization = "com.vividsolutions"),
+//  ExclusionRule(organization = "org.apache.batik")
+//)
+libraryDependencies += "org.thema" % "mupcity" % mupcityVersion excludeAll(
+  ExclusionRule(organization = "org.geotools")
+  )
+//excludeAll(
+//  ExclusionRule(organization = "org.geotools"),
+//  ExclusionRule(organization = "com.vividsolutions")
+//  )
+
+libraryDependencies += "org.jdom" % "jdom" % "1.1.3"
+
+libraryDependencies += "xerces" % "xercesImpl" % "2.12.0"
+
+//libraryDependencies += "it.geosolutions.imageio-ext" % "imageio-ext-tiff" % "1.1.20"
+
+//libraryDependencies += "com.github.jai-imageio" % "jai-imageio-core" % "1.3.1"
+
+//libraryDependencies += "com.github.jai-imageio" % "jai-imageio-core" % "1.4.0"
+
+//excludeDependencies ++= Seq(
+//  ExclusionRule("javax.media", "jai_imageio")
+//)
+excludeDependencies ++= Seq(
+  ExclusionRule("com.vividsolutions", "jts")
+//  ExclusionRule("javax.media","jai_imageio")
+)
+
+//excludeAll(
+//  ExclusionRule(organization = "org.geotools"),
+//  ExclusionRule(organization = "org.jdom"),
+//  ExclusionRule(organization = "it.geosolutions.*"),
+//  ExclusionRule(organization = "com.vividsolutions"),
+//  ExclusionRule(organization = "org.apache.batik")
+//)
 
 //libraryDependencies += "org.geotools" % "gt-geotiff" % geotoolsVersion
 
@@ -101,3 +188,22 @@ OsgiKeys.additionalHeaders :=  Map(
 			   "Implementation-Version" -> "Impl Version",
 			   "Implementation-Vendor" -> "IGN"
 )
+
+//OsgiKeys.embeddedJars := (Keys.externalDependencyClasspath in Compile).value map (_.data) filter (_.getName contains "geotools") map (d=>{
+//  println("dep = " + d)
+//  d
+//})
+
+//enablePlugins(AssemblyPlugin)
+//
+//mergeStrategy in assembly := MergeStrategy.concat
+
+//def myFilter(name: String) =
+//  ((name contains "gt-") && !(name contains "opengis")) ||
+//  (name contains "imageio") ||
+//  (name contains "jai") ||
+//  (name contains "jt-")
+//
+//OsgiKeys.embeddedJars := (Keys.externalDependencyClasspath in Compile).value map (_.data) filter (f=>myFilter(f.getName)) map (_.asFile)
+
+//excludeFilter in Keys.externalDependencyClasspath := ("*gt-*" && -"*opengis") || "*imageio*" || "*jai*" || "*jt-*"

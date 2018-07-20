@@ -6,7 +6,6 @@ import java.io.Serializable;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -42,7 +41,7 @@ public class ProjectCreationDecompTask {
 	public static String nameProj;
 
 	public static void main(String[] args) throws Exception {
-
+/*
 		String name = "ProjectLol";
 		File folderIn = new File("data");
 		File folderOut = new File("result");
@@ -58,7 +57,28 @@ public class ProjectCreationDecompTask {
 
 		DataSetSelec.predefSet();
 		Map<String, String> dataHTproj = DataSetSelec.get("Data1.2");
-		run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHTproj, maxSize, minSize, seuilDensBuild);
+		*/
+		File folderIn = new File("/home/julien/.openmole/DEL1701P003-Ubuntu/webui/projects/mupcity/dataOpenMole/stabilite/dataAutom");
+		String inputName = folderIn.getName();
+		File folderOut = new File("/tmp/output2");
+		folderOut.mkdirs();
+		String name = "Stability";
+		double xmin = 915948.0;
+		double ymin = 6677337.0;
+		double width = 100;
+		double height = 100;
+		double shiftX = 0.0;
+		double shiftY = 0.0;
+		double minSize = 20.0;
+		double maxSize = 60.0;
+		double seuilDensBuild = 0.0;
+
+  		System.out.println("creating project for " + inputName);
+//		val projectFile = mupcityplugin.ProjectCreationDecompTask.apply(name,folderIn,newDir,xmin,ymin,width,height,xshift,yshift,maxSize,minSize,seuilDensBuild)
+		/*File p = */run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, maxSize, minSize, seuilDensBuild);
+		String nameProject = ProjectCreationDecompTask.getName();
+		System.out.println(nameProject);
+
 	}
 
 	public static File run(String name, File folderIn, File folderOut, double xmin, double ymin, double width, double height, double shiftX, double shiftY, double maxSize,
@@ -84,6 +104,8 @@ public class ProjectCreationDecompTask {
 
 	public static MutablePair<String, File> run(String name, File folderIn, File folderOut, double xmin, double ymin, double width, double height, double shiftX, double shiftY,
 			Map<String, String> dataHT, double maxSize, double minSize, double seuilDensBuild, boolean machineReadable) throws Exception {
+		System.out.println("Initializing");
+		Initialize.init();
 		TaskMonitor mon = new TaskMonitor.EmptyMonitor();
 		// Dossier intermédiaire avec les fichiers transformées
 		// File folderTemp = new File(folderIn + "/tmp/");
@@ -164,6 +186,10 @@ public class ProjectCreationDecompTask {
 		System.out.println("Saving project");
 		project.save();
 
+//		CoordinateReferenceSystem crs = project.getCRS();
+//		System.out.println(crs);
+		
+
 		// MASSACRE
 		for (File f : listMassacre) {
 			CharSequence target = f.getName().subSequence(0, f.getName().length() - 4);
@@ -177,7 +203,10 @@ public class ProjectCreationDecompTask {
 		System.out.println("Decomposition");
 		project.decomp(3, maxSize, minSize, seuilDensBuild, mon, false);
 
-		System.out.println("Saving project");
+		System.out.println("Saving project in " + folderOut);
+//		for (String layer : project.getMSGrid().getLayers()) {
+//			project.getMSGrid().saveRaster();
+//		}
 		project.save();
 		System.out.println("Cleanup");
 		cleanProject(project);
@@ -207,6 +236,7 @@ public class ProjectCreationDecompTask {
 		translateSHP2(fileIn, fileOut, shiftX, shiftY);
 	}
 
+	@SuppressWarnings("unused")
 	private static void translateSHP1(File fileIn, File fileOut, double shiftX, double shiftY) throws Exception {
 		ShapefileDataStore dataStore = new ShapefileDataStore(fileIn.toURI().toURL());
 		AffineTransform2D translate = new AffineTransform2D(1, 0, 0, 1, shiftX, shiftY);

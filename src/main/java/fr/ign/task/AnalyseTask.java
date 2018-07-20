@@ -36,9 +36,9 @@ public class AnalyseTask {
 		// runGridSens(file, new File("/home/mcolomb/workspace/mupcity-openMole/data/"), "gridExplo");
 
 		File totFile = new File("/home/mcolomb/tmp/fracExperi/ScenarVrac");
-		File[] totFiles = new File[totFile.listFiles().length];
+		//File[] totFiles = new File[totFile.listFiles().length];
 		String names = "Stabilite";
-		int i = 0;
+		//int i = 0;
 		File totInFile = new File("/home/mcolomb/.openmole/RKS1409W205-Ubuntu/webui/projects/dataOpenMole/stabilite");
 		System.out.println(runStab(totFile, totInFile, names, true));
 
@@ -172,6 +172,8 @@ public class AnalyseTask {
 	}
 
 	public static File runStab(File file, File fileDonnee, String name, boolean machineReadable) throws Exception {
+		System.out.println("Initialization");
+		Initialize.init();
 
 		// folder settings
 		File discreteFile = getDiscrete(fileDonnee);
@@ -274,11 +276,14 @@ public class AnalyseTask {
 					RasterAnalyse.compareInclusionSizeCell(SvgCellRepet20, SvgCellEval20, cellRepet180, cellEval180, nameTest, ech);
 				}
 				// fractal dimention calculation
-				int resolution = 4;
+				int resolution = 10;
 				// pour seulement 20 valeures
 				for (File f : anal.getRandomSeedScenars(arL.get(0), echelle, 20)) {
 					System.out.println("Start DimFrac calculation");
+					long start = System.currentTimeMillis();
 					FractalDimention.getCorrFracDim(getBuild(fileDonnee, arL), f, statFile, resolution, arL.get(0).getNiceName() + echelle);
+					long end = System.currentTimeMillis();
+					System.out.println("End DimFrac calculation: " + (end - start) + " ms");
 				}
 			}
 		}
@@ -414,12 +419,13 @@ public class AnalyseTask {
 		List<Path> vreListFiles = new ArrayList<Path>();
 		for (int i = 0; i < file.length; i++) {
 			for (File f : file[i].listFiles()) {
-				if (f.toString().endsWith(".tif")) {
+				if (f.toString().endsWith(".tif") || f.toString().endsWith(".tfw")) {
 					vreListFiles.add(Paths.get(f.toString()));
 				}
 			}
 		}
 		for (Path p : vreListFiles) {
+			System.out.println("copy " + fileVrac + "/" + p.getFileName().toString());
 			OutputStream out = new FileOutputStream(new File(fileVrac, p.getFileName().toString()));
 			Files.copy(p, out);
 			out.close();
@@ -468,16 +474,24 @@ public class AnalyseTask {
 	}
 
 	public static File getBuild(File fileDonnee, List<ScenarAnalyse> arL) {
+		System.out.println("getBuild from " + fileDonnee + " with " + arL.get(0).getData());
 		File batiFile = new File("");
-		for (File filesDonnee : fileDonnee.listFiles()) {
-			if (filesDonnee.getName().endsWith(arL.get(0).getData())) {
-				for (File fileShp : filesDonnee.listFiles()) {
-					if (fileShp.getName().startsWith("batiment") && fileShp.toString().endsWith(".shp")) {
-						batiFile = fileShp;
-					}
-				}
+//		for (File filesDonnee : fileDonnee.listFiles()) {
+//			if (filesDonnee.getName().endsWith(arL.get(0).getData())) {
+//				System.out.println("searching " + filesDonnee);
+//				for (File fileShp : filesDonnee.listFiles()) {
+//					if (fileShp.getName().startsWith("batiment") && fileShp.toString().endsWith(".shp")) {
+//						batiFile = fileShp;
+//					}
+//				}
+//			}
+//		}
+		for (File fileShp : fileDonnee.listFiles()) {
+			if (fileShp.getName().startsWith("batiment") && fileShp.toString().endsWith(".shp")) {
+				batiFile = fileShp;
 			}
 		}
+		System.out.println("Found " + batiFile);
 		return batiFile;
 	}
 

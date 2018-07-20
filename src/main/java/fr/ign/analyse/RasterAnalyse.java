@@ -435,7 +435,7 @@ public class RasterAnalyse {
 		ParameterValue<Boolean> useJaiRead = AbstractGridFormat.USE_JAI_IMAGEREAD.createValue();
 		useJaiRead.setValue(false);
 		GeneralParameterValue[] params = new GeneralParameterValue[] { policy, gridsize, useJaiRead };
-
+		System.out.println("importing " + f);
 		GridCoverage2DReader reader = new GeoTiffReader(f);
 		return reader.read(params);
 	}

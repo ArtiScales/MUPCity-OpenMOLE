@@ -1,6 +1,7 @@
 package fr.ign.analyse;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +18,7 @@ import org.geotools.geometry.Envelope2D;
 import org.opengis.parameter.GeneralParameterValue;
 import org.opengis.parameter.ParameterValue;
 import org.opengis.parameter.ParameterValueGroup;
+import org.thema.data.IOImage;
 
 import fr.ign.analyse.obj.Analyse;
 import fr.ign.analyse.obj.ScenarAnalyse;
@@ -176,17 +178,22 @@ public class RasterMerge {
 
 	public static void writeGeotiff(File fileName, GridCoverage2D coverage) {
 		try {
-			GeoTiffWriteParams wp = new GeoTiffWriteParams();
-			wp.setCompressionMode(GeoTiffWriteParams.MODE_EXPLICIT);
-			wp.setCompressionType("LZW");
-			ParameterValueGroup params = new GeoTiffFormat().getWriteParameters();
-			params.parameter(AbstractGridFormat.GEOTOOLS_WRITE_PARAMS.getName().toString()).setValue(wp);
-			GeoTiffWriter writer = new GeoTiffWriter(fileName);
-			writer.write(coverage, (GeneralParameterValue[]) params.values().toArray(new GeneralParameterValue[1]));
-		} catch (Exception e) {
-
+			IOImage.saveTiffCoverage(fileName, coverage);
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
+//		try {
+//			GeoTiffWriteParams wp = new GeoTiffWriteParams();
+//			wp.setCompressionMode(GeoTiffWriteParams.MODE_EXPLICIT);
+//			wp.setCompressionType("LZW");
+//			ParameterValueGroup params = new GeoTiffFormat().getWriteParameters();
+//			params.parameter(AbstractGridFormat.GEOTOOLS_WRITE_PARAMS.getName().toString()).setValue(wp);
+//			GeoTiffWriter writer = new GeoTiffWriter(fileName);
+//			writer.write(coverage, (GeneralParameterValue[]) params.values().toArray(new GeneralParameterValue[1]));
+//		} catch (Exception e) {
+//
+//			e.printStackTrace();
+//		}
 
 	}
 

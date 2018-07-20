@@ -17,27 +17,25 @@ MupCityTask.run(seed, data, results, nMax, strict, mean, ahpIndex);
 			}
 
 	private static void run(long seed, File data, File results, int nMax, boolean strict, boolean mean, int ahpIndex) throws IOException, SchemaException {
-		// TODO Auto-generated method stub
-		
-		String name = "testExplo";
-		File dir = results;
-		File buildFile = new File(data, "BATI_AU.shp");
-		int exp = 3;
-		double minSize = 20;
-		double maxSize = 25273;
-		boolean useNoBuild = true;
-		boolean network = false;// true => network distance
-		File roadFile = new File(data, "route_sans_chemin.shp");
-		File facilityFile = new File(data, "CS_au_besac_sirene_2012.shp");
-		File leisureFile = new File(data, "loisirs.shp");
-		File busFile = new File(data, "stations_besac_tram_2015.shp");
-		File trainFile = new File(data, "gare_train_ICONE_docs_2015.shp");
-		File restrictFile = new File(data, "non_urba.shp");
-		// definition de la grille
-		double width = 28303;
-		double height = 21019;
-		double minX = 914760;
-		double minY = 6680157;
+//		String name = "testExplo";
+//		File dir = results;
+//		File buildFile = new File(data, "BATI_AU.shp");
+//		int exp = 3;
+//		double minSize = 20;
+//		double maxSize = 25273;
+//		boolean useNoBuild = true;
+//		boolean network = false;// true => network distance
+//		File roadFile = new File(data, "route_sans_chemin.shp");
+//		File facilityFile = new File(data, "CS_au_besac_sirene_2012.shp");
+//		File leisureFile = new File(data, "loisirs.shp");
+//		File busFile = new File(data, "stations_besac_tram_2015.shp");
+//		File trainFile = new File(data, "gare_train_ICONE_docs_2015.shp");
+//		File restrictFile = new File(data, "non_urba.shp");
+//		// definition de la grille
+//		double width = 28303;
+//		double height = 21019;
+//		double minX = 914760;
+//		double minY = 6680157;
 //		MupCityCLI.run(name, dir, buildFile, exp, minSize, maxSize, nMax, strict, useNoBuild, mean, network, seed, roadFile, facilityFile, leisureFile, busFile, trainFile, restrictFile, minX, minY, width, height, ahpIndex, results);
 //      MupCityCLI.createProject(name, dir, buildFile, exp, minSize, maxSize, network, roadFile, facilityFile, leisureFile, busFile, trainFile, restrictFile, minX, minY, width, height);
 //      MupCityCLI.performScenario(name, dir, exp, nMax, useNoBuild, strict, mean, seed, ahpIndex, results);
