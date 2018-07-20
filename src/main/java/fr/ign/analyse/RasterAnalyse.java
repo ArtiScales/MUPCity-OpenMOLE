@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.commons.math3.stat.correlation.Covariance;
@@ -314,7 +315,7 @@ public class RasterAnalyse {
 	 * @return
 	 * @throws Exception
 	 */
-	public static void compareDiffSizedCell(List<ScenarAnalyse> listfile, Analyse anal, String name, File discreteFile) throws Exception {
+	public static void compareDiffSizedCellIntoCities(Set<ScenarAnalyse> listfile, Analyse anal, String name, File discreteFile) throws Exception {
 
 		// with the other parameters
 		// with the topological spaces
@@ -341,6 +342,8 @@ public class RasterAnalyse {
 			} finally {
 				discreteIt.close();
 			}
+			
+			//pour tous les scénarios de la liste - comprenant les mêmes scenarios et projets mais avec des tailles de cellules différentes 
 			for (ScenarAnalyse sA : listfile) {
 
 				echelle = sA.getSizeCell();

@@ -54,47 +54,70 @@ public class FractalDimention {
 		}
 	}
 
-//	public static void getCorrFracDimfromSimu(File batiFile, File rootFile, File fileOut, String echelle, int resolution) throws IOException {
-//		Hashtable<String, Hashtable<String, Double>> results = new Hashtable<String, Hashtable<String, Double>>();
-//		for (File f : rootFile.listFiles()) {
-//			if (f.toString().contains("_Moy_ahpx_seed_42")) {
-//				for (File ff : f.listFiles()) {
-//					if (ff.toString().endsWith("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif")) {
-//						String name = ff.getName().replaceAll("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif", "-" + echelle);
-//						System.out.println("calculé pour " + name);
-//						results = getCorrFracDim(batiFile, ff, fileOut, resolution, name);
-//					}
-//				}
-//			}
-//		}
-//		System.out.println(results);
-//	}
-//
-//	public static void getCorrFracDimfromSimu(File batiFile, File[] files, File fileOut, String echelle, int resolution) throws IOException {
-//		Hashtable<String, Hashtable<String, Double>> results = new Hashtable<String, Hashtable<String, Double>>();
-//		for (File f : files) {
-//			if (f.toString().contains("_Moy_ahpx_seed_42")) {
-//				for (File ff : f.listFiles()) {
-//					if (ff.toString().endsWith("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif")) {
-//						String name = ff.getName().replaceAll("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif", "-" + echelle);
-//						System.out.println("calculé pour " + name);
-//						results = getCorrFracDim(batiFile, ff, fileOut, resolution, name);
-//					}
-//				}
-//			}
-//		}
-//		System.out.println(results);
-//	}
+	// public static void getCorrFracDimfromSimu(File batiFile, File rootFile, File fileOut, String echelle, int resolution) throws IOException {
+	// Hashtable<String, Hashtable<String, Double>> results = new Hashtable<String, Hashtable<String, Double>>();
+	// for (File f : rootFile.listFiles()) {
+	// if (f.toString().contains("_Moy_ahpx_seed_42")) {
+	// for (File ff : f.listFiles()) {
+	// if (ff.toString().endsWith("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif")) {
+	// String name = ff.getName().replaceAll("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif", "-" + echelle);
+	// System.out.println("calculé pour " + name);
+	// results = getCorrFracDim(batiFile, ff, fileOut, resolution, name);
+	// }
+	// }
+	// }
+	// }
+	// System.out.println(results);
+	// }
+	//
+	// public static void getCorrFracDimfromSimu(File batiFile, File[] files, File fileOut, String echelle, int resolution) throws IOException {
+	// Hashtable<String, Hashtable<String, Double>> results = new Hashtable<String, Hashtable<String, Double>>();
+	// for (File f : files) {
+	// if (f.toString().contains("_Moy_ahpx_seed_42")) {
+	// for (File ff : f.listFiles()) {
+	// if (ff.toString().endsWith("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif")) {
+	// String name = ff.getName().replaceAll("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif", "-" + echelle);
+	// System.out.println("calculé pour " + name);
+	// results = getCorrFracDim(batiFile, ff, fileOut, resolution, name);
+	// }
+	// }
+	// }
+	// }
+	// System.out.println(results);
+	// }
 
+	/**
+	 * get the fractal dimension (calculated with the correlation method) of a MUP-City output by mergini it with a build file
+	 * 
+	 * @param batiFile
+	 *            : build file
+	 * @param mupFile
+	 *            : MUP-City output
+	 * @param fileOut
+	 *            : .csv file where the calculations are written
+	 * @param resolution
+	 *            : resolution of the rasterization of the builing/MUPoutput merge
+	 * @param name
+	 *            : same of the MUP-City scenario
+	 * @return an Hashtable containing the result of the calculation
+	 * @throws IOException
+	 */
 	public static Hashtable<String, Hashtable<String, Double>> getCorrFracDim(File batiFile, File mupFile, File fileOut, int resolution, String name) throws IOException {
 		Hashtable<String, Hashtable<String, Double>> results = new Hashtable<String, Hashtable<String, Double>>();
 		results.put(name, calculFracCor(mergeBuildMUPResultRast(batiFile, mupFile, fileOut, resolution), fileOut));
 		RasterAnalyse.generateCsvFileMultTab(results, fileOut, "dimensionFractale");
 		return results;
 	}
-
+/**
+ * Dedicaded method to merge a building file with a MUP-City output
+ * @param batiFile
+ * @param MUPFile
+ * @param fileOut
+ * @param resolution
+ * @return
+ * @throws IOException
+ */
 	public static GridCoverage2D mergeBuildMUPResultRast(File batiFile, File MUPFile, File fileOut, int resolution) throws IOException {
-
 		GridCoverage2D coverage = importRaster(MUPFile);
 		CoordinateReferenceSystem sourceCRS = coverage.getCoordinateReferenceSystem();
 		ReferencedEnvelope gridBounds = new ReferencedEnvelope(coverage.getEnvelope2D().getMinX(), coverage.getEnvelope2D().getMaxX(), coverage.getEnvelope2D().getMinY(),

@@ -44,7 +44,6 @@ public class Analyse {
 
 		for (File scenar : files.listFiles()) {
 			if (scenar.getName().startsWith(name)) {
-				System.out.println(scenar.getName());
 				String[] decompNameProj = dbTiret.split(scenar.getName());
 				makeProjCollection(decompNameProj[0]);
 				String[] decompNameScProj = tiret.split(decompNameProj[1]);
@@ -304,7 +303,7 @@ public class Analyse {
 		return getScenars(listGen);
 	}
 
-	public List<Set<ProjetAnalyse>> getProjetByCellmin() {
+	public List<Set<ScenarAnalyse>> getScenarByCellmin() throws FileNotFoundException {
 		List<Set<ProjetAnalyse>> listGen = new ArrayList<Set<ProjetAnalyse>>();
 		for (String seuil : seuilCollec) {
 			for (String grid : gridCollec) {
@@ -319,7 +318,7 @@ public class Analyse {
 				}
 			}
 		}
-		return listGen;
+		return getScenars(listGen);
 	}
 
 	public List<List<ProjetAnalyse>> getProjetByData() {

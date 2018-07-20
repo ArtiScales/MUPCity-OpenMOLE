@@ -25,6 +25,7 @@ import fr.ign.analyse.RasterAnalyse;
 import fr.ign.analyse.RasterMerge;
 import fr.ign.analyse.RasterMergeResult;
 import fr.ign.analyse.obj.Analyse;
+import fr.ign.analyse.obj.ProjetAnalyse;
 import fr.ign.analyse.obj.ScenarAnalyse;
 
 public class AnalyseTask {
@@ -35,9 +36,9 @@ public class AnalyseTask {
 		// File file = new File("/home/mcolomb/workspace/mupcity-openMole/result/gridExploProjets2");
 		// runGridSens(file, new File("/home/mcolomb/workspace/mupcity-openMole/data/"), "gridExplo");
 
-		File totFile = new File("/home/mcolomb/tmp/fracExperi/ScenarVrac");
+		File totFile = new File("/home/mcolomb/tmp/dimFracPrb");
 		File[] totFiles = new File[totFile.listFiles().length];
-		String names = "Stabilite";
+		String names = "Stability";
 		int i = 0;
 		File totInFile = new File("/home/mcolomb/.openmole/RKS1409W205-Ubuntu/webui/projects/dataOpenMole/stabilite");
 		System.out.println(runStab(totFile, totInFile, names, true));
@@ -167,6 +168,123 @@ public class AnalyseTask {
 	 * @return
 	 * @throws Exception
 	 */
+	public static File runGridExplo(File[] file, File[] fileDonnee, File mainFile, String[] name, boolean machineReadable) throws Exception {
+		return runStab(copyToScenVrac(file, mainFile), fileDonnee[0], name[0], machineReadable);
+	}
+
+	public static String getNameProjetByScenarSet(Set<ScenarAnalyse> setScenar) {
+		String projName = "";
+		for (ProjetAnalyse sA : setScenar) {
+			projName = sA.getNiceName();
+			System.out.println("projet : " + projName);
+			break;
+		}
+		return projName ;
+	}
+
+	
+	public static File runGridExplo(File file, File fileDonnee, String name, boolean machineReadable) throws Exception {
+
+		// folder settings
+		File discreteFile = getDiscrete(fileDonnee);
+		File resultFile = new File(file, "result--" + name);
+		if (machineReadable) {
+			resultFile = new File(file.getParentFile(), "result--" + name);
+		}
+
+		resultFile.mkdir();
+		RasterAnalyse.rootFile = file;
+
+		// toutes les listes des projets à tester
+		Analyse anal = new Analyse();
+		if (machineReadable) {
+			anal = new Analyse(file, name, machineReadable);
+		} else {
+			anal = new Analyse(file, name);
+		}
+
+		for (String echelle : anal.getEchelleRange(3)) {
+
+			int ech = Integer.valueOf(echelle);
+			RasterAnalyse.echelle = echelle;
+			List<File> fileToTest = new ArrayList<File>();
+		// pour l'analyse des différents seuils
+
+		for (Set<ScenarAnalyse> scenarParSeuils : anal.getProjetBySeuil()) {
+			String scenName = "";
+			for (ScenarAnalyse sA : scenarParSeuils) {
+				scenName = sA.getNiceName();
+				System.out.println("projet : " + scenName);
+		
+				scenName = sA.getData()+"-CM"+sA.getSizeCell()+"-GP_"+sA.getGrid() + "--" + sA.getnMax() + "_" + sA.isStrict() + "_" + sA.isYag() + "_" + sA.getAhp() + "_seed_" + sA.getSeed();
+			break;
+			}
+			File eachResultFile = new File(resultFile, scenName);
+			eachResultFile.mkdirs();
+			File statFile = new File(eachResultFile, "stat");
+			RasterAnalyse.statFile = statFile;
+			File rastFile = new File(eachResultFile, "raster");
+			rastFile.mkdir();
+			// get the set of files to test
+			for (ScenarAnalyse sC : scenarParSeuils) {
+				fileToTest.add(anal.getSimuFile(sC, echelle, "evalAnal"));
+			}
+			// merge the different input rasters
+			RasterMergeResult mergedResult = RasterAnalyse.mergeRasters(fileToTest);
+			
+			//TODO spécialiser l'analyse pour l'étude des seuils
+//			RasterAnalyse.createStatsDescriptive("analyse-seuil---"+scenName, mergedResult);
+//			// discrete statistics
+//			RasterAnalyse.createStatsDiscrete(scenName, mergedResult, discreteFile);
+
+			// create a merged raster
+			RasterMerge.merge(fileToTest, new File(rastFile, scenName + "-rasterMerged-" + echelle + ".tif"), Integer.parseInt(echelle));
+
+			
+		}
+		}
+		return resultFile;
+
+
+//			// different size of cells analyse
+//			HashSet yo = new HashSet();
+//
+//			List<Set<ScenarAnalyse>> listsByProj = anal.getScenarByCellmin();
+//
+//			for (Set<ScenarAnalyse> ScenarDiffCell : listsByProj) {
+//				// get the project name
+//
+//				RasterAnalyse.compareDiffSizedCellIntoCities(ScenarDiffCell, anal, projName, discreteFile);
+//			}
+//
+//
+//			Integer minSizeCell = Integer.valueOf(arL.get(0).getSizeCell());
+//			// cells contained in superior scaled cells
+//			// reference simulation
+//			File concernedFile = getOutputExample(exampleFolder, ech);
+//
+//			// fractal dimention calculation
+//			int resolution = 4;
+//			// pour seulement 20 valeures
+//			for (File f : anal.getRandomSeedScenars(arL.get(0), echelle, 20)) {
+//				System.out.println("Start DimFrac calculation");
+//				FractalDimention.getCorrFracDim(getBuild(fileDonnee, arL), f, statFile, resolution, arL.get(0).getNiceName() + echelle);
+//			}
+//		}
+//	}return resultFile;
+
+	}
+
+	/**
+	 * overlaoding to use aggregation transition from openMole. It copies all the files into a mainFile folder calles 'ScenarVrac'
+	 * 
+	 * @param file
+	 * @param fileDonnee
+	 * @param name
+	 * @param machineReadable
+	 * @return
+	 * @throws Exception
+	 */
 	public static File runStab(File[] file, File[] fileDonnee, File mainFile, String[] name, boolean machineReadable) throws Exception {
 		return runStab(copyToScenVrac(file, mainFile), fileDonnee[0], name[0], machineReadable);
 	}
@@ -236,47 +354,48 @@ public class AnalyseTask {
 					fileToTest.add(anal.getSimuFile(sC, echelle, "evalAnal"));
 				}
 
-				// merge the different input rasters
-				RasterMergeResult mergedResult = RasterAnalyse.mergeRasters(fileToTest);
-
-				// statistics for the simple task with those objects
-				RasterAnalyse.createStatsDescriptive(nameTest, mergedResult);
-				RasterAnalyse.createStatsEvol(mergedResult.getHisto(), echelle);
-
-				// get the average evaluation of cells in a .csv
-				if (!mergedResult.getCellEval().isEmpty()) {
-					RasterAnalyse.createStatEvals(mergedResult.getCellEval());
-				}
-				// discrete statistics
-				RasterAnalyse.createStatsDiscrete(nameTest, mergedResult, discreteFile);
-
-				// create a merged raster
-				RasterMerge.merge(fileToTest, new File(rastFile, nameTest + "-rasterMerged-" + echelle + ".tif"), Integer.parseInt(echelle));
-
-				Integer minSizeCell = Integer.valueOf(arL.get(0).getSizeCell());
-				// cells contained in superior scaled cells
-				// reference simulation
-				File concernedFile = getOutputExample(exampleFolder, ech);
-				// Count how much minimal sized cells are contained into parent cells
-				Hashtable<DirectPosition2D, Float> SvgCellEval20 = new Hashtable<DirectPosition2D, Float>();
-				Hashtable<DirectPosition2D, Integer> SvgCellRepet20 = new Hashtable<DirectPosition2D, Integer>();
-				System.out.println("Inclusions des cellules");
-				if (ech == minSizeCell) {
-					SvgCellEval20 = RasterAnalyse.mergeRasters(concernedFile).getCellEval();
-					SvgCellRepet20 = RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
-				} else if (ech == minSizeCell * 3) {
-					Hashtable<DirectPosition2D, Float> cellEval60 = (Hashtable<DirectPosition2D, Float>) RasterAnalyse.mergeRasters(concernedFile).getCellEval();
-					Hashtable<DirectPosition2D, Integer> cellRepet60 = (Hashtable<DirectPosition2D, Integer>) RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
-					RasterAnalyse.compareInclusionSizeCell(SvgCellRepet20, SvgCellEval20, cellRepet60, cellEval60, nameTest, ech);
-				} else if (ech == minSizeCell * 9) {
-					Hashtable<DirectPosition2D, Float> cellEval180 = (Hashtable<DirectPosition2D, Float>) RasterAnalyse.mergeRasters(concernedFile).getCellEval();
-					Hashtable<DirectPosition2D, Integer> cellRepet180 = (Hashtable<DirectPosition2D, Integer>) RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
-					RasterAnalyse.compareInclusionSizeCell(SvgCellRepet20, SvgCellEval20, cellRepet180, cellEval180, nameTest, ech);
-				}
+//				// merge the different input rasters
+//				RasterMergeResult mergedResult = RasterAnalyse.mergeRasters(fileToTest);
+//
+//				// statistics for the simple task with those objects
+//				RasterAnalyse.createStatsDescriptive(nameTest, mergedResult);
+//				RasterAnalyse.createStatsEvol(mergedResult.getHisto(), echelle);
+//
+//				// get the average evaluation of cells in a .csv
+//				if (!mergedResult.getCellEval().isEmpty()) {
+//					RasterAnalyse.createStatEvals(mergedResult.getCellEval());
+//				}
+//				// discrete statistics
+//				RasterAnalyse.createStatsDiscrete(nameTest, mergedResult, discreteFile);
+//
+//				// create a merged raster
+//				RasterMerge.merge(fileToTest, new File(rastFile, nameTest + "-rasterMerged-" + echelle + ".tif"), Integer.parseInt(echelle));
+//
+//				Integer minSizeCell = Integer.valueOf(arL.get(0).getSizeCell());
+//				// cells contained in superior scaled cells
+//				// reference simulation
+//				File concernedFile = getOutputExample(exampleFolder, ech);
+//				// Count how much minimal sized cells are contained into parent cells
+//				Hashtable<DirectPosition2D, Float> SvgCellEval20 = new Hashtable<DirectPosition2D, Float>();
+//				Hashtable<DirectPosition2D, Integer> SvgCellRepet20 = new Hashtable<DirectPosition2D, Integer>();
+//				System.out.println("Inclusions des cellules");
+//				if (ech == minSizeCell) {
+//					SvgCellEval20 = RasterAnalyse.mergeRasters(concernedFile).getCellEval();
+//					SvgCellRepet20 = RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
+//				} else if (ech == minSizeCell * 3) {
+//					Hashtable<DirectPosition2D, Float> cellEval60 = (Hashtable<DirectPosition2D, Float>) RasterAnalyse.mergeRasters(concernedFile).getCellEval();
+//					Hashtable<DirectPosition2D, Integer> cellRepet60 = (Hashtable<DirectPosition2D, Integer>) RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
+//					RasterAnalyse.compareInclusionSizeCell(SvgCellRepet20, SvgCellEval20, cellRepet60, cellEval60, nameTest, ech);
+//				} else if (ech == minSizeCell * 9) {
+//					Hashtable<DirectPosition2D, Float> cellEval180 = (Hashtable<DirectPosition2D, Float>) RasterAnalyse.mergeRasters(concernedFile).getCellEval();
+//					Hashtable<DirectPosition2D, Integer> cellRepet180 = (Hashtable<DirectPosition2D, Integer>) RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
+//					RasterAnalyse.compareInclusionSizeCell(SvgCellRepet20, SvgCellEval20, cellRepet180, cellEval180, nameTest, ech);
+//				}
 				// fractal dimention calculation
-				int resolution = 4;
+				int resolution = 10;
 				// pour seulement 20 valeures
 				for (File f : anal.getRandomSeedScenars(arL.get(0), echelle, 20)) {
+					System.out.println("file pour la dim fractale : "+f);
 					System.out.println("Start DimFrac calculation");
 					FractalDimention.getCorrFracDim(getBuild(fileDonnee, arL), f, statFile, resolution, arL.get(0).getNiceName() + echelle);
 				}
