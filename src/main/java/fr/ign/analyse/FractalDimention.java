@@ -7,7 +7,6 @@ import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Hashtable;
 
-import org.apache.commons.io.FileUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.data.shapefile.ShapefileDataStore;
@@ -37,7 +36,7 @@ public class FractalDimention {
 		File fileOut = new File("/tmp/fractal");
 		fileOut.mkdirs();
 		File batiFile = new File("/home/julien/.openmole/DEL1701P003-Ubuntu/webui/projects/mupcity/dataOpenMole/stabilite/dataAutom/batimentSys.shp");
-//		File rootFile = new File("/media/mcolomb/Data_2/resultExplo/Stability/N5MoySt");
+		// File rootFile = new File("/media/mcolomb/Data_2/resultExplo/Stability/N5MoySt");
 		// getCorrFracDimfromSimu(batiFile, rootFile, fileOut, resolution);
 		File newFile = new File("/home/julien/.openmole/DEL1701P003-Ubuntu/webui/projects/mupcity/results_min_local/ScenarVrac");
 		for (File f : newFile.listFiles()) {
@@ -52,75 +51,102 @@ public class FractalDimention {
 		}
 	}
 
-//	public static void getCorrFracDimfromSimu(File batiFile, File rootFile, File fileOut, String echelle, int resolution) throws IOException {
-//		Hashtable<String, Hashtable<String, Double>> results = new Hashtable<String, Hashtable<String, Double>>();
-//		for (File f : rootFile.listFiles()) {
-//			if (f.toString().contains("_Moy_ahpx_seed_42")) {
-//				for (File ff : f.listFiles()) {
-//					if (ff.toString().endsWith("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif")) {
-//						String name = ff.getName().replaceAll("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif", "-" + echelle);
-//						System.out.println("calculé pour " + name);
-//						results = getCorrFracDim(batiFile, ff, fileOut, resolution, name);
-//					}
-//				}
-//			}
-//		}
-//		System.out.println(results);
-//	}
-//
-//	public static void getCorrFracDimfromSimu(File batiFile, File[] files, File fileOut, String echelle, int resolution) throws IOException {
-//		Hashtable<String, Hashtable<String, Double>> results = new Hashtable<String, Hashtable<String, Double>>();
-//		for (File f : files) {
-//			if (f.toString().contains("_Moy_ahpx_seed_42")) {
-//				for (File ff : f.listFiles()) {
-//					if (ff.toString().endsWith("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif")) {
-//						String name = ff.getName().replaceAll("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif", "-" + echelle);
-//						System.out.println("calculé pour " + name);
-//						results = getCorrFracDim(batiFile, ff, fileOut, resolution, name);
-//					}
-//				}
-//			}
-//		}
-//		System.out.println(results);
-//	}
+	// public static void getCorrFracDimfromSimu(File batiFile, File rootFile, File fileOut, String echelle, int resolution) throws IOException {
+	// Hashtable<String, Hashtable<String, Double>> results = new Hashtable<String, Hashtable<String, Double>>();
+	// for (File f : rootFile.listFiles()) {
+	// if (f.toString().contains("_Moy_ahpx_seed_42")) {
+	// for (File ff : f.listFiles()) {
+	// if (ff.toString().endsWith("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif")) {
+	// String name = ff.getName().replaceAll("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif", "-" + echelle);
+	// System.out.println("calculé pour " + name);
+	// results = getCorrFracDim(batiFile, ff, fileOut, resolution, name);
+	// }
+	// }
+	// }
+	// }
+	// System.out.println(results);
+	// }
+	//
+	// public static void getCorrFracDimfromSimu(File batiFile, File[] files, File fileOut, String echelle, int resolution) throws IOException {
+	// Hashtable<String, Hashtable<String, Double>> results = new Hashtable<String, Hashtable<String, Double>>();
+	// for (File f : files) {
+	// if (f.toString().contains("_Moy_ahpx_seed_42")) {
+	// for (File ff : f.listFiles()) {
+	// if (ff.toString().endsWith("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif")) {
+	// String name = ff.getName().replaceAll("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif", "-" + echelle);
+	// System.out.println("calculé pour " + name);
+	// results = getCorrFracDim(batiFile, ff, fileOut, resolution, name);
+	// }
+	// }
+	// }
+	// }
+	// System.out.println(results);
+	// }
 
+	/**
+	 * get the fractal dimension (calculated with the correlation method) of a MUP-City output by mergini it with a build file
+	 * 
+	 * @param batiFile
+	 *            : build file
+	 * @param mupFile
+	 *            : MUP-City output
+	 * @param fileOut
+	 *            : .csv file where the calculations are written
+	 * @param resolution
+	 *            : resolution of the rasterization of the builing/MUPoutput merge
+	 * @param name
+	 *            : same of the MUP-City scenario
+	 * @return an Hashtable containing the result of the calculation
+	 * @throws IOException
+	 */
 	public static Hashtable<String, Hashtable<String, Double>> getCorrFracDim(File batiFile, File mupFile, File fileOut, int resolution, String name) throws IOException {
 		Hashtable<String, Hashtable<String, Double>> results = new Hashtable<String, Hashtable<String, Double>>();
 		results.put(name, calculFracCor(mergeBuildMUPResultRast(batiFile, mupFile, fileOut, resolution), fileOut));
 		RasterAnalyse.generateCsvFileMultTab(results, fileOut, "dimensionFractale");
+		File dF = new File(fileOut.getParentFile(), "temprast.tif");
+		dF.delete();
 		return results;
 	}
 
+	/**
+	 * Dedicaded method to merge a building file with a MUP-City output
+	 * 
+	 * @param batiFile
+	 * @param MUPFile
+	 * @param fileOut
+	 * @param resolution
+	 * @return
+	 * @throws IOException
+	 */
 	public static GridCoverage2D mergeBuildMUPResultRast(File batiFile, File MUPFile, File fileOut, int resolution) throws IOException {
-
 		GridCoverage2D coverage = importRaster(MUPFile);
 		File rasterBatiFile = rasterize(batiFile, new File(fileOut.getParentFile(), "temprast.tif"));
 		GridCoverage2D rasterBati = importRaster(rasterBatiFile);
 
-//		System.out.println("MUP envelope2D = " + coverage.getEnvelope2D());
-//		System.out.println("BAT envelope2D = " + rasterBati.getEnvelope2D());
+		// System.out.println("MUP envelope2D = " + coverage.getEnvelope2D());
+		// System.out.println("BAT envelope2D = " + rasterBati.getEnvelope2D());
 		CoordinateReferenceSystem sourceCRS = coverage.getCoordinateReferenceSystem();
-//		CoordinateReferenceSystem batiCRS = rasterBati.getCoordinateReferenceSystem();
-//		System.out.println("MUP CRS = " + sourceCRS);
-//		System.out.println("BAT CRS = " + batiCRS);
+		// CoordinateReferenceSystem batiCRS = rasterBati.getCoordinateReferenceSystem();
+		// System.out.println("MUP CRS = " + sourceCRS);
+		// System.out.println("BAT CRS = " + batiCRS);
 		ReferencedEnvelope mupBounds = new ReferencedEnvelope(coverage.getEnvelope2D(), sourceCRS);
 		ReferencedEnvelope batiBounds = new ReferencedEnvelope(rasterBati.getEnvelope2D(), sourceCRS);
 		ReferencedEnvelope gridBounds = mupBounds.intersection(batiBounds);
-		
+
 		float[][] imagePixelData = new float[(int) Math.floor(gridBounds.getWidth() / resolution)][(int) Math.floor(gridBounds.getHeight() / resolution)];
 		double Xmin = gridBounds.getMinX();
 		double Ymin = gridBounds.getMinY();
 
-//		System.out.println("Xmin = " + Xmin);
-//		System.out.println("Ymin = " + Ymin);
+		// System.out.println("Xmin = " + Xmin);
+		// System.out.println("Ymin = " + Ymin);
 
-//		File f = new File("/tmp/outputTest");
-//		f.mkdirs();
-//		FileUtils.copyFile(MUPFile, new File(f, "MUP.tif"));
-//		FileUtils.copyFile(rasterBatiFile, new File(f, "bati.tif"));
-		
+		// File f = new File("/tmp/outputTest");
+		// f.mkdirs();
+		// FileUtils.copyFile(MUPFile, new File(f, "MUP.tif"));
+		// FileUtils.copyFile(rasterBatiFile, new File(f, "bati.tif"));
+
 		for (int i = 0; i < imagePixelData.length; ++i) {
-//			if (i % 100 == 0) System.out.println("i = " + i  + " / " + imagePixelData.length);
+			// if (i % 100 == 0) System.out.println("i = " + i + " / " + imagePixelData.length);
 			for (int j = 0; j < imagePixelData[0].length; ++j) {
 				DirectPosition2D pt = new DirectPosition2D(Xmin + (2 * i + 1) * resolution / 2, Ymin + (2 * j + 1) * resolution / 2);
 				float[] val = (float[]) coverage.evaluate(pt);
@@ -138,35 +164,35 @@ public class FractalDimention {
 		float[][] imgpix2 = new float[imagePixelData[0].length][imagePixelData.length];
 		float[][] imgpix3 = new float[imagePixelData[0].length][imagePixelData.length];
 
-//		System.out.println("imgpix2");
+		// System.out.println("imgpix2");
 		for (int i = 0; i < imgpix2.length; ++i) {
 			for (int j = 0; j < imgpix2[0].length; ++j) {
 				imgpix2[i][j] = imagePixelData[imgpix2[0].length - 1 - j][i];
 			}
 		}
 
-//		System.out.println("imgpix3");
+		// System.out.println("imgpix3");
 		for (int i = 0; i < imgpix3.length; ++i) {
 			for (int j = 0; j < imgpix3[0].length; ++j) {
 				imgpix3[i][j] = imgpix2[imgpix3.length - 1 - i][imgpix3[0].length - 1 - j];
 			}
 		}
 
-//		System.out.println("toTestRaster");
+		// System.out.println("toTestRaster");
 		GridCoverage2D toTestRaster = new GridCoverageFactory().create("bati", imgpix3, gridBounds);
 		return toTestRaster;
 	}
 
 	public static Hashtable<String, Double> calculFracCor(GridCoverage2D toTestRaster, File fileOut) throws IOException {
-//		System.out.println("\tstart calculFracCor");
+		// System.out.println("\tstart calculFracCor");
 		DefaultSampling dS = new DefaultSampling(22, 3000, 1.5, Sequence.GEOM);
-//		System.out.println("\tcorrelation");
+		// System.out.println("\tcorrelation");
 		CorrelationRasterMethod correlation = new CorrelationRasterMethod("test", dS, toTestRaster.getRenderedImage(), JTS.rectToEnv(toTestRaster.getEnvelope2D()));
 
-//		System.out.println("\tcorrelation execute");
+		// System.out.println("\tcorrelation execute");
 		correlation.execute(new TaskMonitor.EmptyMonitor(), true);
 
-//		System.out.println("\testimation");
+		// System.out.println("\testimation");
 		Estimation estim = new EstimationFactory(correlation).getDefaultEstimation();
 
 		Hashtable<String, Double> values = new Hashtable<String, Double>();
@@ -219,13 +245,13 @@ public class FractalDimention {
 
 	public static void writeGeotiff(File fileName, GridCoverage2D coverage) {
 		try {
-//			GeoTiffWriteParams wp = new GeoTiffWriteParams();
-//			wp.setCompressionMode(GeoTiffWriteParams.MODE_EXPLICIT);
-//			wp.setCompressionType("LZW");
-//			ParameterValueGroup params = new GeoTiffFormat().getWriteParameters();
-//			params.parameter(AbstractGridFormat.GEOTOOLS_WRITE_PARAMS.getName().toString()).setValue(wp);
-//			GeoTiffWriter writer = new GeoTiffWriter(fileName);
-//			writer.write(coverage, (GeneralParameterValue[]) params.values().toArray(new GeneralParameterValue[1]));
+			// GeoTiffWriteParams wp = new GeoTiffWriteParams();
+			// wp.setCompressionMode(GeoTiffWriteParams.MODE_EXPLICIT);
+			// wp.setCompressionType("LZW");
+			// ParameterValueGroup params = new GeoTiffFormat().getWriteParameters();
+			// params.parameter(AbstractGridFormat.GEOTOOLS_WRITE_PARAMS.getName().toString()).setValue(wp);
+			// GeoTiffWriter writer = new GeoTiffWriter(fileName);
+			// writer.write(coverage, (GeneralParameterValue[]) params.values().toArray(new GeneralParameterValue[1]));
 			IOImage.saveTiffCoverage(fileName, coverage);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -233,15 +259,15 @@ public class FractalDimention {
 	}
 
 	public static GridCoverage2D importRaster(File rasterIn) throws IOException {
-//		ParameterValue<OverviewPolicy> policy = AbstractGridFormat.OVERVIEW_POLICY.createValue();
-//		policy.setValue(OverviewPolicy.IGNORE);
-//		ParameterValue<String> gridsize = AbstractGridFormat.SUGGESTED_TILE_SIZE.createValue();
-//		ParameterValue<Boolean> useJaiRead = AbstractGridFormat.USE_JAI_IMAGEREAD.createValue();
-//		useJaiRead.setValue(true);
-//		GeneralParameterValue[] params = new GeneralParameterValue[] { policy, gridsize, useJaiRead };
-//		GridCoverage2DReader reader = new GeoTiffReader(rasterIn);
-//		GridCoverage2D coverage = reader.read(params);
-//		return coverage;
+		// ParameterValue<OverviewPolicy> policy = AbstractGridFormat.OVERVIEW_POLICY.createValue();
+		// policy.setValue(OverviewPolicy.IGNORE);
+		// ParameterValue<String> gridsize = AbstractGridFormat.SUGGESTED_TILE_SIZE.createValue();
+		// ParameterValue<Boolean> useJaiRead = AbstractGridFormat.USE_JAI_IMAGEREAD.createValue();
+		// useJaiRead.setValue(true);
+		// GeneralParameterValue[] params = new GeneralParameterValue[] { policy, gridsize, useJaiRead };
+		// GridCoverage2DReader reader = new GeoTiffReader(rasterIn);
+		// GridCoverage2D coverage = reader.read(params);
+		// return coverage;
 		return IOImage.loadTiff(rasterIn);
 	}
 }

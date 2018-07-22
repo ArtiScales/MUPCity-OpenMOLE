@@ -25,6 +25,7 @@ import fr.ign.analyse.RasterAnalyse;
 import fr.ign.analyse.RasterMerge;
 import fr.ign.analyse.RasterMergeResult;
 import fr.ign.analyse.obj.Analyse;
+import fr.ign.analyse.obj.ProjetAnalyse;
 import fr.ign.analyse.obj.ScenarAnalyse;
 
 public class AnalyseTask {
@@ -35,11 +36,12 @@ public class AnalyseTask {
 		// File file = new File("/home/mcolomb/workspace/mupcity-openMole/result/gridExploProjets2");
 		// runGridSens(file, new File("/home/mcolomb/workspace/mupcity-openMole/data/"), "gridExplo");
 
-		File totFile = new File("/home/mcolomb/tmp/fracExperi/ScenarVrac");
-		//File[] totFiles = new File[totFile.listFiles().length];
-		String names = "Stabilite";
-		//int i = 0;
-		File totInFile = new File("/home/mcolomb/.openmole/RKS1409W205-Ubuntu/webui/projects/dataOpenMole/stabilite");
+		File totFile = new File("/home/mcolomb/tmp/dimFracPrb");
+		File[] totFiles = new File[totFile.listFiles().length];
+		String names = "Stability";
+		int i = 0;
+
+		File totInFile = new File("/home/mcolomb/.openmole/RKS1409W205-Ubuntu/webui/projects/dataOpenMole/stabilite/dataAutom");
 		System.out.println(runStab(totFile, totInFile, names, true));
 
 		// File totFile = new File("/media/mcolomb/Data_2/resultFinal/compData");
@@ -167,6 +169,121 @@ public class AnalyseTask {
 	 * @return
 	 * @throws Exception
 	 */
+	public static File runGridExplo(File[] file, File[] fileDonnee, File mainFile, String[] name, boolean machineReadable) throws Exception {
+		return runStab(copyToScenVrac(file, mainFile), fileDonnee[0], name[0], machineReadable);
+	}
+
+	public static String getNameProjetByScenarSet(Set<ScenarAnalyse> setScenar) {
+		String projName = "";
+		for (ProjetAnalyse sA : setScenar) {
+			projName = sA.getNiceName();
+			System.out.println("projet : " + projName);
+			break;
+		}
+		return projName;
+	}
+
+	public static File runGridExplo(File file, File fileDonnee, String name, boolean machineReadable) throws Exception {
+
+		// folder settings
+		File discreteFile = getDiscrete(fileDonnee);
+		File resultFile = new File(file, "result--" + name);
+		if (machineReadable) {
+			resultFile = new File(file.getParentFile(), "result--" + name);
+		}
+
+		resultFile.mkdir();
+		RasterAnalyse.rootFile = file;
+
+		// toutes les listes des projets à tester
+		Analyse anal = new Analyse();
+		if (machineReadable) {
+			anal = new Analyse(file, name, machineReadable);
+		} else {
+			anal = new Analyse(file, name);
+		}
+
+		for (String echelle : anal.getEchelleRange(3)) {
+
+			int ech = Integer.valueOf(echelle);
+			RasterAnalyse.echelle = echelle;
+			List<File> fileToTest = new ArrayList<File>();
+			// pour l'analyse des différents seuils
+
+			for (Set<ScenarAnalyse> scenarParSeuils : anal.getProjetBySeuil()) {
+				String scenName = "";
+				for (ScenarAnalyse sA : scenarParSeuils) {
+					scenName = sA.getNiceName();
+					System.out.println("projet : " + scenName);
+
+					scenName = sA.getData() + "-CM" + sA.getSizeCell() + "-GP_" + sA.getGrid() + "--" + sA.getnMax() + "_" + sA.isStrict() + "_" + sA.isYag() + "_" + sA.getAhp()
+							+ "_seed_" + sA.getSeed();
+					break;
+				}
+				File eachResultFile = new File(resultFile, scenName);
+				eachResultFile.mkdirs();
+				File statFile = new File(eachResultFile, "stat");
+				RasterAnalyse.statFile = statFile;
+				File rastFile = new File(eachResultFile, "raster");
+				rastFile.mkdir();
+				// get the set of files to test
+				for (ScenarAnalyse sC : scenarParSeuils) {
+					fileToTest.add(anal.getSimuFile(sC, echelle, "evalAnal"));
+				}
+				// merge the different input rasters
+				RasterMergeResult mergedResult = RasterAnalyse.mergeRasters(fileToTest);
+
+				// TODO spécialiser l'analyse pour l'étude des seuils
+				// RasterAnalyse.createStatsDescriptive("analyse-seuil---"+scenName, mergedResult);
+				// // discrete statistics
+				// RasterAnalyse.createStatsDiscrete(scenName, mergedResult, discreteFile);
+
+				// create a merged raster
+				RasterMerge.merge(fileToTest, new File(rastFile, scenName + "-rasterMerged-" + echelle + ".tif"), Integer.parseInt(echelle));
+
+			}
+		}
+		return resultFile;
+
+		// // different size of cells analyse
+		// HashSet yo = new HashSet();
+		//
+		// List<Set<ScenarAnalyse>> listsByProj = anal.getScenarByCellmin();
+		//
+		// for (Set<ScenarAnalyse> ScenarDiffCell : listsByProj) {
+		// // get the project name
+		//
+		// RasterAnalyse.compareDiffSizedCellIntoCities(ScenarDiffCell, anal, projName, discreteFile);
+		// }
+		//
+		//
+		// Integer minSizeCell = Integer.valueOf(arL.get(0).getSizeCell());
+		// // cells contained in superior scaled cells
+		// // reference simulation
+		// File concernedFile = getOutputExample(exampleFolder, ech);
+		//
+		// // fractal dimention calculation
+		// int resolution = 4;
+		// // pour seulement 20 valeures
+		// for (File f : anal.getRandomSeedScenars(arL.get(0), echelle, 20)) {
+		// System.out.println("Start DimFrac calculation");
+		// FractalDimention.getCorrFracDim(getBuild(fileDonnee, arL), f, statFile, resolution, arL.get(0).getNiceName() + echelle);
+		// }
+		// }
+		// }return resultFile;
+
+	}
+
+	/**
+	 * overlaoding to use aggregation transition from openMole. It copies all the files into a mainFile folder calles 'ScenarVrac'
+	 * 
+	 * @param file
+	 * @param fileDonnee
+	 * @param name
+	 * @param machineReadable
+	 * @return
+	 * @throws Exception
+	 */
 	public static File runStab(File[] file, File[] fileDonnee, File mainFile, String[] name, boolean machineReadable) throws Exception {
 		return runStab(copyToScenVrac(file, mainFile), fileDonnee[0], name[0], machineReadable);
 	}
@@ -196,6 +313,9 @@ public class AnalyseTask {
 		// sélectionne des listes de scénario ayant pour différence la seed
 		for (List<ScenarAnalyse> arL : anal.getScenarDiffSeed()) {
 
+			// des objets inter-échelles
+			Hashtable<DirectPosition2D, Float> SvgCellEval20 = new Hashtable<DirectPosition2D, Float>();
+			Hashtable<DirectPosition2D, Integer> SvgCellRepet20 = new Hashtable<DirectPosition2D, Integer>();
 			// pour tous les fichiers de ces listes
 
 			// pour les trois premières échelles
@@ -209,7 +329,7 @@ public class AnalyseTask {
 						+ arL.get(0).getAhp();
 
 				if (machineReadable) {
-					nameTest = new String(arL.get(0).getNiceName());
+					nameTest = new String(arL.get(0).getNiceNameWthSeed());
 				}
 
 				//
@@ -260,8 +380,7 @@ public class AnalyseTask {
 				// reference simulation
 				File concernedFile = getOutputExample(exampleFolder, ech);
 				// Count how much minimal sized cells are contained into parent cells
-				Hashtable<DirectPosition2D, Float> SvgCellEval20 = new Hashtable<DirectPosition2D, Float>();
-				Hashtable<DirectPosition2D, Integer> SvgCellRepet20 = new Hashtable<DirectPosition2D, Integer>();
+
 				System.out.println("Inclusions des cellules");
 				if (ech == minSizeCell) {
 					SvgCellEval20 = RasterAnalyse.mergeRasters(concernedFile).getCellEval();
@@ -279,11 +398,9 @@ public class AnalyseTask {
 				int resolution = 10;
 				// pour seulement 20 valeures
 				for (File f : anal.getRandomSeedScenars(arL.get(0), echelle, 20)) {
-					System.out.println("Start DimFrac calculation");
 					long start = System.currentTimeMillis();
-					FractalDimention.getCorrFracDim(getBuild(fileDonnee, arL), f, statFile, resolution, arL.get(0).getNiceName() + echelle);
+					FractalDimention.getCorrFracDim(getBuild(fileDonnee, arL), f, statFile, resolution, f.getName());
 					long end = System.currentTimeMillis();
-					System.out.println("End DimFrac calculation: " + (end - start) + " ms");
 				}
 			}
 		}
@@ -476,22 +593,21 @@ public class AnalyseTask {
 	public static File getBuild(File fileDonnee, List<ScenarAnalyse> arL) {
 		System.out.println("getBuild from " + fileDonnee + " with " + arL.get(0).getData());
 		File batiFile = new File("");
-//		for (File filesDonnee : fileDonnee.listFiles()) {
-//			if (filesDonnee.getName().endsWith(arL.get(0).getData())) {
-//				System.out.println("searching " + filesDonnee);
-//				for (File fileShp : filesDonnee.listFiles()) {
-//					if (fileShp.getName().startsWith("batiment") && fileShp.toString().endsWith(".shp")) {
-//						batiFile = fileShp;
-//					}
-//				}
-//			}
-//		}
+		// for (File filesDonnee : fileDonnee.listFiles()) {
+		// if (filesDonnee.getName().endsWith(arL.get(0).getData())) {
+		// System.out.println("searching " + filesDonnee);
+		// for (File fileShp : filesDonnee.listFiles()) {
+		// if (fileShp.getName().startsWith("batiment") && fileShp.toString().endsWith(".shp")) {
+		// batiFile = fileShp;
+		// }
+		// }
+		// }
+		// }
 		for (File fileShp : fileDonnee.listFiles()) {
 			if (fileShp.getName().startsWith("batiment") && fileShp.toString().endsWith(".shp")) {
 				batiFile = fileShp;
 			}
 		}
-		System.out.println("Found " + batiFile);
 		return batiFile;
 	}
 

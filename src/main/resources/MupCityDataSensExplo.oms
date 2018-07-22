@@ -8,7 +8,7 @@ val arraySimulFile = Val[Array[File]]
 val arrayFolderIn = Val[Array[File]]
 val arrayName = Val[Array[String]]
 
-//files & folders
+//files
 val folderIn = Val[File]
 val folderOut = Val[File]
 val projectFile = Val[File]
@@ -16,25 +16,17 @@ val simulFile = Val[File]
 val resultFile = Val[File]
 val resultFolder = workDirectory / "results"
 
-val machineReadable = Val[Boolean]
-
 //project param
-val xDecal = Val[Double]
-val yDecal = Val[Double]
 val xmin = Val[Double]
 val ymin = Val[Double]
 val width = Val[Double]
 val height = Val[Double]
 val xshift = Val[Double]
 val yshift = Val[Double]
-val multX = Val[Double]
-val multY = Val[Double]
-val xRange:List[Double] = List(-1,0,1) //pa beau et devrais dépendre de la taille de la cellue min, mais impossible de faire passer une varaible dans le pas des explorations? 
-val yRange:List[Double] = List(-1,0,1)
 
 //decomp param
 val seuilDensBuild=Val[Double]
-val seuilRange: List[Double] = List(0,0.00001,0.0001,0.001,0.01)
+val seuilRange: List[Double] = List(0.00001,0.0001,0.001,0.01)
 val minSize = Val[Double]
 val maxSize = Val[Double]
 
@@ -53,6 +45,7 @@ val mean = Val[Boolean]
 val strict = Val[Boolean]
 val nMax = Val[Int]
 
+
 val dirs = Val[Array[File]]
 
 System.setProperty("java.awt.headless", "true")
@@ -61,31 +54,30 @@ System.setProperty("java.awt.toolkit", "sun.awt.HToolkit")
 val sourceDirectories = ListDirectoriesSource(workDirectory / "dataOpenMole" / "stabilite", dirs, "(?!stabilite).*")
 
 val exploProject = ExplorationTask(
-                (folderIn in dirs withName inputName)x
+								(xshift in (-1.0 to 1.0 by 1.0))x
+								(yshift in (-1.0 to 1.0 by 1.0))x
+								(folderIn in dirs withName inputName)x
 								(minSize in (15.0 to 25.0 by 1.0))x
-								(xDecal in xRange)x
-								(yDecal in yRange)x
-								(seuilDensBuild in seuilRange))
+								(seuilDensBuild in seuilRange)
+								)
 
 val ProjectCreationTask = ScalaTask("""
 |import fr.ign.task._
-|val xmin = 915948+(xDecal* minSize)
-|val ymin = 6677337+(yDecal * minSize)
-|val projectFile = withThreadClassLoader(classLoader(mupcityplugin.ProjectCreationDecompTask))(mupcityplugin.ProjectCreationDecompTask.apply(name,folderIn,newDir(),xmin,ymin,width,height,xshift,yshift,maxSize,minSize,seuilDensBuild))
+|val projectFile = withThreadClassLoader(classLoader(mupcityplugin.ProjectCreationDecompTask))(mupcityplugin.ProjectCreationDecompTask.apply(name, folderIn, newDir(), xmin, ymin, width, height, xshift, yshift,maxSize,minSize,seuilDensBuild)) 
 |val nameProject = ProjectCreationDecompTask.getName()""".stripMargin
 ) set (
-  plugins += pluginsOf(mupcityplugin.ProjectCreationDecompTask),
-  name := "GridExplo",
-  //vraies valeurs 
+  plugins += pluginsOf(mupcityplugin.ProjectCreationDecompTask),  
+  name := "DataSens",
+  xmin := 915948.0,
+  ymin := 6677337.0,
+    //vraies valeurs
   //width := 26590,
   //height := 26590,
   width := 2000,
   height := 2000,
-  xshift := 0.0,
-  yshift := 0.0,
   maxSize :=43740,
-  inputs += (name,inputName, folderIn, width, height, xshift, yshift,minSize,maxSize,seuilDensBuild),
-  outputs += (projectFile, name, nameProject, folderIn)
+  inputs += (name, inputName, folderIn, xmin, ymin, width, height, xshift, yshift, minSize, maxSize, seuilDensBuild),
+  outputs += (projectFile, nameProject, strict,mean, nMax, folderIn, name)
 )
 
 val exploScenario = ExplorationTask(
@@ -113,7 +105,6 @@ val SimuTask = ScalaTask("""
 |val simulName = SimulTask.getProjectName()""".stripMargin
 ) set (
   plugins += pluginsOf(mupcityplugin.SimulTask),
-  machineReadable := true,
   inputs += (projectFile, name, nameProject, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, folderIn),
   outputs += (simulFile, folderIn, name)
 )
@@ -139,7 +130,8 @@ val copySimProjectHook =  CopyFileHook(simulFile, resultFolder / "${name}-${inpu
 val copyVracHook =  CopyFileHook(simulFile, resultFolder / "ScenarVrac")
 val copyHook =  CopyFileHook(resultFile, resultFolder / "analyse_${name}")
 
-//val env = EGIEnvironment("vo.complex-systems.eu", openMOLEMemory = 2500 megabytes)
+//val env = EGIEnvironment(  "vo.complex-systems.eu",openMOLEMemory = 2048 megabytes)
+
 val localEnv = LocalEnvironment(4)
 
 (exploProject source sourceDirectories) -< ((ProjectCreationTask on localEnv hook ToStringHook(inputName)) -- ((exploScenario) -< (SimuTask on localEnv by 2) >- (ResultTask on localEnv hook copyHook)))
