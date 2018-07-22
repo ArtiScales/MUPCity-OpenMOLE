@@ -15,7 +15,7 @@ val projectFile = Val[File]
 val simulFile = Val[File]
 val resultFile = Val[File]
 val mainFolder = Val[File]
-val resultFolder = workDirectory / "results"
+val resultFolder = workDirectory / "results_min_local"
 
 val machineReadable = Val[Boolean]
 
@@ -34,7 +34,7 @@ val maxSize = Val[Double]
 
 //scenar param
 val seed = Val[Long]
-val rangeSeed = (UniformDistribution[Long]() take 10)
+val rangeSeed = (UniformDistribution[Long]()  filter(_>0) take 10)
 val ahp0 = Val[Double]
 val ahp1 = Val[Double]
 val ahp2 = Val[Double]
@@ -53,6 +53,7 @@ val dirs = Val[Array[File]]
 System.setProperty("java.awt.headless", "true")
 System.setProperty("java.awt.toolkit", "sun.awt.HToolkit")
 
+//val sourceDirectories = ListDirectoriesSource(workDirectory / "dataOpenMole" / "stabilite", dirs)
 //val sourceDirectories = ListDirectoriesSource(workDirectory / "dataOpenMole" / "stabilite", dirs, "(?!stabilite).*")
 val sourceDirectories = ListDirectoriesSource(workDirectory / "dataOpenMole" / "stabilite", dirs, "dataAutom")
 
@@ -73,11 +74,16 @@ val ProjectCreationTask = ScalaTask("""
   xshift := 0.0,
   yshift := 0.0,
   minSize := 20.0,
-  maxSize :=14580.0,
+  maxSize := 14580.0,
   seuilDensBuild := 0.0,
   inputs += (name, inputName, folderIn,xmin, ymin, width, height, xshift, yshift, minSize, maxSize, seuilDensBuild),
   outputs += (projectFile, name, nameProject, folderIn)
 )
+
+//	(seed in rangeSeed) x 
+//	(nMax in (3 to 7 by 1)) x 	
+//	(mean in List(true,false)) x
+//	(strict in List(true,false))) set (
 
 val exploScenario = ExplorationTask(
 	(seed in rangeSeed) x 
@@ -94,8 +100,8 @@ val exploScenario = ExplorationTask(
     ahp7 := 0.111,
     ahp8 := 0.111,
     (inputs,outputs) += (projectFile, name, nameProject, folderIn),
-	  (inputs,outputs) += (ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8)
-	)
+	(inputs,outputs) += (ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8)
+)
 
 val SimuTask = ScalaTask("""
 |import fr.ign.task._
@@ -116,7 +122,8 @@ val ResultTask = ScalaTask("""
 |import fr.ign.task._
 |val name = input.name.head
 |val tmpDir = mkDir()
-|val resultFile=withThreadClassLoader(classLoader(mupcityplugin.StabAnalysisTask))(mupcityplugin.StabAnalysisTask.apply(input.simulFile, input.folderIn, tmpDir, input.name))""".stripMargin) set (
+|val resultFile=withThreadClassLoader(classLoader(mupcityplugin.StabAnalysisTask))(mupcityplugin.StabAnalysisTask.apply(input.simulFile, input.folderIn, tmpDir, input.name))""".stripMargin
+) set (
   plugins += pluginsOf(mupcityplugin.StabAnalysisTask),
   inputs += (simulFile.toArray, folderIn.toArray, name.toArray),
   outputs += (resultFile, name)
@@ -126,9 +133,10 @@ val h = ToStringHook(nameProject)
 val copyProjectHook =  CopyFileHook(projectFile, resultFolder / "${name}-${inputName}-CM${minSize}-S${seuilDensBuild}-GP_${xmin}_${ymin}")
 val copySimProjectHook =  CopyFileHook(simulFile, resultFolder / "${name}-${inputName}-CM${minSize}-S${seuilDensBuild}-GP_${xmin}_${ymin}" / "${simulName}")
 val copyVracHook =  CopyFileHook(simulFile, resultFolder / "ScenarVrac")
+//val copySimProjectHookSimplified =  CopyFileHook(simulFile, resultFolder / "${name}-${inputName}-CM${minSize}-S${seuilDensBuild}-GP_${xmin}_${ymin}" / "${simulName}")
 val copyHook =  CopyFileHook(resultFile, resultFolder / "analyse_${name}")
 
-val env = EGIEnvironment("vo.complex-systems.eu", openMOLEMemory = 2500 megabytes)
+val egiEnv = EGIEnvironment("vo.complex-systems.eu", openMOLEMemory = 2500 megabytes)
 val localEnv = LocalEnvironment(4)
 
-(exploProject source sourceDirectories) -< ((ProjectCreationTask on localEnv hook ToStringHook(inputName)) -- ((exploScenario) -< (SimuTask on env by 2) >- (ResultTask on localEnv hook copyHook)))
+(exploProject source sourceDirectories) -< ((ProjectCreationTask on localEnv hook ToStringHook(inputName)) -- ((exploScenario) -< (SimuTask on egiEnv by 10) >- (ResultTask on localEnv hook copyHook hook ToStringHook(name))))
