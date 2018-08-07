@@ -3,13 +3,13 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>fr.ign</groupId>
 	<artifactId>mupcity-openMole</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2-SNAPSHOT</version>
 	<description>Projet maven type pour produire un jar qui peut être lancé sur OpenMole</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<mupcity.version>1.2.3</mupcity.version>
-		<geotools.version>18.4</geotools.version>
-		<fracgis.version>0.7.1</fracgis.version>
+		<mupcity.version>1.2.4-COGIT-SNAPSHOT</mupcity.version>
+		<geotools.version>19.1</geotools.version>
+		<fracgis.version>0.7.2-COGIT-SNAPSHOT</fracgis.version>
 	</properties>
 	<build>
 		<plugins>
@@ -219,13 +219,13 @@
             <name>ThéMA libs Repository</name>
             <url>http://sourcesup.renater.fr/nexus/content/repositories/themalibs-releases/</url>
         </repository>
-         -->
+     
        <repository>
             <id>mupcity</id>
             <name>ThéMA libs Repository</name>
             <url>http://sourcesup.renater.fr/nexus/content/repositories/mupcity-releases/</url>
         </repository>
-        
+            -->
 		<repository>
 			<id>ign-snapshots</id>
 			<name>Cogit Snapshots Repository</name>
@@ -263,4 +263,16 @@
 			</snapshots>
 		</repository>
 	</repositories>
+	<distributionManagement>
+		<repository>
+			<id>ign-releases</id>
+			<name>Nexus Releases Repository</name>
+			<url>https://forge-cogit.ign.fr/nexus/content/repositories/releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>ign-snapshots</id>
+			<name>Nexus Snapshots Repository</name>
+			<url>https://forge-cogit.ign.fr/nexus/content/repositories/snapshots/</url>
+		</snapshotRepository>
+</distributionManagement>
 </project>
