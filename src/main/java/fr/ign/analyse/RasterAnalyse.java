@@ -165,10 +165,10 @@ public class RasterAnalyse {
 
 		// eval moyenne des cellules non contenues
 		float sumOutVal = 0;
-		for (float val : cellInEval) {
+		for (float val : cellOutEval) {
 			sumOutVal = sumOutVal + val;
 		}
-		float averageValOut = sumOutVal / cellInEval.size();
+		float averageValOut = sumOutVal / cellOutEval.size();
 
 		// eval moyenne des cellules totales
 		float sumCellEval = 0;

@@ -60,15 +60,15 @@ OsgiKeys.requireCapability := """osgi.ee; osgi.ee="JavaSE";version:List="1.8,1.9
 
 excludeFilter in unmanagedSources := HiddenFileFilter || "*CompData.java" || "*MouvData.java" || "*MouvGrid.java" || "*TestStabilite.java" || "*TotalTests.java"
 
-resolvers += "IDB" at "http://igetdb.sourceforge.net/maven2-repository/"
+//resolvers += "IDB" at "http://igetdb.sourceforge.net/maven2-repository/"
 
-//resolvers += "Local Maven Repository" at "file://"+Path.userHome.absolutePath+"/.m2/repository"
+//resolvers += "Local Maven Repository" at "file:///home/mcolomb/.m2/repository"
 
 resolvers += Resolver.mavenLocal
 
-resolvers += "IGN snapshots" at "https://forge-cogit.ign.fr/nexus/content/repositories/snapshots"
+//resolvers += "IGN snapshots" at "https://forge-cogit.ign.fr/nexus/content/repositories/snapshots"
 
-resolvers += "IGN releases" at "https://forge-cogit.ign.fr/nexus/content/repositories/releases"
+//resolvers += "IGN releases" at "https://forge-cogit.ign.fr/nexus/content/repositories/releases"
 
 //resolvers += "ISC-PIF Public" at "http://maven.iscpif.fr/public/"
 
@@ -76,17 +76,17 @@ resolvers += "IGN releases" at "https://forge-cogit.ign.fr/nexus/content/reposit
 
 //resolvers += "ISC-PIF Release" at "http://maven.iscpif.fr/ign-releases/"
 
-resolvers += "ImageJ" at "http://maven.imagej.net/content/repositories/public"
+//resolvers += "ImageJ" at "http://maven.imagej.net/content/repositories/public"
 
-//resolvers += "Central" at "http://repo1.maven.org/maven2/"
+resolvers += "Central" at "http://repo1.maven.org/maven2/"
 
-resolvers += "Boundless" at "http://repo.boundlessgeo.com/main"
+//resolvers += "Boundless" at "http://repo.boundlessgeo.com/main"
 
 resolvers += "osgeo" at "http://download.osgeo.org/webdav/geotools/"
 
-resolvers += "geosolutions" at "http://maven.geo-solutions.it/"
+//resolvers += "geosolutions" at "http://maven.geo-solutions.it/"
 
-resolvers += "Hibernate" at "http://www.hibernatespatial.org/repository"
+//resolvers += "Hibernate" at "http://www.hibernatespatial.org/repository"
 
 //val openMOLEVersion = "5.0-SNAPSHOT"
 

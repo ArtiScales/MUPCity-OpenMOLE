@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.plaf.synth.SynthScrollBarUI;
+
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.geotools.data.DefaultTransaction;
 import org.geotools.data.FeatureWriter;
@@ -110,7 +112,6 @@ public class ProjectCreationDecompTask {
 		// Dossier intermédiaire avec les fichiers transformées
 		// File folderTemp = new File(folderIn + "/tmp/");
 		folderOut.mkdirs();
-
 		File buildFile = new File(folderOut, dataHT.get("build"));
 		File roadFile = new File(folderOut, dataHT.get("road"));
 		File facilityFile = new File(folderOut, dataHT.get("fac"));
