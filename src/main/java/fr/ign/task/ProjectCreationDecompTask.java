@@ -32,7 +32,7 @@ import org.thema.mupcity.rule.OriginDistance;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-import fr.ign.exp.DataSetSelec;
+import fr.ign.tools.DataSetSelec;
 
 public class ProjectCreationDecompTask {
 

@@ -554,9 +554,9 @@ public class RasterAnalyse {
 	}
 
 	/**
-	 * analyse different geographic objects, all presented in the "discret file"
+	 * automation of the discrete file treatment
 	 * 
-	 * @return String[] with 0 : the type of entity and 1 : the attribute name
+	 * @return
 	 */
 	public static Hashtable<String, String[]> loopDiffEntities() {
 		Hashtable<String, String[]> tabDifferentObjects = new Hashtable<String, String[]>();
@@ -572,6 +572,21 @@ public class RasterAnalyse {
 	}
 
 	/**
+	 * analyse Mup-city's outputs with different vector geographic objects, all presented in the classic "discret file" with predefined name and fields
+	 * 
+	 * @return String[] with 0 : the type of entity and 1 : the attribute name
+	 */
+	public static File createStatsDiscrete(String nameScenar, RasterMergeResult result, File discreteFile) throws IOException {
+		Hashtable<String, String[]> tabDifferentObjects = loopDiffEntities();
+
+		// loop on those different objects
+		for (String[] differentObject : tabDifferentObjects.values()) {
+			createStatsDiscrete(nameScenar, result, discreteFile, differentObject);
+		}
+		return statFile;
+	}
+
+	/**
 	 * create the statistics for a discretized study
 	 * 
 	 * @param nameScenar
@@ -580,107 +595,104 @@ public class RasterAnalyse {
 	 *            : Collection of the cell's replication
 	 * @param cellEval
 	 *            : Collection of the cell's evaluation
+	 * @param champ
+	 *            : containing [0] the name of the type of entites for the analyze and [1] its field form the attribute table
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 */
-	public static File createStatsDiscrete(String nameScenar, RasterMergeResult result, File discreteFile) throws IOException {
+	public static File createStatsDiscrete(String nameScenar, RasterMergeResult result, File discreteFile, String[] champ) throws IOException {
 
-		Hashtable<String, String[]> tabDifferentObjects = loopDiffEntities();
+		String[] nameLineFabric = new String[5];
+		nameLineFabric[0] = champ[0] + " name - echelle " + echelle + "scenar" + nameScenar;
+		nameLineFabric[1] = "Total Cells";
+		nameLineFabric[2] = "Stable cells";
+		nameLineFabric[3] = "Unstable cells";
+		nameLineFabric[4] = "average evaluation";
 
-		// loop on those different objects
-		for (String[] differentObject : tabDifferentObjects.values()) {
+		Hashtable<String, double[]> cellByFabric = new Hashtable<String, double[]>();
+		Hashtable<String, List<Double>> evals = new Hashtable<String, List<Double>>();
 
-			String[] nameLineFabric = new String[5];
-			nameLineFabric[0] = differentObject[0] + " name - echelle " + echelle + "scenar" + nameScenar;
-			nameLineFabric[1] = "Total Cells";
-			nameLineFabric[2] = "Stable cells";
-			nameLineFabric[3] = "Unstable cells";
-			nameLineFabric[4] = "average evaluation";
+		System.out.println("pour le sujet " + champ[0]);
+		ShapefileDataStore fabricSDS = new ShapefileDataStore(discreteFile.toURI().toURL());
+		SimpleFeatureCollection fabricType = fabricSDS.getFeatureSource().getFeatures();
 
-			Hashtable<String, double[]> cellByFabric = new Hashtable<String, double[]>();
-			Hashtable<String, List<Double>> evals = new Hashtable<String, List<Double>>();
-
-			System.out.println("pour le sujet " + differentObject[0]);
-			ShapefileDataStore fabricSDS = new ShapefileDataStore(discreteFile.toURI().toURL());
-			SimpleFeatureCollection fabricType = fabricSDS.getFeatureSource().getFeatures();
-
-			GeometryFactory factory = new GeometryFactory();
-			SimpleFeatureIterator iteratorCity = fabricType.features();
-			try {
-				// Pour toutes les entitées
-				while (iteratorCity.hasNext()) {
-					SimpleFeature city = iteratorCity.next();
-					double[] resultFabric = new double[4];
-					String fabricName = (String) city.getAttribute(differentObject[1]);
-					// pour toutes les cellules
-					for (DirectPosition2D coordCell : result.getCellRepet().keySet()) {
-						if (((Geometry) city.getDefaultGeometry()).covers(factory.createPoint(new Coordinate(coordCell.getX(), coordCell.getY())))) {
-							// si le tissus a déja été implémenté
-							if (cellByFabric.containsKey(fabricName)) {
-								double[] resultFabricPast = cellByFabric.get(fabricName);
-								resultFabric[0] = resultFabricPast[0] + 1;
-								// si la cellule est stable
-								if (result.getCellRepet().get(coordCell) == result.getNbScenar()) {
-									resultFabric[1] = resultFabricPast[1] + 1;
-									resultFabric[2] = resultFabricPast[2];
-								}
-								// ou non
-								else {
-									resultFabric[2] = resultFabricPast[2] + 1;
-									resultFabric[1] = resultFabricPast[1];
-								}
-								cellByFabric.put(fabricName, resultFabric);
+		GeometryFactory factory = new GeometryFactory();
+		SimpleFeatureIterator iteratorCity = fabricType.features();
+		try {
+			// Pour toutes les entitées
+			while (iteratorCity.hasNext()) {
+				SimpleFeature city = iteratorCity.next();
+				double[] resultFabric = new double[4];
+				String fabricName = (String) city.getAttribute(champ[1]);
+				// pour toutes les cellules
+				for (DirectPosition2D coordCell : result.getCellRepet().keySet()) {
+					if (((Geometry) city.getDefaultGeometry()).covers(factory.createPoint(new Coordinate(coordCell.getX(), coordCell.getY())))) {
+						// si le tissus a déja été implémenté
+						if (cellByFabric.containsKey(fabricName)) {
+							double[] resultFabricPast = cellByFabric.get(fabricName);
+							resultFabric[0] = resultFabricPast[0] + 1;
+							// si la cellule est stable
+							if (result.getCellRepet().get(coordCell) == result.getNbScenar()) {
+								resultFabric[1] = resultFabricPast[1] + 1;
+								resultFabric[2] = resultFabricPast[2];
 							}
-							// si le tissus n'as jamais été implémenté
+							// ou non
 							else {
-								resultFabric[0] = (double) 1;
-								// si la cellule est stable
-								if (result.getCellRepet().get(coordCell) == result.getNbScenar()) {
-									resultFabric[1] = (double) 1;
-									resultFabric[2] = (double) 0;
-								}
-								// ou non
-								else {
-									resultFabric[2] = (double) 1;
-									resultFabric[1] = (double) 0;
-								}
-								cellByFabric.put(fabricName, resultFabric);
+								resultFabric[2] = resultFabricPast[2] + 1;
+								resultFabric[1] = resultFabricPast[1];
 							}
-							// pour calculer les évaluations
-							//on fait une liste vide
-							List<Double> salut = new ArrayList<>();
-							//si l'entité possède déjà une liste d'évaluations, on la récupère à la place
-							if (evals.contains(fabricName)) {
-								salut = evals.get(fabricName);
-							}
-							// on ajoute cette nouvelle évaluation
-							salut.add((double) result.getCellEval().get(coordCell));
-							//on la remet dans notre collection
-							evals.put(fabricName, salut);
+							cellByFabric.put(fabricName, resultFabric);
 						}
+						// si le tissus n'as jamais été implémenté
+						else {
+							resultFabric[0] = (double) 1;
+							// si la cellule est stable
+							if (result.getCellRepet().get(coordCell) == result.getNbScenar()) {
+								resultFabric[1] = (double) 1;
+								resultFabric[2] = (double) 0;
+							}
+							// ou non
+							else {
+								resultFabric[2] = (double) 1;
+								resultFabric[1] = (double) 0;
+							}
+							cellByFabric.put(fabricName, resultFabric);
+						}
+						// pour calculer les évaluations
+						// on fait une liste vide
+						List<Double> salut = new ArrayList<>();
+						// si l'entité possède déjà une liste d'évaluations, on la récupère à la place
+						if (evals.contains(fabricName)) {
+							salut = evals.get(fabricName);
+						}
+						// on ajoute cette nouvelle évaluation
+						salut.add((double) result.getCellEval().get(coordCell));
+						// on la remet dans notre collection
+						evals.put(fabricName, salut);
 					}
 				}
-			} catch (Exception problem) {
-				problem.printStackTrace();
-			} finally {
-				iteratorCity.close();
 			}
-			// put the evals in
-			for (String fabricName : evals.keySet()) {
-				double sum = 0;
-				int tot = 0;
-				for (double db : evals.get(fabricName)) {
-					sum =+ db;
-					tot++;
-				}
-				double[] finalle = cellByFabric.get(fabricName);
-				finalle[3] = sum / tot;
-				cellByFabric.put(fabricName, finalle);
-			}
-
-			generateCsvFile(cellByFabric, statFile, ("cellBy" + differentObject[0]), nameLineFabric);
-			fabricSDS.dispose();
+		} catch (Exception problem) {
+			problem.printStackTrace();
+		} finally {
+			iteratorCity.close();
 		}
+		// put the evals in
+		for (String fabricName : evals.keySet()) {
+			double sum = 0;
+			int tot = 0;
+			for (double db : evals.get(fabricName)) {
+				sum = +db;
+				tot++;
+			}
+			double[] finalle = cellByFabric.get(fabricName);
+			finalle[3] = sum / tot;
+			cellByFabric.put(fabricName, finalle);
+		}
+
+		generateCsvFile(cellByFabric, statFile, ("cellBy" + champ[0]), nameLineFabric);
+		fabricSDS.dispose();
+
 		return statFile;
 	}
 

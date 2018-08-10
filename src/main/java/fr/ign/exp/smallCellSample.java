@@ -1,20 +1,24 @@
-package fr.ign.task;
+package fr.ign.exp;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.MutablePair;
 
+import fr.ign.task.ProjectCreationDecompTask;
+import fr.ign.task.SimulTask;
 import fr.ign.tools.DataSetSelec;
 
-public class CompositeTask {
+public class smallCellSample {
+
 	public static void main(String[] args) throws Exception {
 
 		DataSetSelec.predefSet();
 		Map<String, String> dataHT = DataSetSelec.get("Data1");
-		String name = "Stabilite-evals";
+		String name = "Sensibilite-testCM";
 		File folderIn = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu");
-		File folderOut = new File("/media/mcolomb/Data_2/resultFinal/stab/evals/Yag");
+		File folderOut = new File("/media/mcolomb/Data_2/resultFinal/sens/cellsizesample");
 		File discreteFile = new File("/home/mcolomb/informatique/MUP/explo/dataExtra/admin_typo.shp");
 		File buildFile = new File("/home/mcolomb/donnee/couplage/donneeGeographiques/batiment.shp");
 		double width = 26590;
@@ -26,54 +30,66 @@ public class CompositeTask {
 		double shiftX = 0;
 		double shiftY = 0;
 
-		double minSize = 20;
+		double minSize = 10;
 		double maxSize = 14580;
 		// double maxSize = 200;
 		double seuilDensBuild = 0;
 
+		double ahp8 = 0.111;
+		double ahp7 = 0.111;
+		double ahp6 = 0.111;
+		double ahp5 = 0.111;
+		double ahp4 = 0.111;
+		double ahp3 = 0.111;
+		double ahp2 = 0.111;
+		double ahp1 = 0.111;
+		double ahp0 = 0.111;
+		boolean mean = true;
+		long seed = 1116L;
 		int nMax = 5;
 		boolean strict = false;
 
-		// double ahp8 = 0.083;
-		// double ahp7 = 0.083;
-		// double ahp6 = 0.083;
-		// double ahp5 = 0.04;
-		// double ahp4 = 0.218;
-		// double ahp3 = 0.218;
-		// double ahp2 = 0.218;
-		// double ahp1 = 0.03;
-		// double ahp0 = 0.027;
+		run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2, ahp3,
+				ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
 
-		// double ahp8 = 0.111;
-		// double ahp7 = 0.111;
-		// double ahp6 = 0.111;
-		// double ahp5 = 0.111;
-		// double ahp4 = 0.111;
-		// double ahp3 = 0.111;
-		// double ahp2 = 0.111;
-		// double ahp1 = 0.111;
-		// double ahp0 = 0.111;
+		nMax = 6;
+		strict = true;
 
-		double ahp8 = 1;
-		double ahp7 = 1;
-		double ahp6 = 1;
-		double ahp5 = 1;
-		double ahp4 = 1;
-		double ahp3 = 1;
-		double ahp2 = 1;
-		double ahp1 = 1;
-		double ahp0 = 1;
+		run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2, ahp3,
+				ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
 
-		boolean mean = false;
-		long seed = 1116L;
+		minSize = 15;
 
-		File[] fileDonnee = { folderIn };
-		String[] names = { name };
+		nMax = 5;
+		strict = false;
 
-		File f = run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1,
-				ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
+		run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2, ahp3,
+				ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
 
+		nMax = 6;
+		strict = true;
+
+		run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2, ahp3,
+				ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
+
+		folderIn = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataAutom");
+
+		dataHT = DataSetSelec.get("Data2");
+		minSize = 10;
+
+		nMax = 5;
+		strict = false;
+
+		run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2, ahp3,
+				ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
+
+		nMax = 6;
+		strict = true;
+
+		run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2, ahp3,
+				ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
 	}
+
 
 	/**
 	 * Method used if no dataSet is provided. The folderIn is dug to find matches with the wanted format
@@ -100,13 +116,13 @@ public class CompositeTask {
 		SimulTask.saveWholeProj = true;
 		File scenarFile = SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed,
 				machineReadable);
-		for (int i = 0; i < 99; i++) {
-			seed = (long) (Math.random() * 100000);
-			scenarFile = SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed,
-					machineReadable);
-			System.out.println("scenar file : " + scenarFile);
-		}
+
+		seed = (long) (Math.random() * 100000);
+		scenarFile = SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, machineReadable);
+		System.out.println("scenar file : " + scenarFile);
+
 		System.out.println("----------End task----------");
 		return null;
 	}
+
 }

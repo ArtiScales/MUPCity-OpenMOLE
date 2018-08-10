@@ -45,38 +45,66 @@ public class AnalyseTask {
 		//
 
 		List<File> lF = new ArrayList<File>();
-		lF.add(new File("/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N4_St_Moy_ahpx/SortieExemple"));
-		lF.add(new File("/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N6_St_Moy_ahpx/SortieExemple"));
-		lF.add(new File("/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N5_Ba_Moy_ahpx/SortieExemple"));
-		lF.add(new File("/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N7_Ba_Yag_ahpx/SortieExemple"));
+		lF.add(new File(
+				"/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N4_St_Moy_ahpx/SortieExemple/"));
+		lF.add(new File(
+				"/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N6_St_Moy_ahpx/SortieExemple/"));
+		lF.add(new File(
+				"/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N5_Ba_Moy_ahpx/SortieExemple/"));
+		lF.add(new File(
+				"/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N7_Ba_Yag_ahpx/SortieExemple/"));
 
 		for (File f : lF) {
-			Hashtable<DirectPosition2D, Float> SvgCellEval20 = new Hashtable<DirectPosition2D, Float>();
-			Hashtable<DirectPosition2D, Integer> SvgCellRepet20 = new Hashtable<DirectPosition2D, Integer>();
+			
+				for (File ff : f.listFiles()) {
+					if (ff.getName().contains("evalAnal-20.0.tif")) {
+					RasterAnalyse.echelle = "20";
+					RasterAnalyse.statFile = new File("/home/mcolomb/tmp/");
 
-			for (int ech = 20; ech <= 180; ech = ech * 3) {
-				RasterAnalyse.echelle = Double.toString(ech);
-				RasterAnalyse.statFile=new File("/home/mcolomb/tmp/");
-				File concernedFile = getOutputExample(f, ech);
-				System.out.println("file concerné : "+concernedFile);
-				// Count how much minimal sized cells are contained into parent cells
-				String nameTest = f.getParentFile().getName();
-				System.out.println("nom du test : " + nameTest);
-				System.out.println("Inclusions des cellules");
-				if (ech == 20) {
-					SvgCellEval20 = RasterAnalyse.mergeRasters(concernedFile).getCellEval();
-					SvgCellRepet20 = RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
-				} else if (ech == 20 * 3) {
-					Hashtable<DirectPosition2D, Float> cellEval60 = (Hashtable<DirectPosition2D, Float>) RasterAnalyse.mergeRasters(concernedFile).getCellEval();
-					Hashtable<DirectPosition2D, Integer> cellRepet60 = (Hashtable<DirectPosition2D, Integer>) RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
-					RasterAnalyse.compareInclusionSizeCell(SvgCellRepet20, SvgCellEval20, cellRepet60, cellEval60, nameTest, ech);
-				} else if (ech == 20 * 9) {
-					Hashtable<DirectPosition2D, Float> cellEval180 = (Hashtable<DirectPosition2D, Float>) RasterAnalyse.mergeRasters(concernedFile).getCellEval();
-					Hashtable<DirectPosition2D, Integer> cellRepet180 = (Hashtable<DirectPosition2D, Integer>) RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
-					RasterAnalyse.compareInclusionSizeCell(SvgCellRepet20, SvgCellEval20, cellRepet180, cellEval180, nameTest, ech);
+					RasterMergeResult salut = RasterAnalyse.mergeRasters(ff);
+
+					String[] champ = { "Zones Constructibles", "LIBELLE" };
+
+					RasterAnalyse.createStatsDiscrete(
+							f.getName().replace("_ahpx_seed_6111434047454933700-evalAnal-20.0.tif", "").replace("tability-dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--", ""), salut,
+							new File("/media/mcolomb/Data_2/donnee/docUrbaLocalTotssUx.shp"), champ);
 				}
 			}
 		}
+
+		// List<File> lF = new ArrayList<File>();
+		// lF.add(new File("/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N4_St_Moy_ahpx/SortieExemple"));
+		// lF.add(new File("/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N6_St_Moy_ahpx/SortieExemple"));
+		// lF.add(new File("/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N5_Ba_Moy_ahpx/SortieExemple"));
+		// lF.add(new File("/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N7_Ba_Yag_ahpx/SortieExemple"));
+		//
+		// for (File f : lF) {
+		// Hashtable<DirectPosition2D, Float> SvgCellEval20 = new Hashtable<DirectPosition2D, Float>();
+		// Hashtable<DirectPosition2D, Integer> SvgCellRepet20 = new Hashtable<DirectPosition2D, Integer>();
+		//
+		// for (int ech = 20; ech <= 180; ech = ech * 3) {
+		// RasterAnalyse.echelle = Double.toString(ech);
+		// RasterAnalyse.statFile=new File("/home/mcolomb/tmp/");
+		// File concernedFile = getOutputExample(f, ech);
+		// System.out.println("file concerné : "+concernedFile);
+		// // Count how much minimal sized cells are contained into parent cells
+		// String nameTest = f.getParentFile().getName();
+		// System.out.println("nom du test : " + nameTest);
+		// System.out.println("Inclusions des cellules");
+		// if (ech == 20) {
+		// SvgCellEval20 = RasterAnalyse.mergeRasters(concernedFile).getCellEval();
+		// SvgCellRepet20 = RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
+		// } else if (ech == 20 * 3) {
+		// Hashtable<DirectPosition2D, Float> cellEval60 = (Hashtable<DirectPosition2D, Float>) RasterAnalyse.mergeRasters(concernedFile).getCellEval();
+		// Hashtable<DirectPosition2D, Integer> cellRepet60 = (Hashtable<DirectPosition2D, Integer>) RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
+		// RasterAnalyse.compareInclusionSizeCell(SvgCellRepet20, SvgCellEval20, cellRepet60, cellEval60, nameTest, ech);
+		// } else if (ech == 20 * 9) {
+		// Hashtable<DirectPosition2D, Float> cellEval180 = (Hashtable<DirectPosition2D, Float>) RasterAnalyse.mergeRasters(concernedFile).getCellEval();
+		// Hashtable<DirectPosition2D, Integer> cellRepet180 = (Hashtable<DirectPosition2D, Integer>) RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
+		// RasterAnalyse.compareInclusionSizeCell(SvgCellRepet20, SvgCellEval20, cellRepet180, cellEval180, nameTest, ech);
+		// }
+		// }
+		// }
 
 		// File totFile = new File("/home/mcolomb/tmp/dimFracPrb");
 		// File[] totFiles = new File[totFile.listFiles().length];
@@ -686,7 +714,6 @@ public class AnalyseTask {
 		File exampleFile = new File(resultFile, "SortieExemple");
 		exampleFile.mkdir();
 
-		
 		for (File f : list) {
 			FileOutputStream out = new FileOutputStream(new File(exampleFile, f.getName()));
 			Files.copy(f.toPath(), out);
@@ -700,20 +727,20 @@ public class AnalyseTask {
 		return copyExample(resultFile, list);
 	}
 
-//	public static void copyFolder(Path logFile) {
-//
-//		try (BufferedWriter writer = Files.newBufferedWriter(logFile, StandardCharsets.UTF_8, StandardOpenOption.WRITE)) { // buffer en ecriture (ecrase l’existant), encodage UTF8
-//
-//			writer.write("Hello World!\n");
-//			for (int i = 100; i > 0; --i) {
-//
-//				String n = "" + i + "\n";
-//				writer.write(n);
-//
-//			}
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//	}
+	// public static void copyFolder(Path logFile) {
+	//
+	// try (BufferedWriter writer = Files.newBufferedWriter(logFile, StandardCharsets.UTF_8, StandardOpenOption.WRITE)) { // buffer en ecriture (ecrase l’existant), encodage UTF8
+	//
+	// writer.write("Hello World!\n");
+	// for (int i = 100; i > 0; --i) {
+	//
+	// String n = "" + i + "\n";
+	// writer.write(n);
+	//
+	// }
+	// } catch (IOException e) {
+	// e.printStackTrace();
+	// }
+	// }
 
 }
