@@ -33,22 +33,21 @@ import com.vividsolutions.jts.geom.Geometry;
 public class FractalDimention {
 	public static void main(String[] args) throws Exception {
 		int resolution = 10;
-		File fileOut = new File("/tmp/fractal");
+		File fileOut = new File("/home/mcolomb/tmp/fracExperi/");
 		fileOut.mkdirs();
-		File batiFile = new File("/home/julien/.openmole/DEL1701P003-Ubuntu/webui/projects/mupcity/dataOpenMole/stabilite/dataAutom/batimentSys.shp");
+		File batiFile = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu/batimentPro.shp");
 		// File rootFile = new File("/media/mcolomb/Data_2/resultExplo/Stability/N5MoySt");
 		// getCorrFracDimfromSimu(batiFile, rootFile, fileOut, resolution);
-		File newFile = new File("/home/julien/.openmole/DEL1701P003-Ubuntu/webui/projects/mupcity/results_min_local/ScenarVrac");
-		for (File f : newFile.listFiles()) {
-			if (f.getName().endsWith("evalAnal-20.0.tif")) {
-				System.out.println("START " + new java.util.Date());
-				long start = System.currentTimeMillis();
-				getCorrFracDim(batiFile, f, fileOut, resolution, "sansSimu");
-				long end = System.currentTimeMillis();
-				System.out.println("END   " + new java.util.Date());
-				System.out.println("COMPUTATION TOOK " + (end - start) + " ms");
-			}
-		}
+		File testFile = new File(
+				"/home/mcolomb/tmp/fracExperi/Stabilite-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N5_Ba_Moy_ahpx_seed_8600511651180259677/Stabilite-Autom-CM20.0-S0.0-GP_915948.0_6677337.0--N5_Ba_Moy_ahpx_seed_8600511651180259677-evalAnal-20.0.tif");
+		getCorrFracDim(batiFile, testFile, fileOut, resolution, "seed_8600511651180259677");
+		
+		testFile = new File(
+				"/home/mcolomb/tmp/fracExperi/Stabilite-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N5_Ba_Moy_ahpx_seed_5603054894722456466/Stabilite-Autom-CM20.0-S0.0-GP_915948.0_6677337.0--N5_Ba_Moy_ahpx_seed_5603054894722456466-evalAnal-20.0.tif");
+		getCorrFracDim(batiFile, testFile, fileOut, resolution, "seed_5603054894722456466");
+		testFile = new File(
+				"/home/mcolomb/tmp/fracExperi/Stabilite-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N5_Ba_Moy_ahpx_seed_4727321254513411698/Stabilite-Autom-CM20.0-S0.0-GP_915948.0_6677337.0--N5_Ba_Moy_ahpx_seed_4727321254513411698-evalAnal-20.0.tif");
+		getCorrFracDim(batiFile, testFile, fileOut, resolution, "seed_4727321254513411698");
 	}
 
 	// public static void getCorrFracDimfromSimu(File batiFile, File rootFile, File fileOut, String echelle, int resolution) throws IOException {
@@ -110,6 +109,7 @@ public class FractalDimention {
 
 	/**
 	 * Dedicaded method to merge a building file with a MUP-City output
+	 * May do the same thing as tools.OutputTools.VectorizeMupOutput() 
 	 * 
 	 * @param batiFile
 	 * @param MUPFile
@@ -123,12 +123,8 @@ public class FractalDimention {
 		File rasterBatiFile = rasterize(batiFile, new File(fileOut.getParentFile(), "temprast.tif"));
 		GridCoverage2D rasterBati = importRaster(rasterBatiFile);
 
-		// System.out.println("MUP envelope2D = " + coverage.getEnvelope2D());
-		// System.out.println("BAT envelope2D = " + rasterBati.getEnvelope2D());
 		CoordinateReferenceSystem sourceCRS = coverage.getCoordinateReferenceSystem();
-		// CoordinateReferenceSystem batiCRS = rasterBati.getCoordinateReferenceSystem();
-		// System.out.println("MUP CRS = " + sourceCRS);
-		// System.out.println("BAT CRS = " + batiCRS);
+
 		ReferencedEnvelope mupBounds = new ReferencedEnvelope(coverage.getEnvelope2D(), sourceCRS);
 		ReferencedEnvelope batiBounds = new ReferencedEnvelope(rasterBati.getEnvelope2D(), sourceCRS);
 		ReferencedEnvelope gridBounds = mupBounds.intersection(batiBounds);
