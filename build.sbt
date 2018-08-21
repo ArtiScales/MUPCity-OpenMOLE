@@ -138,6 +138,16 @@ libraryDependencies += "org.thema" % "mupcity" % mupcityVersion excludeAll(
 //  ExclusionRule(organization = "com.vividsolutions")
 //  )
 
+val artiscalesToolsVersion = "0.1-SNAPSHOT"
+
+libraryDependencies += "fr.ign.cogit" % "ArtiScales-tools" % artiscalesToolsVersion
+
+val geoxygeneVersion = "1.9-SNAPSHOT"
+
+libraryDependencies += "fr.ign.cogit" % "geoxygene-contrib" % geoxygeneVersion excludeAll(
+    ExclusionRule(organization = "javax.xml.bind"),
+  )
+
 libraryDependencies += "org.jdom" % "jdom" % "1.1.3"
 
 libraryDependencies += "xerces" % "xercesImpl" % "2.12.0"
@@ -152,8 +162,13 @@ libraryDependencies += "xerces" % "xercesImpl" % "2.12.0"
 //  ExclusionRule("javax.media", "jai_imageio")
 //)
 excludeDependencies ++= Seq(
-  ExclusionRule("com.vividsolutions", "jts")
-//  ExclusionRule("javax.media","jai_imageio")
+  ExclusionRule("com.vividsolutions", "jts"),
+	ExclusionRule("fr.ign.cogit", "geoxygene-database"),
+	ExclusionRule("org.hibernate.common", "hibernate-commons-annotations"),
+	ExclusionRule("org.hibernate.javax.persistence", "hibernate-jpa-2.1-api"),
+	ExclusionRule("org.hibernate", "hibernate-core"),
+	ExclusionRule("org.hibernate", "hibernate-entitymanager")
+	//  ExclusionRule("javax.media","jai_imageio")
 )
 
 //excludeAll(
