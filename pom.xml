@@ -7,9 +7,9 @@
 	<description>Projet maven type pour produire un jar qui peut être lancé sur OpenMole</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<mupcity.version>1.2.3</mupcity.version>
+		<mupcity.version>1.2.4-COGIT-SNAPSHOT</mupcity.version>
 		<geotools.version>18.4</geotools.version>
-		<fracgis.version>0.7.1</fracgis.version>
+		<fracgis.version>0.7.2-COGIT-SNAPSHOT</fracgis.version>
 		<artiscales.tools.version>0.1-SNAPSHOT</artiscales.tools.version>
 	</properties>
 	<build>

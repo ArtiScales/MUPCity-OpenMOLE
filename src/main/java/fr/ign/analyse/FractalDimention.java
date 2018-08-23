@@ -30,6 +30,8 @@ import org.thema.process.Rasterizer;
 
 import com.vividsolutions.jts.geom.Geometry;
 
+import fr.ign.cogit.GTFunctions.Csv;
+
 public class FractalDimention {
 	public static void main(String[] args) throws Exception {
 		int resolution = 10;
@@ -101,7 +103,7 @@ public class FractalDimention {
 	public static Hashtable<String, Hashtable<String, Double>> getCorrFracDim(File batiFile, File mupFile, File fileOut, int resolution, String name) throws IOException {
 		Hashtable<String, Hashtable<String, Double>> results = new Hashtable<String, Hashtable<String, Double>>();
 		results.put(name, calculFracCor(mergeBuildMUPResultRast(batiFile, mupFile, fileOut, resolution), fileOut));
-		RasterAnalyse.generateCsvFileMultTab(results, fileOut, "dimensionFractale");
+		Csv.generateCsvFileMultTab(results, fileOut, "dimensionFractale");
 		File dF = new File(fileOut.getParentFile(), "temprast.tif");
 		dF.delete();
 		return results;

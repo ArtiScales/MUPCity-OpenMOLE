@@ -11,12 +11,12 @@ public class CompositeTask {
 	public static void main(String[] args) throws Exception {
 
 		DataSetSelec.predefSet();
-		Map<String, String> dataHT = DataSetSelec.get("Data1");
+		Map<String, String> dataHT = DataSetSelec.get("Data2");
 		String name = "Stabilite-evals";
-		File folderIn = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu");
-		File folderOut = new File("/media/mcolomb/Data_2/resultFinal/stab/evals/Yag");
-		File discreteFile = new File("/home/mcolomb/informatique/MUP/explo/dataExtra/admin_typo.shp");
-		File buildFile = new File("/home/mcolomb/donnee/couplage/donneeGeographiques/batiment.shp");
+		File folderIn = new File("/home/yo/Documents/these/ArtiScales/donneeGeographiques/");
+		File folderOut = new File("/home/yo/tmp/OutMUP/");
+		File discreteFile = new File("/home/yo/Documents/these/ArtiScales/donneeGeographiques/");
+		File buildFile = new File("/home/yo/Documents/these/ArtiScales/donneeGeographiques/batimentSys.shp");
 		double width = 26590;
 		double height = 26590;
 		// double width = 200;

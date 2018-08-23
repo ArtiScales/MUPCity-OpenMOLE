@@ -54,15 +54,22 @@ import com.vividsolutions.jts.io.WKTReader;
 import fr.ign.analyse.obj.Analyse;
 import fr.ign.analyse.obj.ScenarAnalyse;
 import fr.ign.analyse.obj.ScenarAnalyseFile;
+import fr.ign.cogit.GTFunctions.Csv;
 
 public class RasterAnalyse {
 
 	/**
-	 * This class contains several methods used for the analysis of the MUP-City outputs during the sensibility and stability tests raster outputs must contains the selected to
-	 * urbanize cells mixed with the evaluation layer (output of the extract-eval-anal method) The raster selected with the selectWith method are compared within the mergeRaster
-	 * method There is two ways to compare rasters : if they are composed of the exact same grid, we will use the relative position of the cells within this grid. The "discrete"
-	 * variable will be "false" and CreateStats method will be used to calculate statistics if the rasters to compare are different, we use the DirectPosition object to locate the
-	 * cells. The "discrete" variable will be "true" and SplitMergedTypo method will be used to calculate statistics
+	 * This class contains several methods used for the analysis of the MUP-City
+	 * outputs during the sensibility and stability tests raster outputs must
+	 * contains the selected to urbanize cells mixed with the evaluation layer
+	 * (output of the extract-eval-anal method) The raster selected with the
+	 * selectWith method are compared within the mergeRaster method There is two
+	 * ways to compare rasters : if they are composed of the exact same grid, we
+	 * will use the relative position of the cells within this grid. The "discrete"
+	 * variable will be "false" and CreateStats method will be used to calculate
+	 * statistics if the rasters to compare are different, we use the DirectPosition
+	 * object to locate the cells. The "discrete" variable will be "true" and
+	 * SplitMergedTypo method will be used to calculate statistics
 	 * 
 	 */
 
@@ -73,13 +80,17 @@ public class RasterAnalyse {
 	public static String echelle;
 	public static boolean firstline = true;
 
+	public static void main(String[] args) throws IOException, Exception {
+		echelle = "20";
+		statFile = new File("/home/yo/tmp");
+	createStatsDiscrete("test", mergeRasters(new File("/home/yo/tmp/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N7_St_Yag_ahpx/SortieExemple/Stability-dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N7_St_Yag_ahpx_seed_8196350095762615112-evalAnal-20.0.tif")), new File("/home/yo/Documents/these/data/stabilite/dataManu/discreteFile.shp"));
+	}
+
 	/**
 	 * Select a list of file with the argument "with" in its name from the rootFile
 	 *
-	 * @param with
-	 *            : String that is contained into the selection's name
-	 * @param in:
-	 *            optional , if the search is needed to be in a specific list
+	 * @param with : String that is contained into the selection's name
+	 * @param      in: optional , if the search is needed to be in a specific list
 	 * @return an arrayList of files
 	 * @author Maxime Colomb
 	 * @throws Exception
@@ -113,17 +124,16 @@ public class RasterAnalyse {
 	 * 
 	 * @author Maxime "proud" Colomb
 	 * @param cellRepetCentroid:
-	 * @param echelle:
-	 *            scale of the file
-	 * @param in:
-	 *            array of file to search in (can be null)
+	 * @param echelle: scale of the file
+	 * @param in: array of file to search in (can be null)
 	 * @return an ArrayList of File
 	 * @throws Exception
 	 * @throws IOException
 	 */
 
-	public static void compareInclusionSizeCell(Hashtable<DirectPosition2D, Integer> SvgCellRepet20, Hashtable<DirectPosition2D, Float> SvgCellEval20,
-			Hashtable<DirectPosition2D, Integer> cellRepetParent, Hashtable<DirectPosition2D, Float> cellEvalParent, String namescenar, int echelle) throws IOException {
+	public static void compareInclusionSizeCell(Hashtable<DirectPosition2D, Integer> SvgCellRepet20,
+			Hashtable<DirectPosition2D, Float> SvgCellEval20, Hashtable<DirectPosition2D, Integer> cellRepetParent,
+			Hashtable<DirectPosition2D, Float> cellEvalParent, String namescenar, int echelle) throws IOException {
 
 		// nb of cells
 		int cellIn = 0;
@@ -133,7 +143,8 @@ public class RasterAnalyse {
 		ArrayList<Float> cellInEval = new ArrayList<Float>();
 		ArrayList<Float> cellOutEval = new ArrayList<Float>();
 		// TODO it's a weird line
-		Hashtable<DirectPosition2D, Float> doubleSvgCellEval20 = (Hashtable<DirectPosition2D, Float>) SvgCellEval20.clone();
+		Hashtable<DirectPosition2D, Float> doubleSvgCellEval20 = (Hashtable<DirectPosition2D, Float>) SvgCellEval20
+				.clone();
 
 		for (DirectPosition2D coord : cellRepetParent.keySet()) {
 			double empXmin = coord.getX() - echelle / 2;
@@ -141,7 +152,8 @@ public class RasterAnalyse {
 			double empYmin = coord.getY() - echelle / 2;
 			double empYmax = coord.getY() + echelle / 2;
 			for (DirectPosition2D coord20 : SvgCellRepet20.keySet()) {
-				if (coord20.getX() > empXmin && coord20.getX() < empXmax && coord20.getY() > empYmin && coord20.getY() < empYmax) {
+				if (coord20.getX() > empXmin && coord20.getX() < empXmax && coord20.getY() > empYmin
+						&& coord20.getY() < empYmax) {
 					cellIn = cellIn + 1;
 					cellInEval.add(SvgCellEval20.get(coord20));
 					doubleSvgCellEval20.remove(coord20);
@@ -194,7 +206,8 @@ public class RasterAnalyse {
 		resultStats[4] = cellIn;
 		resultStats[5] = averageValIn;
 
-		StatTab result = new StatTab("compare_20to" + echelle, (namescenar + "--compare-20/" + echelle), resultStats, firstLine);
+		StatTab result = new StatTab("compare_20to" + echelle, (namescenar + "--compare-20/" + echelle), resultStats,
+				firstLine);
 
 		result.toCsv(statFile, true);
 
@@ -203,10 +216,8 @@ public class RasterAnalyse {
 	/**
 	 * Vectorize a MUP-City output
 	 * 
-	 * @param coverage
-	 *            : raster file of the MUP-City Output
-	 * @param cellSize
-	 *            : resolution of the cells
+	 * @param coverage : raster file of the MUP-City Output
+	 * @param cellSize : resolution of the cells
 	 * @return : A collection of vectorized cells
 	 * @throws IOException
 	 * @throws NoSuchAuthorityCodeException
@@ -217,7 +228,8 @@ public class RasterAnalyse {
 			throws IOException, NoSuchAuthorityCodeException, FactoryException, ParseException {
 
 		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:2154");
-		ReferencedEnvelope gridBounds = new ReferencedEnvelope(coverage.getEnvelope2D().getMinX(), coverage.getEnvelope2D().getMaxX(), coverage.getEnvelope2D().getMinY(),
+		ReferencedEnvelope gridBounds = new ReferencedEnvelope(coverage.getEnvelope2D().getMinX(),
+				coverage.getEnvelope2D().getMaxX(), coverage.getEnvelope2D().getMinY(),
 				coverage.getEnvelope2D().getMaxY(), sourceCRS);
 
 		WKTReader wktReader = new WKTReader();
@@ -241,7 +253,8 @@ public class RasterAnalyse {
 		try {
 			while (featureIt.hasNext()) {
 				SimpleFeature feat = featureIt.next();
-				DirectPosition2D coord = new DirectPosition2D((feat.getBounds().getMaxX() - feat.getBounds().getHeight() / 2),
+				DirectPosition2D coord = new DirectPosition2D(
+						(feat.getBounds().getMaxX() - feat.getBounds().getHeight() / 2),
 						(feat.getBounds().getMaxY() - feat.getBounds().getHeight() / 2));
 				float[] yo = (float[]) coverage.evaluate(coord);
 				if (yo[0] > 0) {
@@ -265,7 +278,8 @@ public class RasterAnalyse {
 		return exportSFC(toExport, fileName, toExport.getSchema());
 	}
 
-	public static File exportSFC(SimpleFeatureCollection toExport, File fileName, SimpleFeatureType ft) throws IOException {
+	public static File exportSFC(SimpleFeatureCollection toExport, File fileName, SimpleFeatureType ft)
+			throws IOException {
 
 		ShapefileDataStoreFactory dataStoreFactory = new ShapefileDataStoreFactory();
 
@@ -310,12 +324,13 @@ public class RasterAnalyse {
 	 * 
 	 * @param listfile
 	 * @param nameScenar
-	 * @param discreteFile
-	 *            : the file to make the discretization. Must contain a "NOM_COM" field
+	 * @param discreteFile : the file to make the discretization. Must contain a
+	 *                     "NOM_COM" field
 	 * @return
 	 * @throws Exception
 	 */
-	public static void compareDiffSizedCellIntoCities(Set<ScenarAnalyse> listfile, Analyse anal, String name, File discreteFile) throws Exception {
+	public static void compareDiffSizedCellIntoCities(Set<ScenarAnalyse> listfile, Analyse anal, String name,
+			File discreteFile) throws Exception {
 
 		// with the other parameters
 		// with the topological spaces
@@ -343,7 +358,8 @@ public class RasterAnalyse {
 				discreteIt.close();
 			}
 
-			// pour tous les scénarios de la liste - comprenant les mêmes scenarios et projets mais avec des tailles de cellules différentes
+			// pour tous les scénarios de la liste - comprenant les mêmes scenarios et
+			// projets mais avec des tailles de cellules différentes
 			for (ScenarAnalyse sA : listfile) {
 
 				echelle = sA.getSizeCell();
@@ -364,8 +380,10 @@ public class RasterAnalyse {
 						try {
 							while (outputIt.hasNext()) {
 								SimpleFeature cell = outputIt.next();
-								if (((Geometry) city.getDefaultGeometry()).intersects((Geometry) cell.getDefaultGeometry())) {
-									double surf = ((Geometry) city.getDefaultGeometry()).intersection((Geometry) cell.getDefaultGeometry()).getArea();
+								if (((Geometry) city.getDefaultGeometry())
+										.intersects((Geometry) cell.getDefaultGeometry())) {
+									double surf = ((Geometry) city.getDefaultGeometry())
+											.intersection((Geometry) cell.getDefaultGeometry()).getArea();
 									if (entitySurf.containsKey(entityName)) {
 										double temp = entitySurf.get(entityName) + surf;
 										entitySurf.remove(entityName);
@@ -413,12 +431,13 @@ public class RasterAnalyse {
 					result.put(entity, toPut);
 				}
 			}
-			generateCsvFile(result, statFile, name + "-surfaceOfCells" + "-" + differentObject[0], firstCol);
+			Csv.generateCsvFile(result, statFile, name + "-surfaceOfCells" + "-" + differentObject[0], firstCol);
 			discreteSDS.dispose();
 		}
 	}
 
-	public static RasterMergeResult mergeRasters(List<ScenarAnalyse> listSA, Analyse anal, ScenarAnalyse justToOverload) throws Exception {
+	public static RasterMergeResult mergeRasters(List<ScenarAnalyse> listSA, Analyse anal, ScenarAnalyse justToOverload)
+			throws Exception {
 		List<File> inList = new ArrayList<File>();
 		for (ScenarAnalyseFile sAf : anal.fileCollec) {
 			for (ScenarAnalyse sA : listSA) {
@@ -444,17 +463,12 @@ public class RasterAnalyse {
 	}
 
 	/**
-	 * mergeRaster Merge the given Array of Files regarding to a grid. Return a list with different objects The cells are taken in a general geographic environment
+	 * Overload to praticcaly put a single raster into a RasterMergeResult format
 	 * 
-	 * @param listRepliFile
-	 *            : ArrayList of File pointing to the raster layer to merge
-	 * @param nameScenar
-	 *            : the given name for scenarios
-	 * @return List of object defined as : list[0] = Hashtable<GridCoordinates2D, Integer> Replication of the cells list[1] = Hashtable<GridCoordinates2D, Float> Meaned evaluation
-	 *         of the cells list[2] = DescriptiveStatistic historical statistic file list[3] = tab of the maximum different cells of the simulation
+	 * @param f
+	 * @return
 	 * @throws Exception
 	 */
-
 	public static RasterMergeResult mergeRasters(File f) throws Exception {
 		List<File> singleList = new ArrayList<File>();
 		singleList.add(f);
@@ -462,14 +476,14 @@ public class RasterAnalyse {
 	}
 
 	/**
-	 * Merge all the input raster on the RasterMergeResult format
+	 * mergeRaster Merge the given list of MUP-City's output regarding to a grid.
 	 * 
-	 * @param listRepliFile
-	 *            : list of raster to merge
-	 * @return the object RasterMergeResult containing different infos about
+	 * @param listRepliFile : ArrayList of File pointing to the raster layer to
+	 *                      merge
+	 * 
+	 * @return RasterMergeResult object
 	 * @throws Exception
 	 */
-
 	public static RasterMergeResult mergeRasters(List<File> listRepliFile) throws Exception {
 		System.out.println("merging " + listRepliFile.size() + " rasters");
 		// variables to create statistics
@@ -484,7 +498,8 @@ public class RasterAnalyse {
 		int iter = 0;
 
 		// variables for merged raster
-		// not cool coz i cannot know the number of column and lines of the enveloppe yet and the type need it
+		// not cool coz i cannot know the number of column and lines of the enveloppe
+		// yet and the type need it
 		// change the type to a collection or an arraylist?
 
 		Envelope2D env = null;
@@ -499,7 +514,8 @@ public class RasterAnalyse {
 			int compteurNombre = 0;
 			nbDeScenar = nbDeScenar + 1;
 
-			// in case of a move of the grid, we have to delete the border cells because they will be moved
+			// in case of a move of the grid, we have to delete the border cells because
+			// they will be moved
 
 			double Xmin = env.getMinX();
 			double Xmax = env.getMaxX();
@@ -514,15 +530,19 @@ public class RasterAnalyse {
 			}
 
 			for (double r = Xmin + Double.parseDouble(echelle) / 2; r <= Xmax; r = r + Double.parseDouble(echelle)) {
-				// those values are the bounds from project (and upped to correspond to a multiple of 180 to analyse all the cells in the project)
-				for (double t = Ymin + Double.parseDouble(echelle) / 2; t <= Ymax; t = t + Double.parseDouble(echelle)) {
+				// those values are the bounds from project (and upped to correspond to a
+				// multiple of 180 to analyse all the cells in the project)
+				for (double t = Ymin + Double.parseDouble(echelle) / 2; t <= Ymax; t = t
+						+ Double.parseDouble(echelle)) {
 					DirectPosition2D coordCentre = new DirectPosition2D(r, t);
 					float[] yo = (float[]) coverage.evaluate(coordCentre);
 					if (yo[0] > 0) {
 						compteurNombre++;
-						if (cellRepetCentroid.containsKey(coordCentre)) { // si la cellule a déja été sélectionné lors de réplications
+						if (cellRepetCentroid.containsKey(coordCentre)) { // si la cellule a déja été sélectionné lors
+																			// de réplications
 							cellRepetCentroid.put(coordCentre, cellRepetCentroid.get(coordCentre) + 1);
-							ArrayList<Float> temp = cellEvalCentroid.get(coordCentre); // on mets les valeurs d'évaluation dans un tableau
+							ArrayList<Float> temp = cellEvalCentroid.get(coordCentre); // on mets les valeurs
+																						// d'évaluation dans un tableau
 							temp.add(yo[0]);
 							cellEvalCentroid.put(coordCentre, temp);
 						} else { // si la cellule est sélectionné pour la première fois
@@ -534,9 +554,11 @@ public class RasterAnalyse {
 					}
 				}
 			}
-			System.out.println("il y a " + compteurNombre + " cellules sur " + cellRepetCentroid.size() + " dans la réplication " + nbDeScenar);
+			System.out.println("il y a " + compteurNombre + " cellules sur " + cellRepetCentroid.size()
+					+ " dans la réplication " + nbDeScenar);
 			System.out.println();
-			// Historique de l'évolution du nombre de cellules sélectionnées dans toutes les simulations
+			// Historique de l'évolution du nombre de cellules sélectionnées dans toutes les
+			// simulations
 			statNb.addValue(compteurNombre);
 			histo[iter] = (double) cellRepetCentroid.size();
 			iter = iter + 1;
@@ -572,11 +594,13 @@ public class RasterAnalyse {
 	}
 
 	/**
-	 * analyse Mup-city's outputs with different vector geographic objects, all presented in the classic "discret file" with predefined name and fields
+	 * analyse Mup-city's outputs with different vector geographic objects, all
+	 * presented in the classic "discret file" with predefined name and fields
 	 * 
 	 * @return String[] with 0 : the type of entity and 1 : the attribute name
 	 */
-	public static File createStatsDiscrete(String nameScenar, RasterMergeResult result, File discreteFile) throws IOException {
+	public static File createStatsDiscrete(String nameScenar, RasterMergeResult result, File discreteFile)
+			throws IOException {
 		Hashtable<String, String[]> tabDifferentObjects = loopDiffEntities();
 
 		// loop on those different objects
@@ -589,18 +613,16 @@ public class RasterAnalyse {
 	/**
 	 * create the statistics for a discretized study
 	 * 
-	 * @param nameScenar
-	 *            : name given to the study
-	 * @param cellRepet
-	 *            : Collection of the cell's replication
-	 * @param cellEval
-	 *            : Collection of the cell's evaluation
-	 * @param champ
-	 *            : containing [0] the name of the type of entites for the analyze and [1] its field form the attribute table
+	 * @param nameScenar : name given to the study
+	 * @param cellRepet  : Collection of the cell's replication
+	 * @param cellEval   : Collection of the cell's evaluation
+	 * @param champ      : containing [0] the name of the type of entites for the
+	 *                   analyze and [1] its field form the attribute table
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 */
-	public static File createStatsDiscrete(String nameScenar, RasterMergeResult result, File discreteFile, String[] champ) throws IOException {
+	public static File createStatsDiscrete(String nameScenar, RasterMergeResult result, File discreteFile,
+			String[] champ) throws IOException {
 
 		String[] nameLineFabric = new String[5];
 		nameLineFabric[0] = champ[0] + " name - echelle " + echelle + "scenar" + nameScenar;
@@ -626,7 +648,8 @@ public class RasterAnalyse {
 				String fabricName = (String) city.getAttribute(champ[1]);
 				// pour toutes les cellules
 				for (DirectPosition2D coordCell : result.getCellRepet().keySet()) {
-					if (((Geometry) city.getDefaultGeometry()).covers(factory.createPoint(new Coordinate(coordCell.getX(), coordCell.getY())))) {
+					if (((Geometry) city.getDefaultGeometry())
+							.covers(factory.createPoint(new Coordinate(coordCell.getX(), coordCell.getY())))) {
 						// si le tissus a déja été implémenté
 						if (cellByFabric.containsKey(fabricName)) {
 							double[] resultFabricPast = cellByFabric.get(fabricName);
@@ -690,7 +713,7 @@ public class RasterAnalyse {
 			cellByFabric.put(fabricName, finalle);
 		}
 
-		generateCsvFile(cellByFabric, statFile, ("cellBy" + champ[0]), nameLineFabric);
+		Csv.generateCsvFile(cellByFabric, statFile, ("cellBy" + champ[0]), nameLineFabric);
 		fabricSDS.dispose();
 
 		return statFile;
@@ -706,7 +729,7 @@ public class RasterAnalyse {
 
 		Hashtable<String, double[]> enForme = new Hashtable<String, double[]>();
 		enForme.put("histo", histo);
-		generateCsvFileCol(enForme, statFile, "selected_cells_all_simu-" + echelle);
+		Csv.generateCsvFileCol(enForme, statFile, "selected_cells_all_simu-" + echelle);
 	}
 
 	/**
@@ -724,10 +747,11 @@ public class RasterAnalyse {
 			cpt++;
 		}
 		deuForme.put("Évaluations du scénario", distrib);
-		generateCsvFileCol(deuForme, statFile, "evaluation_moyenne-" + echelle);
+		Csv.generateCsvFileCol(deuForme, statFile, "evaluation_moyenne-" + echelle);
 	}
 
-	private static Hashtable<DirectPosition2D, Float> moyenneEvals(Hashtable<DirectPosition2D, ArrayList<Float>> cellEval) {
+	private static Hashtable<DirectPosition2D, Float> moyenneEvals(
+			Hashtable<DirectPosition2D, ArrayList<Float>> cellEval) {
 		Hashtable<DirectPosition2D, Float> cellEvalFinal = new Hashtable<DirectPosition2D, Float>();
 		for (DirectPosition2D temp : cellEval.keySet()) {
 			float somme = 0;
@@ -833,82 +857,4 @@ public class RasterAnalyse {
 		return statFile;
 	}
 
-	public static void generateCsvFileMultTab(Hashtable<String, Hashtable<String, Double>> results, File file, String name) throws IOException {
-
-		File fileName = new File(file + "/" + name + ".csv");
-		FileWriter writer = new FileWriter(fileName, true);
-		for (String tab : results.keySet()) {
-			Hashtable<String, Double> intResult = results.get(tab);
-			writer.append("scenario " + tab + "\n");
-			for (String nomScenar : intResult.keySet()) {
-				writer.append(nomScenar + "," + intResult.get(nomScenar));
-				writer.append("\n");
-			}
-			writer.append("\n");
-		}
-		writer.close();
-	}
-
-	public static void generateCsvFile(Hashtable<String, Object[]> cellRepet, File file, String name) throws IOException {
-		Hashtable<String, double[]> result = new Hashtable<String, double[]>();
-		for (Object[] ligne : cellRepet.values()) {
-			double[] aMettre = new double[ligne.length - 1];
-			for (int i = 1; i < ligne.length; i = i + 1) {
-				aMettre[i - 1] = (double) ligne[i];
-			}
-			result.put(String.valueOf(ligne[0]), aMettre);
-		}
-		generateCsvFileCol(result, file, name);
-	}
-
-	public static void generateCsvFile(Hashtable<String, double[]> cellRepet, File file, String name, String[] premiereColonne) throws IOException {
-		File fileName = new File(file + "/" + name + ".csv");
-		boolean addAfter = true;
-		FileWriter writer = new FileWriter(fileName, addAfter);
-		if (premiereColonne != null) {
-			for (String title : premiereColonne) {
-				writer.append(title + ",");
-			}
-			writer.append("\n");
-		}
-
-		for (String nomScenar : cellRepet.keySet()) {
-			writer.append(nomScenar + ",");
-			for (double val : cellRepet.get(nomScenar)) {
-				writer.append(val + ",");
-			}
-			writer.append("\n");
-		}
-		writer.close();
-	}
-
-	public static void generateCsvFileCol(Hashtable<String, double[]> cellRepet, File file, String name) throws IOException {
-		File fileName = new File(file + "/" + name + ".csv");
-		FileWriter writer = new FileWriter(fileName, false);
-
-		// selec the longest tab
-		int longestTab = 0;
-		for (double[] tab : cellRepet.values()) {
-			if (tab.length > longestTab) {
-				longestTab = tab.length;
-			}
-		}
-		// put the main names
-		for (String nomm : cellRepet.keySet()) {
-			writer.append(nomm + ",");
-		}
-		writer.append("\n");
-
-		for (int i = 0; i <= longestTab - 1; i++) {
-			for (String nomm : cellRepet.keySet()) {
-				try {
-					writer.append(Double.toString(cellRepet.get(nomm)[i]) + ",");
-				} catch (ArrayIndexOutOfBoundsException a) {
-				}
-			}
-			writer.append("\n");
-		}
-
-		writer.close();
-	}
 }
