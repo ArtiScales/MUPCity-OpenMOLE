@@ -32,6 +32,32 @@ public class ScenarAnalyse extends ProjetAnalyse {
 		scenarFile = scenarfile;
 	}
 
+	/**
+	 * Lazy way to determine MupCity's characteristics for scenarios
+	 * @param sizeCell2
+	 * @param grid2
+	 * @param seuil2
+	 * @param data2
+	 * @param nMax2
+	 * @param ahp2
+	 * @param strict2
+	 * @param yag2
+	 * @param seed2
+	 */
+	public ScenarAnalyse(String sizeCell2, String grid2, String seuil2, String data2, String nMax2, String ahp2,
+			String strict2, String yag2, String seed2) {
+		super(sizeCell2, grid2, seuil2, data2);
+		nMax = nMax2;
+		ahp = ahp2;
+		strict = strict2;
+		yag = yag2;
+		seed = seed2;
+	}
+	
+	/**
+	 * Lazy constructor
+	 * @param totFile
+	 */
 	public ScenarAnalyse(File totFile) {
 		super(totFile);
 

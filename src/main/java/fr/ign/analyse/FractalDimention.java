@@ -9,11 +9,17 @@ import java.util.Hashtable;
 
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
+import org.geotools.coverage.grid.io.AbstractGridFormat;
+import org.geotools.coverage.grid.io.GridCoverage2DReader;
+import org.geotools.coverage.grid.io.OverviewPolicy;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.opengis.parameter.GeneralParameterValue;
+import org.opengis.parameter.ParameterValue;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.thema.common.JTS;
 import org.thema.common.swing.TaskMonitor;
@@ -34,55 +40,16 @@ import fr.ign.cogit.GTFunctions.Csv;
 
 public class FractalDimention {
 	public static void main(String[] args) throws Exception {
-		int resolution = 10;
-		File fileOut = new File("/home/mcolomb/tmp/fracExperi/");
+		int resolution = 5;
+		File fileOut = new File("/home/yo/tmp/try.tif");
 		fileOut.mkdirs();
-		File batiFile = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu/batimentPro.shp");
+		File batiFile = new File("/home/yo/Documents/these/data/stabilite/dataManu/batimentPro.shp");
 		// File rootFile = new File("/media/mcolomb/Data_2/resultExplo/Stability/N5MoySt");
 		// getCorrFracDimfromSimu(batiFile, rootFile, fileOut, resolution);
 		File testFile = new File(
-				"/home/mcolomb/tmp/fracExperi/Stabilite-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N5_Ba_Moy_ahpx_seed_8600511651180259677/Stabilite-Autom-CM20.0-S0.0-GP_915948.0_6677337.0--N5_Ba_Moy_ahpx_seed_8600511651180259677-evalAnal-20.0.tif");
+				"/home/yo/Documents/these/resultFinal/dataAutom/dataAutom-CM20.0-S0.0-GP_915948.0_6677337.0--N5_Ba_Yag_ahpx/SortieExemple/Stability-dataAutom-CM20.0-S0.0-GP_915948.0_6677337.0--N5_Ba_Yag_ahpx_seed_6263036718188638317-evalAnal-20.0.tif");
 		getCorrFracDim(batiFile, testFile, fileOut, resolution, "seed_8600511651180259677");
-		
-		testFile = new File(
-				"/home/mcolomb/tmp/fracExperi/Stabilite-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N5_Ba_Moy_ahpx_seed_5603054894722456466/Stabilite-Autom-CM20.0-S0.0-GP_915948.0_6677337.0--N5_Ba_Moy_ahpx_seed_5603054894722456466-evalAnal-20.0.tif");
-		getCorrFracDim(batiFile, testFile, fileOut, resolution, "seed_5603054894722456466");
-		testFile = new File(
-				"/home/mcolomb/tmp/fracExperi/Stabilite-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N5_Ba_Moy_ahpx_seed_4727321254513411698/Stabilite-Autom-CM20.0-S0.0-GP_915948.0_6677337.0--N5_Ba_Moy_ahpx_seed_4727321254513411698-evalAnal-20.0.tif");
-		getCorrFracDim(batiFile, testFile, fileOut, resolution, "seed_4727321254513411698");
 	}
-
-	// public static void getCorrFracDimfromSimu(File batiFile, File rootFile, File fileOut, String echelle, int resolution) throws IOException {
-	// Hashtable<String, Hashtable<String, Double>> results = new Hashtable<String, Hashtable<String, Double>>();
-	// for (File f : rootFile.listFiles()) {
-	// if (f.toString().contains("_Moy_ahpx_seed_42")) {
-	// for (File ff : f.listFiles()) {
-	// if (ff.toString().endsWith("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif")) {
-	// String name = ff.getName().replaceAll("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif", "-" + echelle);
-	// System.out.println("calculé pour " + name);
-	// results = getCorrFracDim(batiFile, ff, fileOut, resolution, name);
-	// }
-	// }
-	// }
-	// }
-	// System.out.println(results);
-	// }
-	//
-	// public static void getCorrFracDimfromSimu(File batiFile, File[] files, File fileOut, String echelle, int resolution) throws IOException {
-	// Hashtable<String, Hashtable<String, Double>> results = new Hashtable<String, Hashtable<String, Double>>();
-	// for (File f : files) {
-	// if (f.toString().contains("_Moy_ahpx_seed_42")) {
-	// for (File ff : f.listFiles()) {
-	// if (ff.toString().endsWith("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif")) {
-	// String name = ff.getName().replaceAll("_Moy_ahpx_seed_42-eval_anal-" + echelle + ".0.tif", "-" + echelle);
-	// System.out.println("calculé pour " + name);
-	// results = getCorrFracDim(batiFile, ff, fileOut, resolution, name);
-	// }
-	// }
-	// }
-	// }
-	// System.out.println(results);
-	// }
 
 	/**
 	 * get the fractal dimension (calculated with the correlation method) of a MUP-City output by mergini it with a build file
@@ -111,13 +78,12 @@ public class FractalDimention {
 
 	/**
 	 * Dedicaded method to merge a building file with a MUP-City output
-	 * May do the same thing as tools.OutputTools.VectorizeMupOutput() 
 	 * 
 	 * @param batiFile
 	 * @param MUPFile
 	 * @param fileOut
 	 * @param resolution
-	 * @return
+	 * @return a raster layer from the emprise of the mup-city's output
 	 * @throws IOException
 	 */
 	public static GridCoverage2D mergeBuildMUPResultRast(File batiFile, File MUPFile, File fileOut, int resolution) throws IOException {
@@ -135,16 +101,7 @@ public class FractalDimention {
 		double Xmin = gridBounds.getMinX();
 		double Ymin = gridBounds.getMinY();
 
-		// System.out.println("Xmin = " + Xmin);
-		// System.out.println("Ymin = " + Ymin);
-
-		// File f = new File("/tmp/outputTest");
-		// f.mkdirs();
-		// FileUtils.copyFile(MUPFile, new File(f, "MUP.tif"));
-		// FileUtils.copyFile(rasterBatiFile, new File(f, "bati.tif"));
-
 		for (int i = 0; i < imagePixelData.length; ++i) {
-			// if (i % 100 == 0) System.out.println("i = " + i + " / " + imagePixelData.length);
 			for (int j = 0; j < imagePixelData[0].length; ++j) {
 				DirectPosition2D pt = new DirectPosition2D(Xmin + (2 * i + 1) * resolution / 2, Ymin + (2 * j + 1) * resolution / 2);
 				float[] val = (float[]) coverage.evaluate(pt);
@@ -178,6 +135,8 @@ public class FractalDimention {
 
 		// System.out.println("toTestRaster");
 		GridCoverage2D toTestRaster = new GridCoverageFactory().create("bati", imgpix3, gridBounds);
+
+		RasterMerge.writeGeotiff(new File("/home/yo/tmp.tif"), toTestRaster);
 		return toTestRaster;
 	}
 
@@ -257,15 +216,15 @@ public class FractalDimention {
 	}
 
 	public static GridCoverage2D importRaster(File rasterIn) throws IOException {
-		// ParameterValue<OverviewPolicy> policy = AbstractGridFormat.OVERVIEW_POLICY.createValue();
-		// policy.setValue(OverviewPolicy.IGNORE);
-		// ParameterValue<String> gridsize = AbstractGridFormat.SUGGESTED_TILE_SIZE.createValue();
-		// ParameterValue<Boolean> useJaiRead = AbstractGridFormat.USE_JAI_IMAGEREAD.createValue();
-		// useJaiRead.setValue(true);
-		// GeneralParameterValue[] params = new GeneralParameterValue[] { policy, gridsize, useJaiRead };
-		// GridCoverage2DReader reader = new GeoTiffReader(rasterIn);
-		// GridCoverage2D coverage = reader.read(params);
-		// return coverage;
+//		 ParameterValue<OverviewPolicy> policy = AbstractGridFormat.OVERVIEW_POLICY.createValue();
+//		 policy.setValue(OverviewPolicy.IGNORE);
+//		 ParameterValue<String> gridsize = AbstractGridFormat.SUGGESTED_TILE_SIZE.createValue();
+//		 ParameterValue<Boolean> useJaiRead = AbstractGridFormat.USE_JAI_IMAGEREAD.createValue();
+//		 useJaiRead.setValue(true);
+//		 GeneralParameterValue[] params = new GeneralParameterValue[] { policy, gridsize, useJaiRead };
+//		 GridCoverage2DReader reader = new GeoTiffReader(rasterIn);
+//		 GridCoverage2D coverage = reader.read(params);
+//		 return coverage;
 		return IOImage.loadTiff(rasterIn);
 	}
 }

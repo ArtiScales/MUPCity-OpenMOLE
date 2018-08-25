@@ -35,8 +35,6 @@ public class RasterMerge {
 		List<File> lFile = new ArrayList<File>();
 		lFile.add(file2);
 		lFile.add(file1);
-
-		String nameSimul = "N5_St_Moy_ahpx_seed_";
 		int echelle = 20;
 		merge(lFile, fileOut, echelle);
 	}
@@ -171,6 +169,9 @@ public class RasterMerge {
 		return fileOut;
 	}
 
+	
+	
+	//TODO to delete coz it'll be in Artiscales.tools.Rasters
 	public static void writeGeotiff(File fileName, float[][] imagePixelData, Envelope2D env) {
 		GridCoverage2D coverage = new GridCoverageFactory().create("OTPAnalyst", imagePixelData, env);
 		writeGeotiff(fileName, coverage);

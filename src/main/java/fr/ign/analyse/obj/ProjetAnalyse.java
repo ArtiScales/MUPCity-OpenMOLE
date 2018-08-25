@@ -20,7 +20,19 @@ public class ProjetAnalyse {
 		seuil = seuil2;
 		data = data2;
 	}
-
+/**
+ * Lazy way to determine MupCity's characteristics
+ * @param sizeCell2
+ * @param grid2
+ * @param seuil2
+ * @param data2
+ */
+	public ProjetAnalyse(String sizeCell2, String grid2, String seuil2, String data2) {
+		sizeCell = sizeCell2;
+		grid = grid2;
+		seuil = seuil2;
+		data = data2;
+		}
 
 	public ProjetAnalyse(File totFile) {
 		Pattern tiret = Pattern.compile("-");
@@ -31,6 +43,7 @@ public class ProjetAnalyse {
 		seuil = decompName[3].replace("S", "");
 		data = decompName[1];
 	}
+
 
 	public File getProjFile() {
 		return projFile;
