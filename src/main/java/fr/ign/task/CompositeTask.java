@@ -13,10 +13,10 @@ public class CompositeTask {
 		DataSetSelec.predefSet();
 		Map<String, String> dataHT = DataSetSelec.get("Data2");
 		String name = "Stabilite-evals";
-		File folderIn = new File("/home/yo/Documents/these/ArtiScales/donneeGeographiques/");
-		File folderOut = new File("/home/yo/tmp/OutMUP/");
-		File discreteFile = new File("/home/yo/Documents/these/ArtiScales/donneeGeographiques/");
-		File buildFile = new File("/home/yo/Documents/these/ArtiScales/donneeGeographiques/batimentSys.shp");
+		File folderIn = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataAutom/");
+		File folderOut = new File("/home/mcolomb/tmp/");
+		File discreteFile = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataAutom/discreteFile.shp");
+		File buildFile = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataAutom//batimentSys.shp");
 		double width = 26590;
 		double height = 26590;
 		// double width = 200;
