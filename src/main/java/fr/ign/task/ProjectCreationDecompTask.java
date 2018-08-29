@@ -32,6 +32,7 @@ import org.thema.mupcity.rule.OriginDistance;
 
 import com.vividsolutions.jts.geom.Geometry;
 
+import fr.ign.cogit.GTFunctions.Vectors;
 import fr.ign.tools.DataSetSelec;
 
 public class ProjectCreationDecompTask {
@@ -41,6 +42,7 @@ public class ProjectCreationDecompTask {
 	}
 
 	public static String nameProj;
+	public static boolean snap=false;
 
 	public static void main(String[] args) throws Exception {
 /*
@@ -166,6 +168,24 @@ public class ProjectCreationDecompTask {
 		long end = System.currentTimeMillis();
 		System.out.println("Translation in " + (end - start) + " ms");
 		System.out.println("Creating project");
+		
+		//test to snap the datas 
+		
+		if (snap) {
+		File dataSnaped = new File(folderOut,"dataSnaped");
+		dataSnaped.mkdir();
+		
+		//simulation de l'enveloppe
+		int stade = 1;
+		while (minSize * 3< width) {
+			stade = stade +1;
+			
+		}
+//bBoxFile = new 
+		Vectors.snapDatas(buildFile, bBoxFile, new File(dataSnaped,buildFile.getName()));
+		}
+		
+		
 		// Creation du projet dans le dossier de données translaté
 		Project project = Project.createProject(nameProj, folderOut, buildFile, xmin, ymin, width, height);
 		project.setNetPrecision(0.1);

@@ -15,16 +15,16 @@ public class smallCellSample {
 	public static void main(String[] args) throws Exception {
 
 		DataSetSelec.predefSet();
-		Map<String, String> dataHT = DataSetSelec.get("Data1");
+		Map<String, String> dataHT = DataSetSelec.get("Data2");
 		String name = "Sensibilite-testCM";
-		File folderIn = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu");
-		File folderOut = new File("/media/mcolomb/Data_2/resultFinal/sens/cellsizesample");
-		File discreteFile = new File("/home/mcolomb/informatique/MUP/explo/dataExtra/admin_typo.shp");
-		File buildFile = new File("/home/mcolomb/donnee/couplage/donneeGeographiques/batiment.shp");
-		double width = 26590;
-		double height = 26590;
-		// double width = 200;
-		// double height = 200;
+		File folderIn = new File("/home/yo/Documents/these/data/stabilite/dataAutom/");
+		File folderOut = new File("/home/yo/tmp/mup");
+		File discreteFile = new File("/home/yo/Documents/these/data/stabilite/dataAutom/admin_typo.shp");
+		File buildFile = new File("/home/yo/Documents/these/data/stabilite/dataAutom/batimentSys.shp");
+//		double width = 26590;
+//		double height = 26590;
+		double width = 100;
+		double height = 100;
 		double xmin = 915948;
 		double ymin = 6677337;
 		double shiftX = 0;
@@ -49,28 +49,32 @@ public class smallCellSample {
 		int nMax = 5;
 		boolean strict = false;
 
-		run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2, ahp3,
-				ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
+		run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize,
+				maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed,
+				dataHT);
 
 		nMax = 6;
 		strict = true;
 
-		run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2, ahp3,
-				ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
+		run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize,
+				maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed,
+				dataHT);
 
 		minSize = 15;
 
 		nMax = 5;
 		strict = false;
 
-		run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2, ahp3,
-				ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
+		run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize,
+				maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed,
+				dataHT);
 
 		nMax = 6;
 		strict = true;
 
-		run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2, ahp3,
-				ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
+		run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize,
+				maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed,
+				dataHT);
 
 		folderIn = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataAutom");
 
@@ -80,45 +84,52 @@ public class smallCellSample {
 		nMax = 5;
 		strict = false;
 
-		run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2, ahp3,
-				ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
+		run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize,
+				maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed,
+				dataHT);
 
 		nMax = 6;
 		strict = true;
 
-		run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2, ahp3,
-				ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
+		run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize,
+				maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed,
+				dataHT);
 	}
 
-
 	/**
-	 * Method used if no dataSet is provided. The folderIn is dug to find matches with the wanted format
+	 * Method used if no dataSet is provided. The folderIn is dug to find matches
+	 * with the wanted format
 	 * 
 	 * @throws Exception
 	 */
-	public static File run(String name, File folderIn, File folderOut, File discreteFile, File buildFile, double xmin, double ymin, double width, double height, double shiftX,
-			double shiftY, double minSize, double maxSize, double seuilDensBuild, int nMax, boolean strict, double ahp0, double ahp1, double ahp2, double ahp3, double ahp4,
-			double ahp5, double ahp6, double ahp7, double ahp8, boolean mean, long seed) throws Exception {
+	public static File run(String name, File folderIn, File folderOut, File discreteFile, File buildFile, double xmin,
+			double ymin, double width, double height, double shiftX, double shiftY, double minSize, double maxSize,
+			double seuilDensBuild, int nMax, boolean strict, double ahp0, double ahp1, double ahp2, double ahp3,
+			double ahp4, double ahp5, double ahp6, double ahp7, double ahp8, boolean mean, long seed) throws Exception {
 
-		return run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2,
-				ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, DataSetSelec.dig(folderIn));
+		return run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY,
+				minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8,
+				mean, seed, DataSetSelec.dig(folderIn));
 	}
 
-	public static File run(String name, File folderIn, File folderOut, File discreteFile, File buildFile, double xmin, double ymin, double width, double height, double shiftX,
-			double shiftY, double minSize, double maxSize, double seuilDensBuild, int nMax, boolean strict, double ahp0, double ahp1, double ahp2, double ahp3, double ahp4,
-			double ahp5, double ahp6, double ahp7, double ahp8, boolean mean, long seed, Map<String, String> dataHT) throws Exception {
+	public static File run(String name, File folderIn, File folderOut, File discreteFile, File buildFile, double xmin,
+			double ymin, double width, double height, double shiftX, double shiftY, double minSize, double maxSize,
+			double seuilDensBuild, int nMax, boolean strict, double ahp0, double ahp1, double ahp2, double ahp3,
+			double ahp4, double ahp5, double ahp6, double ahp7, double ahp8, boolean mean, long seed,
+			Map<String, String> dataHT) throws Exception {
 		boolean machineReadable = true;
 
 		System.out.println("----------Project & Decomp creation----------");
-		MutablePair<String, File> projectFile = ProjectCreationDecompTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT, maxSize, minSize,
-				seuilDensBuild, machineReadable);
+		MutablePair<String, File> projectFile = ProjectCreationDecompTask.run(name, folderIn, folderOut, xmin, ymin,
+				width, height, shiftX, shiftY, dataHT, maxSize, minSize, seuilDensBuild, machineReadable);
 		System.out.println("----------Simulation task----------");
 		SimulTask.saveWholeProj = true;
-		File scenarFile = SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed,
-				machineReadable);
+		File scenarFile = SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, ahp0, ahp1, ahp2,
+				ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, machineReadable);
 
 		seed = (long) (Math.random() * 100000);
-		scenarFile = SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, machineReadable);
+		scenarFile = SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, ahp0, ahp1, ahp2, ahp3,
+				ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, machineReadable);
 		System.out.println("scenar file : " + scenarFile);
 
 		System.out.println("----------End task----------");
