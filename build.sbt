@@ -94,10 +94,10 @@ resolvers += "osgeo" at "http://download.osgeo.org/webdav/geotools/"
 
 //libraryDependencies += "org.openmole" %% "org-openmole-plugin-task-scala" % openMOLEVersion
 
-val mupcityVersion = "1.2.3"
+val mupcityVersion = "1.2.3-ORIGINAL"
 //val geotoolsVersion = "19.1"
 val geotoolsGridVersion = "18.4"
-val fracgisVersion = "0.7.1"
+val fracgisVersion = "0.7-ORIGINAL"
 
 libraryDependencies += "org.geotools" % "gt-grid" % geotoolsGridVersion
 libraryDependencies += "org.geotools" % "gt-coverage" % geotoolsGridVersion

@@ -17,14 +17,14 @@ public class smallCellSample {
 		DataSetSelec.predefSet();
 		Map<String, String> dataHT = DataSetSelec.get("Data1");
 		String name = "Sensibilite-testCM";
-		File folderIn = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu");
-		File folderOut = new File("/media/mcolomb/Data_2/resultFinal/sens/cellsizesample");
-		File discreteFile = new File("/home/mcolomb/informatique/MUP/explo/dataExtra/admin_typo.shp");
-		File buildFile = new File("/home/mcolomb/donnee/couplage/donneeGeographiques/batiment.shp");
-		double width = 26590;
-		double height = 26590;
-		// double width = 200;
-		// double height = 200;
+		File folderIn = new File("./stabilite/dataManu");
+		File folderOut = new File("./resultFinal/sens/cellsizesample");
+		File discreteFile = new File(folderIn, "admin_typo.shp");
+		File buildFile = new File(folderIn, "batimentPro.shp");
+//		double width = 26590;
+//		double height = 26590;
+		 double width = 200;
+		 double height = 200;
 		double xmin = 915948;
 		double ymin = 6677337;
 		double shiftX = 0;
@@ -72,7 +72,7 @@ public class smallCellSample {
 		run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2, ahp3,
 				ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, dataHT);
 
-		folderIn = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataAutom");
+		folderIn = new File("./stabilite/dataAutom");
 
 		dataHT = DataSetSelec.get("Data2");
 		minSize = 10;
