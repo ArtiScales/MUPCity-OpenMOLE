@@ -17,10 +17,10 @@ public class smallCellSample {
 		DataSetSelec.predefSet();
 		Map<String, String> dataHT = DataSetSelec.get("Data2");
 		String name = "Sensibilite-testCM";
-		File folderIn = new File("/home/yo/Documents/these/data/stabilite/dataAutom/");
-		File folderOut = new File("/home/yo/tmp/mup");
-		File discreteFile = new File("/home/yo/Documents/these/data/stabilite/dataAutom/admin_typo.shp");
-		File buildFile = new File("/home/yo/Documents/these/data/stabilite/dataAutom/batimentSys.shp");
+		File folderIn = new File("./stabilite/dataManu");
+		File folderOut = new File("./result/sens/cellsizesample");
+		File discreteFile = new File(folderIn, "admin_typo.shp");
+		File buildFile = new File(folderIn, "batimentPro.shp");
 //		double width = 26590;
 //		double height = 26590;
 		double width = 100;
@@ -76,7 +76,7 @@ public class smallCellSample {
 				maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed,
 				dataHT);
 
-		folderIn = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataAutom");
+		folderIn = new File("./stabilite/dataAutom");
 
 		dataHT = DataSetSelec.get("Data2");
 		minSize = 10;
