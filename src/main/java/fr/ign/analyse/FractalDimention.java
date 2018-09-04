@@ -9,17 +9,11 @@ import java.util.Hashtable;
 
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
-import org.geotools.coverage.grid.io.AbstractGridFormat;
-import org.geotools.coverage.grid.io.GridCoverage2DReader;
-import org.geotools.coverage.grid.io.OverviewPolicy;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
-import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.opengis.parameter.GeneralParameterValue;
-import org.opengis.parameter.ParameterValue;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.thema.common.JTS;
 import org.thema.common.swing.TaskMonitor;
@@ -41,13 +35,17 @@ import fr.ign.cogit.GTFunctions.Csv;
 public class FractalDimention {
 	public static void main(String[] args) throws Exception {
 		int resolution = 5;
-		File fileOut = new File("/home/yo/tmp/try.tif");
+		File fileOut = new File("/home/mcolomb/tmp/fractDimS.tif");
 		fileOut.mkdirs();
-		File batiFile = new File("/home/yo/Documents/these/data/stabilite/dataManu/batimentPro.shp");
+		File batiFile = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu/batimentPro.shp");
 		// File rootFile = new File("/media/mcolomb/Data_2/resultExplo/Stability/N5MoySt");
 		// getCorrFracDimfromSimu(batiFile, rootFile, fileOut, resolution);
 		File testFile = new File(
-				"/home/yo/Documents/these/resultFinal/dataAutom/dataAutom-CM20.0-S0.0-GP_915948.0_6677337.0--N5_Ba_Yag_ahpx/SortieExemple/Stability-dataAutom-CM20.0-S0.0-GP_915948.0_6677337.0--N5_Ba_Yag_ahpx_seed_6263036718188638317-evalAnal-20.0.tif");
+				"/media/mcolomb/Data_2/resultFinal/testAHP/Stabilite-testAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N5_Ba_MoyahpS_Moy_seed_42/N5_Ba_MoyahpS_Moy_seed_42-evalAnal-20.0.tif");
+		getCorrFracDim(batiFile, testFile, fileOut, resolution, "seed_8600511651180259677");
+		fileOut = new File("/home/mcolomb/tmp/fractDimT.tif");
+		testFile = new File(
+				"/media/mcolomb/Data_2/resultFinal/testAHP/Stabilite-testAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N5_Ba_MoyahpT_Moy_seed_42/N5_Ba_MoyahpT_Moy_seed_42-evalAnal-20.0.tif");
 		getCorrFracDim(batiFile, testFile, fileOut, resolution, "seed_8600511651180259677");
 	}
 
@@ -136,7 +134,7 @@ public class FractalDimention {
 		// System.out.println("toTestRaster");
 		GridCoverage2D toTestRaster = new GridCoverageFactory().create("bati", imgpix3, gridBounds);
 
-		RasterMerge.writeGeotiff(new File("/home/yo/tmp.tif"), toTestRaster);
+	//	RasterMerge.writeGeotiff(new File("/home/mcolomb/rastermergedtmp.tif"), toTestRaster);
 		return toTestRaster;
 	}
 

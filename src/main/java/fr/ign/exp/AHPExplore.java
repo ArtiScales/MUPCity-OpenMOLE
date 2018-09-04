@@ -8,6 +8,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.MutablePair;
 
+import fr.ign.analyse.FractalDimention;
+import fr.ign.task.AnalyseTask;
 import fr.ign.task.ProjectCreationDecompTask;
 import fr.ign.task.SimulTask;
 import fr.ign.tools.DataSetSelec;
@@ -19,11 +21,11 @@ public class AHPExplore {
 
 		DataSetSelec.predefSet();
 		Map<String, String> dataHT = DataSetSelec.get("Data1");
-		String name = "Stabilite-testAHP";
-		File folderIn = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu");
-		File folderOut = new File("/media/mcolomb/Data_2/resultFinal/stab/testAHP");
-		File discreteFile = new File("/home/mcolomb/informatique/MUP/explo/dataExtra/admin_typo.shp");
-		File buildFile = new File("/home/mcolomb/donnee/couplage/donneeGeographiques/batiment.shp");
+		String name = "StabiliteTestAHP";
+		File folderIn = new File("./stabilite/dataManu");
+		File folderOut = new File("./result/testAHP");
+		File discreteFile = new File(folderIn, "admin_typo.shp");
+		File buildFile = new File(folderIn, "batimentPro.shp");
 		double width = 26590;
 		double height = 26590;
 		// double width = 200;
@@ -80,7 +82,6 @@ public class AHPExplore {
 		ahpS_Yag.put("ahp0", 0.243);
 		ahpS_Yag.put("ahpS_Yag", 99.0);
 
-
 		ahpE_Moy.put("ahp8", 0.111);
 		ahpE_Moy.put("ahp7", 0.111);
 		ahpE_Moy.put("ahp6", 0.111);
@@ -123,34 +124,41 @@ public class AHPExplore {
 		ahpList.add(ahpT_Moy);
 		ahpList.add(ahpS_Moy);
 
-		long seed = 1116L;
-		int nMax = 5;
+		long seed = 42L;
+
 		boolean strict = false;
-		
-		File[] fileDonnee = { folderIn };
-		String[] names = { name };
-		for (HashMap<String, Double> list : ahpList) {
-			
-			
-			run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict,
-					list.get("ahp0"), list.get("ahp1"), list.get("ahp2"), list.get("ahp3"), list.get("ahp4"), list.get("ahp5"), list.get("ahp6"), list.get("ahp7"),
-					list.get("ahp8"), ScenarTools.setAgregMethod(list), seed, dataHT);
+
+		MutablePair<String, File> projectFile = ProjectCreationDecompTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT, maxSize, minSize,
+				seuilDensBuild, false);
+		System.out.println("----------Simulation task----------");
+		SimulTask.saveEval = false;
+
+		for (int nMax = 3; nMax <= 7; nMax++) {
+			for (int i = 0; i <= 1; i++) {
+				if (i == 1) {
+					strict = true;
+				}
+
+				for (HashMap<String, Double> list : ahpList) {
+					String ahpName = ScenarTools.getAHPName(list);
+					File fileScenar = SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, list.get("ahp0"), list.get("ahp1"), list.get("ahp2"),
+							list.get("ahp3"), list.get("ahp4"), list.get("ahp5"), list.get("ahp6"), list.get("ahp7"), list.get("ahp8"), ahpName, ScenarTools.setAgregMethod(list),
+							seed, false);
+					File fileMup = new File("");
+					for (File f : fileMup.listFiles()) {
+						if (f.getName().endsWith("evalAnal-20.0.tif")) {
+							fileMup = f;
+						}
+					}
+					FractalDimention.getCorrFracDim(new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu/batimentPro.shp"), fileMup,
+							new File(folderOut, "dimFractales.csv"), 10, String.valueOf(nMax) + "-" + ahpName);
+				}
+
+			}
 		}
 
-		nMax = 6;
-		strict= true;
-		
-		for (HashMap<String, Double> list : ahpList) {
-			
-			
-			run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict,
-					list.get("ahp0"), list.get("ahp1"), list.get("ahp2"), list.get("ahp3"), list.get("ahp4"), list.get("ahp5"), list.get("ahp6"), list.get("ahp7"),
-					list.get("ahp8"), ScenarTools.setAgregMethod(list), seed, dataHT);
-		}
-		
 	}
 
-	
 	/**
 	 * Method used if no dataSet is provided. The folderIn is dug to find matches with the wanted format
 	 * 
@@ -158,32 +166,36 @@ public class AHPExplore {
 	 */
 	public static File run(String name, File folderIn, File folderOut, File discreteFile, File buildFile, double xmin, double ymin, double width, double height, double shiftX,
 			double shiftY, double minSize, double maxSize, double seuilDensBuild, int nMax, boolean strict, double ahp0, double ahp1, double ahp2, double ahp3, double ahp4,
-			double ahp5, double ahp6, double ahp7, double ahp8, boolean mean, long seed) throws Exception {
+			double ahp5, double ahp6, double ahp7, double ahp8, String ahpName, boolean mean, long seed) throws Exception {
 
 		return run(name, folderIn, folderOut, discreteFile, buildFile, xmin, ymin, width, height, shiftX, shiftY, minSize, maxSize, seuilDensBuild, nMax, strict, ahp0, ahp1, ahp2,
-				ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed, DataSetSelec.dig(folderIn));
+				ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, ahpName, mean, seed, DataSetSelec.dig(folderIn));
 	}
 
 	public static File run(String name, File folderIn, File folderOut, File discreteFile, File buildFile, double xmin, double ymin, double width, double height, double shiftX,
 			double shiftY, double minSize, double maxSize, double seuilDensBuild, int nMax, boolean strict, double ahp0, double ahp1, double ahp2, double ahp3, double ahp4,
-			double ahp5, double ahp6, double ahp7, double ahp8, boolean mean, long seed, Map<String, String> dataHT) throws Exception {
-		boolean machineReadable = true;
+			double ahp5, double ahp6, double ahp7, double ahp8, String ahpName, boolean mean, long seed, Map<String, String> dataHT) throws Exception {
+		boolean machineReadable = false;
 
 		System.out.println("----------Project & Decomp creation----------");
 		MutablePair<String, File> projectFile = ProjectCreationDecompTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT, maxSize, minSize,
 				seuilDensBuild, machineReadable);
 		System.out.println("----------Simulation task----------");
-		SimulTask.saveWholeProj = true;
-		File scenarFile = SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed,
+		SimulTask.saveEval = false;
+		File scenarFile = SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, ahpName, mean, seed,
 				machineReadable);
-		
 		for (int i = 0; i < 99; i++) {
 			seed = (long) (Math.random() * 100000);
-			scenarFile = SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed,
+			scenarFile = SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, ahpName, mean, seed,
 					machineReadable);
 			System.out.println("scenar file : " + scenarFile);
+
 		}
-		
+		try {
+			AnalyseTask.runStab(projectFile.getRight(), folderIn, name, machineReadable);
+		} catch (Exception e) {
+			System.out.println("ton système n'est pas assez stable mon cochon");
+		}
 		System.out.println("----------End task----------");
 		return null;
 	}

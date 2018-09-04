@@ -38,7 +38,10 @@ public class SimulTask {
 //		}
 //	}
 
+	//save all the infos of the scenario+project
 	public static boolean saveWholeProj = false;
+	//save the synthetic evaluation layer
+	public static boolean saveEval= true;
 	public static String nameTot;
 	public static String nameProj;
 
@@ -80,10 +83,15 @@ public class SimulTask {
 
 	public static File run(File decompFile, String name, int nMax, boolean strict, double ahp0, double ahp1, double ahp2, double ahp3, double ahp4, double ahp5, double ahp6,
 			double ahp7, double ahp8, boolean mean, long seed, boolean machineReadable) throws Exception {
-		return run(decompFile, name, nMax, strict, prepareAHP(ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8), mean, seed, machineReadable);
+		return run(decompFile, name, nMax, strict, prepareAHP(ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8),"ahpx", mean, seed, machineReadable);
+	}
+	
+	public static File run(File decompFile, String name, int nMax, boolean strict, double ahp0, double ahp1, double ahp2, double ahp3, double ahp4, double ahp5, double ahp6,
+			double ahp7, double ahp8,String ahpName, boolean mean, long seed, boolean machineReadable) throws Exception {
+		return run(decompFile, name, nMax, strict, prepareAHP(ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8),ahpName, mean, seed, machineReadable);
 	}
 
-	public static File run(File projectFile, String name, int nMax, boolean strict, AHP ahp, boolean mean, long seed, boolean machineReadable) throws Exception {
+	public static File run(File projectFile, String name, int nMax, boolean strict, AHP ahp,String ahpName, boolean mean, long seed, boolean machineReadable) throws Exception {
         System.out.println("Initialization of " + projectFile);
 		Initialize.init();
 		System.out.println("Simulation of " + name);
@@ -98,7 +106,7 @@ public class SimulTask {
 		if (mean) {
 			nYag = "Moy";
 		}
-		String nameScenar = "N" + String.valueOf(nMax) + "_" + nBa + "_" + nYag + "_ahpx" + "_seed_" + String.valueOf(seed);
+		String nameScenar = "N" + String.valueOf(nMax) + "_" + nBa + "_" + nYag + ahpName + "_seed_" + String.valueOf(seed);
 
 		File scenarOut = new File(projectFile, nameScenar);
 		if (machineReadable) {
@@ -120,8 +128,9 @@ public class SimulTask {
 		ScenarioAuto scenario = ScenarioAuto.createMultiScaleScenario(nameScenar, res.first(), res.last(), nMax, strict, ahp, useNU, mean, 3, seed, false, false);
 		project.performScenarioAuto(scenario);
 		scenario.extractEvalAnal(scenarOut, project);
+		if (saveEval) {
 		project.getMSGrid().saveRaster(nameScenar + "-eval", scenarOut);
-
+		}
 		setName(ProjectCreationDecompTask.getName() + "_" + nameScenar);
 
 		// save the project
