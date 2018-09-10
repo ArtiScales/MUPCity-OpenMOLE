@@ -1,17 +1,13 @@
 package fr.ign.task;
 
-import java.awt.image.Raster;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -19,9 +15,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.MutablePair;
-import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.geometry.DirectPosition2D;
-import org.geotools.geometry.Envelope2D;
 
 import fr.ign.analyse.FractalDimention;
 import fr.ign.analyse.RasterAnalyse;
@@ -44,75 +38,46 @@ public class AnalyseTask {
 		// compTwoSimus(toCompare,"20");
 		//
 
-		List<File> lF = new ArrayList<File>();
-		lF.add(new File(
-				"/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N4_St_Moy_ahpx/SortieExemple/"));
-		lF.add(new File(
-				"/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N6_St_Moy_ahpx/SortieExemple/"));
-		lF.add(new File(
-				"/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N5_Ba_Moy_ahpx/SortieExemple/"));
-		lF.add(new File(
-				"/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N7_Ba_Yag_ahpx/SortieExemple/"));
+		
+		File AHPFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/");		
+		RasterAnalyse.echelle = "20";
+		RasterAnalyse.statFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/stat");
+		runStabAHP(AHPFile,new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu") , "StabiliteTestAHP", false);
+		
+		
+//		//cellules par rapport aux zones constructibles
+//		List<File> lF = new ArrayList<File>();
+//		lF.add(new File(
+//				"/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N4_St_Moy_ahpx/SortieExemple/"));
+//		lF.add(new File(
+//				"/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N6_St_Moy_ahpx/SortieExemple/"));
+//		lF.add(new File(
+//				"/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N5_Ba_Moy_ahpx/SortieExemple/"));
+//		lF.add(new File(
+//				"/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N7_Ba_Yag_ahpx/SortieExemple/"));
+//
+//		for (File f : lF) {
+//			
+//				for (File ff : f.listFiles()) {
+//					if (ff.getName().contains("evalAnal-20.0.tif")) {
+//					RasterAnalyse.echelle = "20";
+//					RasterAnalyse.statFile = new File("/home/mcolomb/tmp/");
+//
+//					RasterMergeResult salut = RasterAnalyse.mergeRasters(ff);
+//
+//					String[] champ = { "Zones Constructibles", "LIBELLE" };
+//
+//					RasterAnalyse.createStatsDiscrete(
+//							f.getName().replace("_ahpx_seed_6111434047454933700-evalAnal-20.0.tif", "").replace("tability-dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--", ""), salut,
+//							new File("/media/mcolomb/Data_2/donnee/docUrbaLocalTotssUx.shp"), champ);
+//				}
+//			}
+//		}
 
-		for (File f : lF) {
-			
-				for (File ff : f.listFiles()) {
-					if (ff.getName().contains("evalAnal-20.0.tif")) {
-					RasterAnalyse.echelle = "20";
-					RasterAnalyse.statFile = new File("/home/mcolomb/tmp/");
 
-					RasterMergeResult salut = RasterAnalyse.mergeRasters(ff);
 
-					String[] champ = { "Zones Constructibles", "LIBELLE" };
 
-					RasterAnalyse.createStatsDiscrete(
-							f.getName().replace("_ahpx_seed_6111434047454933700-evalAnal-20.0.tif", "").replace("tability-dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--", ""), salut,
-							new File("/media/mcolomb/Data_2/donnee/docUrbaLocalTotssUx.shp"), champ);
-				}
-			}
-		}
-
-		// List<File> lF = new ArrayList<File>();
-		// lF.add(new File("/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N4_St_Moy_ahpx/SortieExemple"));
-		// lF.add(new File("/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N6_St_Moy_ahpx/SortieExemple"));
-		// lF.add(new File("/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N5_Ba_Moy_ahpx/SortieExemple"));
-		// lF.add(new File("/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N7_Ba_Yag_ahpx/SortieExemple"));
-		//
-		// for (File f : lF) {
-		// Hashtable<DirectPosition2D, Float> SvgCellEval20 = new Hashtable<DirectPosition2D, Float>();
-		// Hashtable<DirectPosition2D, Integer> SvgCellRepet20 = new Hashtable<DirectPosition2D, Integer>();
-		//
-		// for (int ech = 20; ech <= 180; ech = ech * 3) {
-		// RasterAnalyse.echelle = Double.toString(ech);
-		// RasterAnalyse.statFile=new File("/home/mcolomb/tmp/");
-		// File concernedFile = getOutputExample(f, ech);
-		// System.out.println("file concerné : "+concernedFile);
-		// // Count how much minimal sized cells are contained into parent cells
-		// String nameTest = f.getParentFile().getName();
-		// System.out.println("nom du test : " + nameTest);
-		// System.out.println("Inclusions des cellules");
-		// if (ech == 20) {
-		// SvgCellEval20 = RasterAnalyse.mergeRasters(concernedFile).getCellEval();
-		// SvgCellRepet20 = RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
-		// } else if (ech == 20 * 3) {
-		// Hashtable<DirectPosition2D, Float> cellEval60 = (Hashtable<DirectPosition2D, Float>) RasterAnalyse.mergeRasters(concernedFile).getCellEval();
-		// Hashtable<DirectPosition2D, Integer> cellRepet60 = (Hashtable<DirectPosition2D, Integer>) RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
-		// RasterAnalyse.compareInclusionSizeCell(SvgCellRepet20, SvgCellEval20, cellRepet60, cellEval60, nameTest, ech);
-		// } else if (ech == 20 * 9) {
-		// Hashtable<DirectPosition2D, Float> cellEval180 = (Hashtable<DirectPosition2D, Float>) RasterAnalyse.mergeRasters(concernedFile).getCellEval();
-		// Hashtable<DirectPosition2D, Integer> cellRepet180 = (Hashtable<DirectPosition2D, Integer>) RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
-		// RasterAnalyse.compareInclusionSizeCell(SvgCellRepet20, SvgCellEval20, cellRepet180, cellEval180, nameTest, ech);
-		// }
-		// }
-		// }
-
-		// File totFile = new File("/home/mcolomb/tmp/dimFracPrb");
-		// File[] totFiles = new File[totFile.listFiles().length];
-		// String names = "Stability";
-		// int i = 0;
-		// File totInFile = new File("/home/mcolomb/.openmole/RKS1409W205-Ubuntu/webui/projects/dataOpenMole/stabilite/dataAutom");
-		// System.out.println(runStab(totFile, totInFile, names, true));
-
+		// //compdata
 		// File totFile = new File("/media/mcolomb/Data_2/resultFinal/compData");
 		// File[] totFiles = new File[totFile.listFiles().length];
 		// String[] names = { "CompDonneeLight" };
@@ -487,15 +452,89 @@ public class AnalyseTask {
 				int resolution = 10;
 				// pour seulement 20 valeures
 				for (File f : anal.getRandomSeedScenars(arL.get(0), echelle, 1)) {
-					long start = System.currentTimeMillis();
 					FractalDimention.getCorrFracDim(getBuild(fileDonnee, arL), f, statFile, resolution, f.getName());
-					long end = System.currentTimeMillis();
 				}
 			}
 		}
 		return resultFile;
 	}
 
+	
+	public static File runStabAHP(File file, File fileDonnee, String name, boolean machineReadable) throws Exception {
+		System.out.println("Initialization");
+		Initialize.init();
+System.out.println("je ne sais pas ce que c'est, mais c'est fait");
+		// folder settings
+		File resultFile = new File(file, "result--" + name);
+		if (machineReadable) {
+			resultFile = new File(file.getParentFile(), "result--" + name);
+		}
+		resultFile.mkdir();
+		RasterAnalyse.rootFile = file;
+		RasterAnalyse.stabilite = true;
+
+		Analyse	anal = new Analyse(file, name);
+
+		// sélectionne des listes de scénario ayant pour différence la seed
+		for (List<ScenarAnalyse> arL : anal.getScenarDiffSeed()) {
+System.out.println("on trouves "+arL.get(0).getScenarFile());
+			// pour tous les fichiers de ces listes
+
+			// pour les trois premières échelles
+			for (String echelle : anal.getEchelleRange(3)) {
+				System.out.println("!! Pour les scénarios " + arL.get(0).getNiceNameWthSeed());
+
+				// convert Scenar to File
+				String nameTest = arL.get(0).getProjFile().getName() + "_" + arL.get(0).getnMax() + "_" + arL.get(0).isStrict() + "_" + arL.get(0).isYag() + "_"
+						+ arL.get(0).getAhp();
+
+				if (machineReadable) {
+					nameTest = new String(arL.get(0).getNiceNameWthSeed());
+				}
+
+				//
+				File eachResultFile = new File(resultFile, nameTest);
+				eachResultFile.mkdirs();
+
+				File statFile = new File(eachResultFile, "stat");
+				RasterAnalyse.statFile = statFile;
+				File rastFile = new File(eachResultFile, "raster");
+				rastFile.mkdir();
+
+				RasterAnalyse.echelle = echelle;
+				List<File> fileToTest = new ArrayList<File>();
+
+				// get the set of files to test
+				for (ScenarAnalyse sC : arL) {
+		
+					fileToTest.add(anal.getSimuFile(sC, echelle, "evalAnal"));
+				}
+
+				// merge the different input rasters
+				RasterMergeResult mergedResult = RasterAnalyse.mergeRasters(fileToTest);
+
+				// statistics for the simple task with those objects
+				RasterAnalyse.createStatsDescriptive(nameTest, mergedResult);
+				RasterAnalyse.createStatsEvol(mergedResult.getHisto(), echelle);
+
+				// get the average evaluation of cells in a .csv
+				if (!mergedResult.getCellEval().isEmpty()) {
+					RasterAnalyse.createStatEvals(mergedResult.getCellEval());
+				}
+
+				// create a merged raster
+				RasterMerge.merge(fileToTest, new File(rastFile, nameTest + "-rasterMerged-" + echelle + ".tif"), Integer.parseInt(echelle));
+				// fractal dimention calculation
+				int resolution = 10;
+				// pour seulement 20 valeures
+				for (File f : anal.getRandomSeedScenars(arL.get(0), echelle, 1)) {
+					FractalDimention.getCorrFracDim(getBuild(fileDonnee, arL), f, statFile, resolution, f.getName());
+				}
+			}
+		}
+		return resultFile;
+	}
+	
 	/**
 	 * Overlaoding to use aggregation transition from openMole Creates a new directory <i>mainFile</i> with the use of <i>copyToScenVrac</i> and puts all of the incoming
 	 * <i>file[]</i> in it

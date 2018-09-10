@@ -106,7 +106,6 @@ public class Analyse {
 	 * (scenarCollec.get(i).equals(scenarCollec.get(j))) { scenarCollec.remove(j); j--; } } } }
 	 */
 
-	// human readable - not re-tested
 	public Analyse(File file, String name) {
 		this(file.listFiles(), name);
 	}
@@ -121,50 +120,63 @@ public class Analyse {
 				// set scenar
 				for (File scenarFile : folderProjet.listFiles()) {
 					if (scenarFile.getName().startsWith("N")) {
-						String[] decompNameScProj = tiret.split(scenarFile.getName());
-						makeScenCollection(decompNameScProj[0]);
-						makeFileCollection(decompNameScProj[1], decompNameScProj[2]);
+						makeScenCollection(scenarFile.getName());
+						for (File fileFile : scenarFile.listFiles()) {
+							if (fileFile.getName().startsWith("N")) {
+								makeFileCollection(fileFile);
+							}
+						}
 					}
 				}
 			}
 		}
+		// projectFiles
+		for (File f : files) {
+			if (f.isDirectory() && f.getName().startsWith(name)) {
+				String[] decompNameProj = tiret.split(f.getName());
+				// nom de l'explo
+				// String nameExplo = decompNameProj[0];
+				// Set les différents jeux de données
+				String data = decompNameProj[1];
+				// Set les différentes tailles minimales de cellules
+				String size = decompNameProj[2].replace(".0", "").replace("CM", "");
+				// Set les differents seuils et grilles
+				String seuil = null;
+				String grid = null;
+				if (decompNameProj[3].startsWith("S0")) {
+					seuil = decompNameProj[3].replace("S", "");
+					grid = decompNameProj[4].replace("GP_", "");
+				} else {
+					seuil = decompNameProj[3].replace("S", "") + "-" + decompNameProj[4];
+					grid = decompNameProj[5].replace("GP_", "");
+				}
+				ProjetAnalyse proj = new ProjetAnalyse(false, f, size, grid, seuil, data);
+				projetCollec.add(proj);
 
-		// la montagne russe
-		for (File fileProjet : files) {
-			for (String size : cellMinCollec) {
-				for (String grid : gridCollec) {
-					for (String seuil : seuilCollec) {
-						for (String data : dataCollec) {
-							if (fileProjet.getName().contains("CM" + size) && fileProjet.getName().contains("GP_" + grid) && fileProjet.getName().contains("S" + seuil)
-									&& fileProjet.getName().contains(data)) {
-								ProjetAnalyse proj = new ProjetAnalyse(false, fileProjet, size, grid, seuil, data);
-								projetCollec.add(proj);
-								for (File fileScenar : fileProjet.listFiles()) {
-									for (String nMax : nMaxCollec) {
-										for (String strict : strictCollec) {
-											for (String yag : yagCollec) {
-												for (String ahp : ahpCollec) {
-													for (String seed : seedCollec) {
-														if (fileScenar.getName().contains(nMax.toString()) && fileScenar.getName().contains(strict)
-																&& fileScenar.getName().contains(yag) && fileScenar.getName().contains(ahp)
-																&& fileScenar.getName().contains(seed.toString())) {
-															ScenarAnalyse sC = new ScenarAnalyse(false, fileProjet, fileScenar, size, grid, seuil, data, nMax, ahp, strict, yag,
-																	seed);
-															scenarCollec.add(sC);
-															for (String echelle : echelleCollec) {
-																for (String mean : meanCollec) {
-																	ScenarAnalyseFile sCf = new ScenarAnalyseFile(false, fileProjet, fileScenar, size, grid, seuil, data, nMax, ahp,
-																			strict, yag, seed, echelle, mean);
-																	fileCollec.add(sCf);
-																}
-															}
-														}
-													}
-												}
-											}
-										}
-									}
-								}
+				for (File ff : f.listFiles()) {
+					if (ff.getName().startsWith("N")) {
+						//scenar files
+						Pattern underscore = Pattern.compile("_");
+						String[] decompScenar = underscore.split(ff.getName());
+						String nMax = decompScenar[0];
+						String strict = decompScenar[1];
+
+						// Warning there may be an inerversion??
+						String yag = decompScenar[3];
+						String ahp = decompScenar[2];
+						String seed = decompScenar[5];
+
+						ScenarAnalyse sC = new ScenarAnalyse(false, f, ff, size, grid, seuil, data, nMax, ahp, strict, yag, seed);
+						scenarCollec.add(sC);
+						for (File fff : ff.listFiles()) {
+							if (fff.getName().endsWith(".tif")) {
+								//scenarFile files
+								String[] decompScenarEval = tiret.split(fff.getName());
+								String meaning = decompScenarEval[1];
+								String echelle = decompScenarEval[2].replace(".0.tif", "");
+
+								ScenarAnalyseFile sCf = new ScenarAnalyseFile(false, f, ff, fff, size, grid, seuil, data, nMax, ahp, strict, yag, seed, echelle, meaning);
+								fileCollec.add(sCf);
 							}
 						}
 					}
@@ -212,7 +224,6 @@ public class Analyse {
 
 	public void makeScenCollection(String scenar) {
 		Pattern underscore = Pattern.compile("_");
-		System.out.println("scenar = " + scenar);
 		String[] decompScenar = underscore.split(scenar);
 		if (!nMaxCollec.contains(decompScenar[0])) {
 			nMaxCollec.add(decompScenar[0]);
@@ -231,8 +242,13 @@ public class Analyse {
 		}
 	}
 
+	private void makeFileCollection(File fileFile) {
+		Pattern tiret = Pattern.compile("-");
+		String[] fileCar = tiret.split(fileFile.getName());
+		makeFileCollection(fileCar[1], fileCar[2].replace(".0.tif", ""));
+	}
+
 	public void makeFileCollection(String mean, String ech) {
-		System.out.println("makeFileCollection " + mean + " (" + ech + ")");
 		if (!meanCollec.contains(mean)) {
 			meanCollec.add(mean);
 		}
@@ -429,7 +445,8 @@ public class Analyse {
 						for (String str : strictCollec) {
 							List<ScenarAnalyse> sortedList = new ArrayList<ScenarAnalyse>();
 							for (ScenarAnalyse scen : scenProj) {
-								if (scen.getAhp().equals(ahp) && scen.getnMax().equals(n) && scen.isStrict().equals(str) && scen.isYag().equals(yag)) {
+								//if (scen.getAhp().equals(ahp) && scen.getnMax().equals(n) && scen.isStrict().equals(str) && scen.isYag().equals(yag)) {
+								if (scen.getAhp().equals(yag) && scen.getnMax().equals(n) && scen.isStrict().equals(str) && scen.isYag().equals(ahp)) { //fausse ligne mais une simu manuelle avait des nombres inversées (pourquoi??!)
 									sortedList.add(scen);
 								}
 							}

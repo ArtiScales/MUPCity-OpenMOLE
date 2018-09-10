@@ -5,6 +5,7 @@ import java.io.File;
 public class ScenarAnalyseFile extends ScenarAnalyse {
 
 	public String echelle;
+	public File filescenarfile ;
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -44,6 +45,14 @@ public class ScenarAnalyseFile extends ScenarAnalyse {
 		echelle = echl;
 		meaning = mean;
 	}
+	
+	public ScenarAnalyseFile(boolean machineRead, File fileProj, File fileScenar,File fileScenarFile, String sizeCell2, String grid2, String seuil2, String data2, String nMax2, String ahp2,
+			String strict2, String yag2, String seed2, String echl, String mean) {
+		super(machineRead, fileProj, fileScenar, sizeCell2, grid2, seuil2, data2, nMax2, ahp2, strict2, yag2, seed2);
+		filescenarfile = fileScenarFile;
+		echelle = echl;
+		meaning = mean;
+	}
 
 	@Override
 	public String getNiceName() {
@@ -67,7 +76,7 @@ public class ScenarAnalyseFile extends ScenarAnalyse {
 		if (machineReading) {
 			resultFile = scenarFile;
 		} else {
-			resultFile = new File(scenarFile, this.getScenarName() + "-" + meaning + "-" + echelle + ".0.tif");
+			resultFile = filescenarfile;
 		}
 		return resultFile;
 	}
