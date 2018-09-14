@@ -30,19 +30,25 @@ public class AnalyseTask {
 	// public static String echelle;
 
 	public static void main(String[] args) throws Exception {
-		// File file = new File("/home/mcolomb/workspace/mupcity-openMole/result/gridExploProjets2");
-		// runGridSens(file, new File("/home/mcolomb/workspace/mupcity-openMole/data/"), "gridExplo");
-
-		// List<File> toCompare = new ArrayList<File>();
-		// toCompare.add(new File(""));
-		// compTwoSimus(toCompare,"20");
-		//
+//		 File file = new File("/home/mcolomb/workspace/mupcity-openMole/result/gridExploProjets2");
+//		 runGridSens(file, new File("/home/mcolomb/workspace/mupcity-openMole/data/"), "gridExplo");
 
 		
-		File AHPFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/");		
 		RasterAnalyse.echelle = "20";
-		RasterAnalyse.statFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/stat");
-		runStabAHP(AHPFile,new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu") , "StabiliteTestAHP", false);
+		RasterAnalyse.statFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/comparaison/N5Ba/stat");
+		 List<File> toCompare = new ArrayList<File>();
+		 toCompare.add(new File("/media/mcolomb/Data_2/resultFinal/testAHP/2emevague/StabiliteTestAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N5_Ba_MoyahpS_Moy_seed_42/N5_Ba_MoyahpS_Moy_seed_42-evalAnal-20.0.tif"));
+		 toCompare.add(new File("/media/mcolomb/Data_2/resultFinal/testAHP/2emevague/StabiliteTestAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N5_Ba_MoyahpE_Moy_seed_42/N5_Ba_MoyahpE_Moy_seed_42-evalAnal-20.0.tif"));
+		 toCompare.add(new File("/media/mcolomb/Data_2/resultFinal/testAHP/2emevague/StabiliteTestAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N5_Ba_MoyahpT_Moy_seed_42/N5_Ba_MoyahpT_Moy_seed_42-evalAnal-20.0.tif"));
+
+		 compTwoSimus(toCompare,RasterAnalyse.statFile.getParentFile(),"20");
+		
+
+//		//AHP
+//		File AHPFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/");		
+//		RasterAnalyse.echelle = "20";
+//		RasterAnalyse.statFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/stat");
+//		runStabAHP(AHPFile,new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu") , "StabiliteTestAHP", false);
 		
 		
 //		//cellules par rapport aux zones constructibles
@@ -308,14 +314,14 @@ public class AnalyseTask {
 
 	}
 
-	public static void compTwoSimus(List<File> fileToTest, String echelle) throws Exception {
+	public static void compTwoSimus(List<File> fileToTest, File fileOut, String echelle) throws Exception {
 
 		String nameTest = fileToTest.get(0).getName();
-		File mainFile = fileToTest.get(0).getParentFile();
+		File mainFile = fileOut;
 
 		for (File f : fileToTest) {
 			if (!f.equals(fileToTest.get(0))) {
-				nameTest = nameTest.concat("-comaredTo-" + f.getName());
+				nameTest = nameTest.concat("-comparedTo-" + f.getName());
 			}
 		}
 

@@ -155,7 +155,7 @@ public class Analyse {
 
 				for (File ff : f.listFiles()) {
 					if (ff.getName().startsWith("N")) {
-						//scenar files
+						// scenar files
 						Pattern underscore = Pattern.compile("_");
 						String[] decompScenar = underscore.split(ff.getName());
 						String nMax = decompScenar[0];
@@ -170,7 +170,7 @@ public class Analyse {
 						scenarCollec.add(sC);
 						for (File fff : ff.listFiles()) {
 							if (fff.getName().endsWith(".tif")) {
-								//scenarFile files
+								// scenarFile files
 								String[] decompScenarEval = tiret.split(fff.getName());
 								String meaning = decompScenarEval[1];
 								String echelle = decompScenarEval[2].replace(".0.tif", "");
@@ -445,8 +445,9 @@ public class Analyse {
 						for (String str : strictCollec) {
 							List<ScenarAnalyse> sortedList = new ArrayList<ScenarAnalyse>();
 							for (ScenarAnalyse scen : scenProj) {
-								//if (scen.getAhp().equals(ahp) && scen.getnMax().equals(n) && scen.isStrict().equals(str) && scen.isYag().equals(yag)) {
-								if (scen.getAhp().equals(yag) && scen.getnMax().equals(n) && scen.isStrict().equals(str) && scen.isYag().equals(ahp)) { //fausse ligne mais une simu manuelle avait des nombres inversées (pourquoi??!)
+								if (scen.getAhp().equals(ahp) && scen.getnMax().equals(n) && scen.isStrict().equals(str) && scen.isYag().equals(yag)) {
+									// if (scen.getAhp().equals(yag) && scen.getnMax().equals(n) && scen.isStrict().equals(str) && scen.isYag().equals(ahp)) { //fausse ligne mais
+									// une simu manuelle avait des nombres inversées (pourquoi??!)
 									sortedList.add(scen);
 								}
 							}

@@ -1,15 +1,11 @@
 package fr.ign.analyse;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -19,14 +15,10 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.io.AbstractGridFormat;
 import org.geotools.coverage.grid.io.GridCoverage2DReader;
 import org.geotools.coverage.grid.io.OverviewPolicy;
-import org.geotools.data.DefaultTransaction;
-import org.geotools.data.Transaction;
 import org.geotools.data.shapefile.ShapefileDataStore;
-import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
-import org.geotools.data.simple.SimpleFeatureStore;
 import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
@@ -55,21 +47,16 @@ import fr.ign.analyse.obj.Analyse;
 import fr.ign.analyse.obj.ScenarAnalyse;
 import fr.ign.analyse.obj.ScenarAnalyseFile;
 import fr.ign.cogit.GTFunctions.Csv;
+import fr.ign.tools.ScenarTools;
 
 public class RasterAnalyse {
 
 	/**
-	 * This class contains several methods used for the analysis of the MUP-City
-	 * outputs during the sensibility and stability tests raster outputs must
-	 * contains the selected to urbanize cells mixed with the evaluation layer
-	 * (output of the extract-eval-anal method) The raster selected with the
-	 * selectWith method are compared within the mergeRaster method There is two
-	 * ways to compare rasters : if they are composed of the exact same grid, we
-	 * will use the relative position of the cells within this grid. The "discrete"
-	 * variable will be "false" and CreateStats method will be used to calculate
-	 * statistics if the rasters to compare are different, we use the DirectPosition
-	 * object to locate the cells. The "discrete" variable will be "true" and
-	 * SplitMergedTypo method will be used to calculate statistics
+	 * This class contains several methods used for the analysis of the MUP-City outputs during the sensibility and stability tests raster outputs must contains the selected to
+	 * urbanize cells mixed with the evaluation layer (output of the extract-eval-anal method) The raster selected with the selectWith method are compared within the mergeRaster
+	 * method There is two ways to compare rasters : if they are composed of the exact same grid, we will use the relative position of the cells within this grid. The "discrete"
+	 * variable will be "false" and CreateStats method will be used to calculate statistics if the rasters to compare are different, we use the DirectPosition object to locate the
+	 * cells. The "discrete" variable will be "true" and SplitMergedTypo method will be used to calculate statistics
 	 * 
 	 */
 
@@ -79,18 +66,68 @@ public class RasterAnalyse {
 	public static boolean cutBorder = false;
 	public static String echelle;
 	public static boolean firstline = true;
+	public static boolean saveEvalTab = false;
 
 	public static void main(String[] args) throws IOException, Exception {
+		rootFile = new File("/media/mcolomb/Data_2/resultFinal/evals");
 		echelle = "20";
-		statFile = new File("/home/yo/tmp");
-	createStatsDiscrete("test", mergeRasters(new File("/home/yo/tmp/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N7_St_Yag_ahpx/SortieExemple/Stability-dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N7_St_Yag_ahpx_seed_8196350095762615112-evalAnal-20.0.tif")), new File("/home/yo/Documents/these/data/stabilite/dataManu/discreteFile.shp"));
+		saveEvalTab = true;
+
+		List<File> listFile = new ArrayList<File>();
+
+		for (File f : rootFile.listFiles()) {
+			if (f.getName().endsWith("eval-20.0.tif")) {
+				listFile.add(f);
+			}
+		}
+		List<RasterMergeResult> list = new ArrayList<RasterMergeResult>();
+		RasterMergeResult resultEval = mergeRasters(listFile.subList(0, 33));
+		list.add(resultEval);
+		RasterMergeResult resultEval2 = mergeRasters(listFile.subList(34, 67));
+		list.add(resultEval2);
+		RasterMergeResult resultEval3 = mergeRasters(listFile.subList(68, 100));
+		list.add(resultEval3);
+		RasterMergeResult.merge(list);
+		File resultFile = new File(rootFile, "result");
+		resultFile.mkdir();
+		HighAndLowEvals(resultEval.getCellEvals(), resultFile, listFile.get(0));
+
+		// Hashtable<String, Hashtable<String, Double>> resultAmenite = new Hashtable<String, Hashtable<String, Double>>();
+		//
+		// File mupFile = new File(rootFile, "StabiliteTestAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0");
+		// for (File f : mupFile.listFiles()) {
+		// if (f.getName().startsWith("N") && f.getName().endsWith("_42") && f.isDirectory()) {
+		// for (File ff : f.listFiles()) {
+		// if (ff.getName().endsWith(echelle + ".0.tif")) {
+		// resultAmenite.put(f.getName(), getDistanceFromServices(ff, f.getName().replace("scenario ", "").replace("seed_50042", "").replace("_",",")));
+		// }
+		// }
+		// }
+		// }
+		// Csv.generateCsvFileMultTab(resultAmenite, rootFile, "distanceAmenite");
+		//
+		// Hashtable<String, Hashtable<String, Double>> resultTC = new Hashtable<String, Hashtable<String, Double>>();
+		//
+		// for (File f : mupFile.listFiles()) {
+		// if (f.getName().startsWith("N") && f.getName().endsWith("_42") && f.isDirectory()) {
+		// for (File ff : f.listFiles()) {
+		// if (ff.getName().endsWith(echelle + ".0.tif")) {
+		// resultTC.put(f.getName(), getDistanceFromTC(ff, f.getName().replace("scenario ", "").replace("seed_50042", "").replace("_",",")));
+		// }
+		// }
+		// }
+		// }
+		// Csv.generateCsvFileMultTab(resultTC, rootFile, "distanceTC");
+
 	}
 
 	/**
 	 * Select a list of file with the argument "with" in its name from the rootFile
 	 *
-	 * @param with : String that is contained into the selection's name
-	 * @param      in: optional , if the search is needed to be in a specific list
+	 * @param with
+	 *            : String that is contained into the selection's name
+	 * @param in:
+	 *            optional , if the search is needed to be in a specific list
 	 * @return an arrayList of files
 	 * @author Maxime Colomb
 	 * @throws Exception
@@ -124,16 +161,17 @@ public class RasterAnalyse {
 	 * 
 	 * @author Maxime "proud" Colomb
 	 * @param cellRepetCentroid:
-	 * @param echelle: scale of the file
-	 * @param in: array of file to search in (can be null)
+	 * @param echelle:
+	 *            scale of the file
+	 * @param in:
+	 *            array of file to search in (can be null)
 	 * @return an ArrayList of File
 	 * @throws Exception
 	 * @throws IOException
 	 */
 
-	public static void compareInclusionSizeCell(Hashtable<DirectPosition2D, Integer> SvgCellRepet20,
-			Hashtable<DirectPosition2D, Float> SvgCellEval20, Hashtable<DirectPosition2D, Integer> cellRepetParent,
-			Hashtable<DirectPosition2D, Float> cellEvalParent, String namescenar, int echelle) throws IOException {
+	public static void compareInclusionSizeCell(Hashtable<DirectPosition2D, Integer> SvgCellRepet20, Hashtable<DirectPosition2D, Float> SvgCellEval20,
+			Hashtable<DirectPosition2D, Integer> cellRepetParent, Hashtable<DirectPosition2D, Float> cellEvalParent, String namescenar, int echelle) throws IOException {
 
 		// nb of cells
 		int cellIn = 0;
@@ -143,8 +181,7 @@ public class RasterAnalyse {
 		ArrayList<Float> cellInEval = new ArrayList<Float>();
 		ArrayList<Float> cellOutEval = new ArrayList<Float>();
 		// TODO it's a weird line
-		Hashtable<DirectPosition2D, Float> doubleSvgCellEval20 = (Hashtable<DirectPosition2D, Float>) SvgCellEval20
-				.clone();
+		Hashtable<DirectPosition2D, Float> doubleSvgCellEval20 = (Hashtable<DirectPosition2D, Float>) SvgCellEval20.clone();
 
 		for (DirectPosition2D coord : cellRepetParent.keySet()) {
 			double empXmin = coord.getX() - echelle / 2;
@@ -152,8 +189,7 @@ public class RasterAnalyse {
 			double empYmin = coord.getY() - echelle / 2;
 			double empYmax = coord.getY() + echelle / 2;
 			for (DirectPosition2D coord20 : SvgCellRepet20.keySet()) {
-				if (coord20.getX() > empXmin && coord20.getX() < empXmax && coord20.getY() > empYmin
-						&& coord20.getY() < empYmax) {
+				if (coord20.getX() > empXmin && coord20.getX() < empXmax && coord20.getY() > empYmin && coord20.getY() < empYmax) {
 					cellIn = cellIn + 1;
 					cellInEval.add(SvgCellEval20.get(coord20));
 					doubleSvgCellEval20.remove(coord20);
@@ -206,18 +242,87 @@ public class RasterAnalyse {
 		resultStats[4] = cellIn;
 		resultStats[5] = averageValIn;
 
-		StatTab result = new StatTab("compare_20to" + echelle, (namescenar + "--compare-20/" + echelle), resultStats,
-				firstLine);
+		StatTab result = new StatTab("compare_20to" + echelle, (namescenar + "--compare-20/" + echelle), resultStats, firstLine);
 
 		result.toCsv(statFile, true);
 
 	}
 
+	public static Hashtable<String, Double> getDistanceFromTC(File mupOutputFile, String nameScenario)
+			throws NoSuchAuthorityCodeException, IOException, FactoryException, ParseException {
+
+		Hashtable<String, Double> result = new Hashtable<String, Double>();
+
+		String[] nameFac = { "pt" };
+
+		for (String name : nameFac) {
+			result.put(nameScenario + "," + name, getDistanceFromDot(mupOutputFile, name));
+		}
+		return result;
+	}
+
+	/**
+	 * 
+	 * @param networkFile
+	 * @param buildFile
+	 * @param mupOutputFile
+	 * @param echelle
+	 * @return
+	 * @throws NoSuchAuthorityCodeException
+	 * @throws IOException
+	 * @throws FactoryException
+	 * @throws ParseException
+	 */
+	public static Hashtable<String, Double> getDistanceFromServices(File mupOutputFile, String nameScenario)
+			throws NoSuchAuthorityCodeException, IOException, FactoryException, ParseException {
+
+		Hashtable<String, Double> result = new Hashtable<String, Double>();
+
+		String[] nameFac = { "fac1", "fac2", "fac3" };
+
+		for (String name : nameFac) {
+			result.put(nameScenario + "-" + name, getDistanceFromDot(mupOutputFile, name));
+		}
+		return result;
+	}
+
+	public static Double getDistanceFromDot(File mupOutputFile, String nameEval) throws IOException {
+
+		File gridFoler = ScenarTools.getGridFolderWhereEver(rootFile);
+
+		DescriptiveStatistics facDS = new DescriptiveStatistics();
+
+		GridCoverage2D coverageMup = importRaster(mupOutputFile);
+
+		GridCoverage2D coverageServiceQuot = importRaster(new File(gridFoler, nameEval + "-" + echelle + ".0.tif"));
+		Envelope2D env = coverageMup.getEnvelope2D();
+		double Xmin = env.getMinX();
+		double Xmax = env.getMaxX();
+		double Ymin = env.getMinY();
+		double Ymax = env.getMaxY();
+
+		for (double r = Xmin + Double.valueOf(echelle) / 2; r <= Xmax; r = r + Double.valueOf(echelle)) {
+			// those values are the bounds from project (and upped to correspond to a
+			// multiple of 180 to analyse all the cells in the project)
+			for (double t = Ymin + Double.valueOf(echelle) / 2; t <= Ymax; t = t + Double.valueOf(echelle)) {
+				DirectPosition2D coordCentre = new DirectPosition2D(r, t);
+				float[] cellMup = (float[]) coverageMup.evaluate(coordCentre);
+				if (cellMup[0] > 0) {
+					facDS.addValue(((float[]) coverageServiceQuot.evaluate(coordCentre))[0]);
+				}
+			}
+		}
+
+		return facDS.getMean();
+	}
+
 	/**
 	 * Vectorize a MUP-City output
 	 * 
-	 * @param coverage : raster file of the MUP-City Output
-	 * @param cellSize : resolution of the cells
+	 * @param coverage
+	 *            : raster file of the MUP-City Output
+	 * @param cellSize
+	 *            : resolution of the cells
 	 * @return : A collection of vectorized cells
 	 * @throws IOException
 	 * @throws NoSuchAuthorityCodeException
@@ -228,8 +333,7 @@ public class RasterAnalyse {
 			throws IOException, NoSuchAuthorityCodeException, FactoryException, ParseException {
 
 		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:2154");
-		ReferencedEnvelope gridBounds = new ReferencedEnvelope(coverage.getEnvelope2D().getMinX(),
-				coverage.getEnvelope2D().getMaxX(), coverage.getEnvelope2D().getMinY(),
+		ReferencedEnvelope gridBounds = new ReferencedEnvelope(coverage.getEnvelope2D().getMinX(), coverage.getEnvelope2D().getMaxX(), coverage.getEnvelope2D().getMinY(),
 				coverage.getEnvelope2D().getMaxY(), sourceCRS);
 
 		WKTReader wktReader = new WKTReader();
@@ -253,8 +357,7 @@ public class RasterAnalyse {
 		try {
 			while (featureIt.hasNext()) {
 				SimpleFeature feat = featureIt.next();
-				DirectPosition2D coord = new DirectPosition2D(
-						(feat.getBounds().getMaxX() - feat.getBounds().getHeight() / 2),
+				DirectPosition2D coord = new DirectPosition2D((feat.getBounds().getMaxX() - feat.getBounds().getHeight() / 2),
 						(feat.getBounds().getMaxY() - feat.getBounds().getHeight() / 2));
 				float[] yo = (float[]) coverage.evaluate(coord);
 				if (yo[0] > 0) {
@@ -274,63 +377,17 @@ public class RasterAnalyse {
 		return victory.collection();
 	}
 
-	public static File exportSFC(SimpleFeatureCollection toExport, File fileName) throws IOException {
-		return exportSFC(toExport, fileName, toExport.getSchema());
-	}
-
-	public static File exportSFC(SimpleFeatureCollection toExport, File fileName, SimpleFeatureType ft)
-			throws IOException {
-
-		ShapefileDataStoreFactory dataStoreFactory = new ShapefileDataStoreFactory();
-
-		Map<String, Serializable> params = new HashMap<>();
-		params.put("url", fileName.toURI().toURL());
-		params.put("create spatial index", Boolean.TRUE);
-
-		ShapefileDataStore newDataStore = (ShapefileDataStore) dataStoreFactory.createNewDataStore(params);
-		newDataStore.createSchema(ft);
-
-		Transaction transaction = new DefaultTransaction("create");
-
-		String typeName = newDataStore.getTypeNames()[0];
-		SimpleFeatureSource featureSource = newDataStore.getFeatureSource(typeName);
-
-		SimpleFeatureType SHAPE_TYPE = featureSource.getSchema();
-		System.out.println("SHAPE:" + SHAPE_TYPE);
-
-		if (featureSource instanceof SimpleFeatureStore) {
-			SimpleFeatureStore featureStore = (SimpleFeatureStore) featureSource;
-			featureStore.setTransaction(transaction);
-			try {
-				featureStore.addFeatures(toExport);
-				transaction.commit();
-			} catch (Exception problem) {
-				problem.printStackTrace();
-				transaction.rollback();
-			} finally {
-				transaction.close();
-			}
-		} else {
-			System.out.println(typeName + " does not support read/write access");
-			newDataStore.dispose();
-			System.exit(1);
-		}
-		newDataStore.dispose();
-		return fileName;
-	}
-
 	/**
 	 * Write how much surface are included into each cities
 	 * 
 	 * @param listfile
 	 * @param nameScenar
-	 * @param discreteFile : the file to make the discretization. Must contain a
-	 *                     "NOM_COM" field
+	 * @param discreteFile
+	 *            : the file to make the discretization. Must contain a "NOM_COM" field
 	 * @return
 	 * @throws Exception
 	 */
-	public static void compareDiffSizedCellIntoCities(Set<ScenarAnalyse> listfile, Analyse anal, String name,
-			File discreteFile) throws Exception {
+	public static void compareDiffSizedCellIntoCities(Set<ScenarAnalyse> listfile, Analyse anal, String name, File discreteFile) throws Exception {
 
 		// with the other parameters
 		// with the topological spaces
@@ -380,10 +437,8 @@ public class RasterAnalyse {
 						try {
 							while (outputIt.hasNext()) {
 								SimpleFeature cell = outputIt.next();
-								if (((Geometry) city.getDefaultGeometry())
-										.intersects((Geometry) cell.getDefaultGeometry())) {
-									double surf = ((Geometry) city.getDefaultGeometry())
-											.intersection((Geometry) cell.getDefaultGeometry()).getArea();
+								if (((Geometry) city.getDefaultGeometry()).intersects((Geometry) cell.getDefaultGeometry())) {
+									double surf = ((Geometry) city.getDefaultGeometry()).intersection((Geometry) cell.getDefaultGeometry()).getArea();
 									if (entitySurf.containsKey(entityName)) {
 										double temp = entitySurf.get(entityName) + surf;
 										entitySurf.remove(entityName);
@@ -436,8 +491,7 @@ public class RasterAnalyse {
 		}
 	}
 
-	public static RasterMergeResult mergeRasters(List<ScenarAnalyse> listSA, Analyse anal, ScenarAnalyse justToOverload)
-			throws Exception {
+	public static RasterMergeResult mergeRasters(List<ScenarAnalyse> listSA, Analyse anal, ScenarAnalyse justToOverload) throws Exception {
 		List<File> inList = new ArrayList<File>();
 		for (ScenarAnalyseFile sAf : anal.fileCollec) {
 			for (ScenarAnalyse sA : listSA) {
@@ -478,8 +532,8 @@ public class RasterAnalyse {
 	/**
 	 * mergeRaster Merge the given list of MUP-City's output regarding to a grid.
 	 * 
-	 * @param listRepliFile : ArrayList of File pointing to the raster layer to
-	 *                      merge
+	 * @param listRepliFile
+	 *            : ArrayList of File pointing to the raster layer to merge
 	 * 
 	 * @return RasterMergeResult object
 	 * @throws Exception
@@ -532,30 +586,35 @@ public class RasterAnalyse {
 			for (double r = Xmin + Double.parseDouble(echelle) / 2; r <= Xmax; r = r + Double.parseDouble(echelle)) {
 				// those values are the bounds from project (and upped to correspond to a
 				// multiple of 180 to analyse all the cells in the project)
-				for (double t = Ymin + Double.parseDouble(echelle) / 2; t <= Ymax; t = t
-						+ Double.parseDouble(echelle)) {
+				for (double t = Ymin + Double.parseDouble(echelle) / 2; t <= Ymax; t = t + Double.parseDouble(echelle)) {
 					DirectPosition2D coordCentre = new DirectPosition2D(r, t);
-					float[] yo = (float[]) coverage.evaluate(coordCentre);
-					if (yo[0] > 0) {
+					float val = 0;
+					try {
+						val = ((float[]) coverage.evaluate(coordCentre))[0];
+					} catch (ClassCastException c) {
+						double zob = ((double[]) coverage.evaluate(coordCentre))[0];
+						val = (float) zob;
+					}
+
+					if (val > 0) {
 						compteurNombre++;
 						if (cellRepetCentroid.containsKey(coordCentre)) { // si la cellule a déja été sélectionné lors
 																			// de réplications
 							cellRepetCentroid.put(coordCentre, cellRepetCentroid.get(coordCentre) + 1);
 							ArrayList<Float> temp = cellEvalCentroid.get(coordCentre); // on mets les valeurs
 																						// d'évaluation dans un tableau
-							temp.add(yo[0]);
+							temp.add(val);
 							cellEvalCentroid.put(coordCentre, temp);
 						} else { // si la cellule est sélectionné pour la première fois
 							cellRepetCentroid.put(coordCentre, 1);
 							ArrayList<Float> firstList = new ArrayList<Float>();
-							firstList.add(yo[0]);
+							firstList.add(val);
 							cellEvalCentroid.put(coordCentre, firstList);
 						}
 					}
 				}
 			}
-			System.out.println("il y a " + compteurNombre + " cellules sur " + cellRepetCentroid.size()
-					+ " dans la réplication " + nbDeScenar);
+			System.out.println("il y a " + compteurNombre + " cellules sur " + cellRepetCentroid.size() + " dans la réplication " + nbDeScenar);
 			System.out.println();
 			// Historique de l'évolution du nombre de cellules sélectionnées dans toutes les
 			// simulations
@@ -567,6 +626,12 @@ public class RasterAnalyse {
 		Hashtable<DirectPosition2D, Float> cellEvalFinal = moyenneEvals(cellEvalCentroid);
 
 		RasterMergeResult result = new RasterMergeResult();
+
+		// could be heavy and unnecessary
+		if (saveEvalTab) {
+			result.setCellEvals(cellEvalCentroid);
+		}
+
 		result.setCellRepet(cellRepetCentroid);
 		result.setCellEval(cellEvalFinal);
 		result.setHistoDS(statNb);
@@ -594,13 +659,11 @@ public class RasterAnalyse {
 	}
 
 	/**
-	 * analyse Mup-city's outputs with different vector geographic objects, all
-	 * presented in the classic "discret file" with predefined name and fields
+	 * analyse Mup-city's outputs with different vector geographic objects, all presented in the classic "discret file" with predefined name and fields
 	 * 
 	 * @return String[] with 0 : the type of entity and 1 : the attribute name
 	 */
-	public static File createStatsDiscrete(String nameScenar, RasterMergeResult result, File discreteFile)
-			throws IOException {
+	public static File createStatsDiscrete(String nameScenar, RasterMergeResult result, File discreteFile) throws IOException {
 		Hashtable<String, String[]> tabDifferentObjects = loopDiffEntities();
 
 		// loop on those different objects
@@ -613,16 +676,18 @@ public class RasterAnalyse {
 	/**
 	 * create the statistics for a discretized study
 	 * 
-	 * @param nameScenar : name given to the study
-	 * @param cellRepet  : Collection of the cell's replication
-	 * @param cellEval   : Collection of the cell's evaluation
-	 * @param champ      : containing [0] the name of the type of entites for the
-	 *                   analyze and [1] its field form the attribute table
+	 * @param nameScenar
+	 *            : name given to the study
+	 * @param cellRepet
+	 *            : Collection of the cell's replication
+	 * @param cellEval
+	 *            : Collection of the cell's evaluation
+	 * @param champ
+	 *            : containing [0] the name of the type of entites for the analyze and [1] its field form the attribute table
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 */
-	public static File createStatsDiscrete(String nameScenar, RasterMergeResult result, File discreteFile,
-			String[] champ) throws IOException {
+	public static File createStatsDiscrete(String nameScenar, RasterMergeResult result, File discreteFile, String[] champ) throws IOException {
 
 		String[] nameLineFabric = new String[5];
 		nameLineFabric[0] = champ[0] + " name - echelle " + echelle + "scenar" + nameScenar;
@@ -648,8 +713,7 @@ public class RasterAnalyse {
 				String fabricName = (String) city.getAttribute(champ[1]);
 				// pour toutes les cellules
 				for (DirectPosition2D coordCell : result.getCellRepet().keySet()) {
-					if (((Geometry) city.getDefaultGeometry())
-							.covers(factory.createPoint(new Coordinate(coordCell.getX(), coordCell.getY())))) {
+					if (((Geometry) city.getDefaultGeometry()).covers(factory.createPoint(new Coordinate(coordCell.getX(), coordCell.getY())))) {
 						// si le tissus a déja été implémenté
 						if (cellByFabric.containsKey(fabricName)) {
 							double[] resultFabricPast = cellByFabric.get(fabricName);
@@ -750,8 +814,7 @@ public class RasterAnalyse {
 		Csv.generateCsvFileCol(deuForme, statFile, "evaluation_moyenne-" + echelle);
 	}
 
-	private static Hashtable<DirectPosition2D, Float> moyenneEvals(
-			Hashtable<DirectPosition2D, ArrayList<Float>> cellEval) {
+	private static Hashtable<DirectPosition2D, Float> moyenneEvals(Hashtable<DirectPosition2D, ArrayList<Float>> cellEval) {
 		Hashtable<DirectPosition2D, Float> cellEvalFinal = new Hashtable<DirectPosition2D, Float>();
 		for (DirectPosition2D temp : cellEval.keySet()) {
 			float somme = 0;
@@ -763,6 +826,31 @@ public class RasterAnalyse {
 			cellEvalFinal.put(temp, somme / tablTemp.size());
 		}
 		return cellEvalFinal;
+	}
+
+	public static void HighAndLowEvals(Hashtable<DirectPosition2D, ArrayList<Float>> cellEval, File fileOut, File fileExample) throws IOException {
+		Hashtable<DirectPosition2D, Float> cellEvalMin = new Hashtable<DirectPosition2D, Float>();
+		Hashtable<DirectPosition2D, Float> cellEvalMax = new Hashtable<DirectPosition2D, Float>();
+		for (DirectPosition2D temp : cellEval.keySet()) {
+			ArrayList<Float> tablTemp = new ArrayList<Float>();
+			tablTemp.addAll(cellEval.get(temp));
+			float valMin = 1;
+			float valMax = 0;
+
+			for (float nombre : tablTemp) {
+
+				if (nombre > valMax) {
+					valMax = nombre;
+					cellEvalMax.put(temp, valMax);
+				} else if (nombre < valMin) {
+					valMin = nombre;
+					cellEvalMin.put(temp, valMin);
+				}
+			}
+		}
+
+		RasterMerge.writeGeotiff(cellEvalMin, 20, new File(fileOut, "rastMin.tif"), fileExample);
+		RasterMerge.writeGeotiff(cellEvalMax, 20, new File(fileOut, "rastMax.tif"), fileExample);
 	}
 
 	public static File createStatsDescriptive(String nameScenar, RasterMergeResult result) throws IOException {

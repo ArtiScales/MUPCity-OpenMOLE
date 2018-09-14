@@ -23,7 +23,7 @@ public class AHPExplore {
 		Map<String, String> dataHT = DataSetSelec.get("Data1");
 		String name = "StabiliteTestAHP";
 		File folderIn = new File("./stabilite/dataManu");
-		File folderOut = new File("./result/testAHP");
+		File folderOut = new File("./result/testAHP/2emevague");
 		File discreteFile = new File(folderIn, "admin_typo.shp");
 		File buildFile = new File(folderIn, "batimentPro.shp");
 		double width = 26590;
@@ -133,30 +133,22 @@ public class AHPExplore {
 		System.out.println("----------Simulation task----------");
 		SimulTask.saveEval = false;
 
-		for (int nMax = 3; nMax <= 7; nMax++) {
-			for (int i = 0; i <= 1; i++) {
-				if (i == 1) {
-					strict = true;
-				}
-
-				for (HashMap<String, Double> list : ahpList) {
-					String ahpName = ScenarTools.getAHPName(list);
-					File fileScenar = SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, list.get("ahp0"), list.get("ahp1"), list.get("ahp2"),
-							list.get("ahp3"), list.get("ahp4"), list.get("ahp5"), list.get("ahp6"), list.get("ahp7"), list.get("ahp8"), ahpName, ScenarTools.setAgregMethod(list),
-							seed, false);
-					File fileMup = new File("");
-					for (File f : fileMup.listFiles()) {
-						if (f.getName().endsWith("evalAnal-20.0.tif")) {
-							fileMup = f;
-						}
+		for (int nMax = 4; nMax <= 7; nMax++) {
+			strict = false;
+			for (HashMap<String, Double> list : ahpList) {
+				String ahpName = ScenarTools.getAHPName(list);
+				File fileScenar = SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, list.get("ahp0"), list.get("ahp1"), list.get("ahp2"), list.get("ahp3"),
+						list.get("ahp4"), list.get("ahp5"), list.get("ahp6"), list.get("ahp7"), list.get("ahp8"), ahpName, ScenarTools.setAgregMethod(list), seed, false);
+				File fileMup = new File("");
+				for (File f : fileScenar.listFiles()) {
+					if (f.getName().endsWith("evalAnal-20.0.tif")) {
+						fileMup = f;
 					}
-					FractalDimention.getCorrFracDim(new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu/batimentPro.shp"), fileMup,
-							new File(folderOut, "dimFractales.csv"), 10, String.valueOf(nMax) + "-" + ahpName);
 				}
-
+				FractalDimention.getCorrFracDim(new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu/batimentPro.shp"), fileMup, folderOut, 10,
+						String.valueOf(nMax) + "-"+"Ba"+"-" + ahpName);
 			}
 		}
-
 	}
 
 	/**
@@ -184,18 +176,18 @@ public class AHPExplore {
 		SimulTask.saveEval = false;
 		File scenarFile = SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, ahpName, mean, seed,
 				machineReadable);
-		for (int i = 0; i < 99; i++) {
-			seed = (long) (Math.random() * 100000);
-			scenarFile = SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, ahpName, mean, seed,
-					machineReadable);
-			System.out.println("scenar file : " + scenarFile);
+		// for (int i = 0; i < 99; i++) {
+		// seed = (long) (Math.random() * 100000);
+		scenarFile = SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, ahpName, mean, seed,
+				machineReadable);
+		System.out.println("scenar file : " + scenarFile);
 
-		}
-		try {
-			AnalyseTask.runStab(projectFile.getRight(), folderIn, name, machineReadable);
-		} catch (Exception e) {
-			System.out.println("ton système n'est pas assez stable mon cochon");
-		}
+		// }
+		// try {
+		// AnalyseTask.runStab(projectFile.getRight(), folderIn, name, machineReadable);
+		// } catch (Exception e) {
+		// System.out.println("ton système n'est pas assez stable mon cochon");
+		// }
 		System.out.println("----------End task----------");
 		return null;
 	}

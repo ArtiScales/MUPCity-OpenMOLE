@@ -3,12 +3,14 @@ package fr.ign.analyse;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.coverage.grid.io.AbstractGridFormat;
 import org.geotools.coverage.grid.io.OverviewPolicy;
+import org.geotools.data.DataSourceException;
 import org.geotools.gce.geotiff.GeoTiffFormat;
 import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.gce.geotiff.GeoTiffWriteParams;
@@ -90,11 +92,11 @@ public class RasterMerge {
 		return merge(inList, fileOut, Integer.valueOf(ScenarsIn.get(0).getSizeCell()), crop);
 	}
 
-	public static File merge(List<File> folderIn, File fileOut, int echelle) throws Exception {
-		return merge(folderIn, fileOut, echelle, false);
+	public static File merge(List<File> folderIn, File fileOut, int ech) throws Exception {
+		return merge(folderIn, fileOut, ech, false);
 	}
 
-	public static File merge(List<File> folderIn, File fileOut, int echelle, boolean crop) throws Exception {
+	public static File merge(List<File> folderIn, File fileOut, int ech, boolean crop) throws Exception {
 
 		// just to make sure
 		if (!fileOut.getName().endsWith(".tif")) {
@@ -122,7 +124,7 @@ public class RasterMerge {
 		GridCoverage2D coverageSet = readerSet.read(params);
 		Envelope2D env = coverageSet.getEnvelope2D();
 
-		float[][] imagePixelData = new float[(int) Math.floor(env.getWidth() / echelle)][(int) Math.floor(env.getHeight() / echelle)];
+		float[][] imagePixelData = new float[(int) Math.floor(env.getWidth() / ech)][(int) Math.floor(env.getHeight() / ech)];
 
 		double xMin = env.getMinX();
 		double yMin = env.getMinY();
@@ -132,19 +134,18 @@ public class RasterMerge {
 
 		// if a crop on the area is needed
 		if (crop) {
-			xMin = xMin + echelle;
-			longueur = longueur - echelle;
-			yMin = yMin + echelle;
-			largeur = largeur - echelle;
+			xMin = xMin + ech;
+			longueur = longueur - ech;
+			yMin = yMin + ech;
+			largeur = largeur - ech;
 		}
 
 		for (int fInd = 0; fInd < (folderIn.size()); fInd++) {
-
 			GeoTiffReader reader = new GeoTiffReader(folderIn.get(fInd));
 			GridCoverage2D coverage = reader.read(params);
 			for (int i = 0; i < longueur; ++i) {
 				for (int j = 0; j < largeur; ++j) {
-					DirectPosition2D pt = new DirectPosition2D(xMin + (2 * i + 1) * echelle / 2, yMin + (2 * j + 1) * echelle / 2);
+					DirectPosition2D pt = new DirectPosition2D(xMin + (2 * i + 1) * ech / 2, yMin + (2 * j + 1) * ech / 2);
 					float[] val = (float[]) coverage.evaluate(pt);
 					if (val[0] > 0) {
 						imagePixelData[i][j] = imagePixelData[i][j] + 1;
@@ -169,9 +170,60 @@ public class RasterMerge {
 		return fileOut;
 	}
 
-	
-	
-	//TODO to delete coz it'll be in Artiscales.tools.Rasters
+	public static void writeGeotiff(Hashtable<DirectPosition2D, Float> table, int ech, File fileOut, File exempleRaster) throws IOException {
+		ParameterValue<OverviewPolicy> policy = AbstractGridFormat.OVERVIEW_POLICY.createValue();
+		policy.setValue(OverviewPolicy.IGNORE);
+		// this will basically read 4 tiles worth of data at once from the
+		// disk...
+		ParameterValue<String> gridsize = AbstractGridFormat.SUGGESTED_TILE_SIZE.createValue();
+		// Setting read type: use JAI ImageRead (true) or ImageReaders read
+		// methods (false)
+		ParameterValue<Boolean> useJaiRead = AbstractGridFormat.USE_JAI_IMAGEREAD.createValue();
+		useJaiRead.setValue(false);
+		GeneralParameterValue[] params = new GeneralParameterValue[] { policy, gridsize, useJaiRead };
+
+		// set matrice
+
+		GeoTiffReader readerSet = new GeoTiffReader(exempleRaster);
+		GridCoverage2D coverageSet = readerSet.read(params);
+		Envelope2D env = coverageSet.getEnvelope2D();
+
+		float[][] imagePixelData = new float[(int) Math.floor(env.getWidth() / ech)][(int) Math.floor(env.getHeight() / ech)];
+
+		double xMin = env.getMinX();
+		double yMin = env.getMinY();
+
+		int longueur = imagePixelData.length;
+		int largeur = imagePixelData[0].length;
+
+		for (int i = 0; i < longueur; ++i) {
+			for (int j = 0; j < largeur; ++j) {
+				DirectPosition2D pt = new DirectPosition2D(xMin + (2 * i + 1) * ech / 2, yMin + (2 * j + 1) * ech / 2);
+				try {
+				imagePixelData[i][j] = table.get(pt);
+				}
+				catch (NullPointerException n ) {
+					
+				}
+			}
+			}
+		float[][] imgpix2 = new float[imagePixelData[0].length][imagePixelData.length];
+		float[][] imgpix3 = new float[imagePixelData[0].length][imagePixelData.length];
+		for (int i = 0; i < imgpix2.length; ++i) {
+			for (int j = 0; j < imgpix2[0].length; ++j) {
+				imgpix2[i][j] = imagePixelData[imgpix2[0].length - 1 - j][i];
+			}
+		}
+		for (int i = 0; i < imgpix3.length; ++i) {
+			for (int j = 0; j < imgpix3[0].length; ++j) {
+				imgpix3[i][j] = imgpix2[imgpix3.length - 1 - i][imgpix3[0].length - 1 - j];
+			}
+		}
+
+		writeGeotiff(fileOut, imgpix3, env);
+	}
+
+	// TODO to delete coz it'll be in Artiscales.tools.Rasters
 	public static void writeGeotiff(File fileName, float[][] imagePixelData, Envelope2D env) {
 		GridCoverage2D coverage = new GridCoverageFactory().create("OTPAnalyst", imagePixelData, env);
 		writeGeotiff(fileName, coverage);
@@ -183,18 +235,18 @@ public class RasterMerge {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-//		try {
-//			GeoTiffWriteParams wp = new GeoTiffWriteParams();
-//			wp.setCompressionMode(GeoTiffWriteParams.MODE_EXPLICIT);
-//			wp.setCompressionType("LZW");
-//			ParameterValueGroup params = new GeoTiffFormat().getWriteParameters();
-//			params.parameter(AbstractGridFormat.GEOTOOLS_WRITE_PARAMS.getName().toString()).setValue(wp);
-//			GeoTiffWriter writer = new GeoTiffWriter(fileName);
-//			writer.write(coverage, (GeneralParameterValue[]) params.values().toArray(new GeneralParameterValue[1]));
-//		} catch (Exception e) {
-//
-//			e.printStackTrace();
-//		}
+		// try {
+		// GeoTiffWriteParams wp = new GeoTiffWriteParams();
+		// wp.setCompressionMode(GeoTiffWriteParams.MODE_EXPLICIT);
+		// wp.setCompressionType("LZW");
+		// ParameterValueGroup params = new GeoTiffFormat().getWriteParameters();
+		// params.parameter(AbstractGridFormat.GEOTOOLS_WRITE_PARAMS.getName().toString()).setValue(wp);
+		// GeoTiffWriter writer = new GeoTiffWriter(fileName);
+		// writer.write(coverage, (GeneralParameterValue[]) params.values().toArray(new GeneralParameterValue[1]));
+		// } catch (Exception e) {
+		//
+		// e.printStackTrace();
+		// }
 
 	}
 

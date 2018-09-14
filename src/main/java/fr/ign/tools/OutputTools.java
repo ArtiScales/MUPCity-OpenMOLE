@@ -9,9 +9,11 @@ import java.util.regex.Pattern;
 
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.grid.Grids;
 import org.geotools.referencing.CRS;
@@ -25,12 +27,14 @@ import com.vividsolutions.jts.io.ParseException;
 
 import au.com.bytecode.opencsv.CSVReader;
 import fr.ign.cogit.GTFunctions.Csv;
+import fr.ign.cogit.GTFunctions.Rasters;
 import fr.ign.cogit.GTFunctions.Vectors;
 
 public class OutputTools {
 
-	public static void main(String[] args) throws IOException {
-		digOnDimFract(new File("/home/yo/Documents/these/resultFinal/dataAutom/"), "20");
+	public static void main(String[] args) throws IOException, NoSuchAuthorityCodeException, FactoryException, ParseException {
+		VectorizeMupOutput(Rasters.importRaster(new File("/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataAutom/dataAutom-CM20.0-S0.0-GP_915948.0_6677337.0--N5_Ba_Moy_ahpx/SortieExemple/Stability-dataAutom-CM20.0-S0.0-GP_915948.0_6677337.0--N5_Ba_Moy_ahpx_seed_8186048318420992154-evalAnal-20.0.tif")), 
+				new File("/home/mcolomb/tmp/N5BaAutom"),20);
 
 	}
 
@@ -59,31 +63,32 @@ public class OutputTools {
 		// être calculé une bonne fois pour toute et rester dans un objet dédié. J'ai
 		// fait ça pour que moins de trucs en mémoire soit stocké et peut être pas avoir
 		// l'erreure
-		// SimpleFeatureIterator featIt = Grids.createSquareGrid(gridBounds,
-		// sizeCell).getFeatures().features();
-
-		SimpleFeatureCollection cellsGridSFC = Grids.createSquareGrid(gridBounds, sizeCell).getFeatures();
-		SimpleFeature[] salut = cellsGridSFC.toArray(new SimpleFeature[0]);
+		
+//		SimpleFeatureCollection cellsGridSFC = Grids.createSquareGrid(gridBounds, sizeCell).getFeatures();
+//		SimpleFeature[] salut = cellsGridSFC.toArray(new SimpleFeature[0]);
 //		Stream<SimpleFeature> s = Arrays.stream(salut).filter(sf-> (((float[])(coverage.evaluate(new DirectPosition2D((sf.getBounds().getMaxX() - sf.getBounds().getHeight() / 2),
 //				(sf.getBounds().getMaxY() - sf.getBounds().getHeight() / 2))))[0])>0));
 //		DefaultFeatureCollection geometryCollection = new DefaultFeatureCollection(Arrays.asList(s.toArray()));
+		
+		 SimpleFeatureIterator featIt = Grids.createSquareGrid(gridBounds,
+		 sizeCell).getFeatures().features();
 
-//		try {
-//			while (featIt.hasNext()) {
-//	
-//				float yo = ((float[]) coverage.evaluate(new DirectPosition2D((featIt.next().getBounds().getMaxX() - featIt.next().getBounds().getHeight() / 2),
-//						(featIt.next().getBounds().getMaxY() - featIt.next().getBounds().getHeight() / 2))))[0];
-//				if (yo > 0) {
-//					i = i + 1;
-//					sfBuilder.add(featIt.next().getDefaultGeometry());
-//					output.add(sfBuilder.buildFeature("id" + i, new Object[]{ yo }));
-//				}
-//			}
-//		} catch (Exception problem) {
-//			problem.printStackTrace();
-//		} finally {
-//			featIt.close();
-//		}
+		try {
+			while (featIt.hasNext()) {
+	
+				float yo = ((float[]) coverage.evaluate(new DirectPosition2D((featIt.next().getBounds().getMaxX() - featIt.next().getBounds().getHeight() / 2),
+						(featIt.next().getBounds().getMaxY() - featIt.next().getBounds().getHeight() / 2))))[0];
+				if (yo > 0) {
+					i = i + 1;
+					sfBuilder.add(featIt.next().getDefaultGeometry());
+					output.add(sfBuilder.buildFeature("id" + i, new Object[]{ yo }));
+				}
+			}
+		} catch (Exception problem) {
+			problem.printStackTrace();
+		} finally {
+			featIt.close();
+		}
 		Vectors.exportSFC(output.collection(), destFile);
 		return destFile;
 	}
