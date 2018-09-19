@@ -8,6 +8,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.math3.stat.correlation.Covariance;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -68,27 +69,29 @@ public class RasterAnalyse {
 	public static boolean firstline = true;
 	public static boolean saveEvalTab = false;
 
-	public static void main(String[] args) throws IOException, Exception {
+	public static void main(String[] args) throws Exception {
 		rootFile = new File("/media/mcolomb/Data_2/resultFinal/evals");
 		echelle = "20";
 		saveEvalTab = true;
 
 		List<File> listFile = new ArrayList<File>();
+		RasterMergeResult rmr = new RasterMergeResult();
 
 		for (File f : rootFile.listFiles()) {
-			if (f.getName().endsWith("eval-20.0.tif")) {
+			if (f.getName().endsWith("eval-20.0.tif") && f.getName().contains("ahpS")) {
 				listFile.add(f);
 			}
 		}
-		List<RasterMergeResult> list = new ArrayList<RasterMergeResult>();
-		RasterMergeResult resultEval = mergeRasters(listFile.subList(0, 33));
-		list.add(resultEval);
-		RasterMergeResult resultEval2 = mergeRasters(listFile.subList(34, 67));
-		list.add(resultEval2);
-		RasterMergeResult resultEval3 = mergeRasters(listFile.subList(68, 100));
-		list.add(resultEval3);
-		RasterMergeResult.merge(list);
-		File resultFile = new File(rootFile, "result");
+
+		
+		RasterMergeResult resultEval = mergeRasters(listFile.subList(0, 50));
+//		list.add(resultEval);
+//		RasterMergeResult resultEval2 = mergeRasters(listFile.subList(34, 67));
+//		list.add(resultEval2);
+//		RasterMergeResult resultEval3 = mergeRasters(listFile.subList(68, 100));
+//		list.add(resultEval3);
+//		RasterMergeResult.merge(list);
+		File resultFile = new File(rootFile, "resultYag");
 		resultFile.mkdir();
 		HighAndLowEvals(resultEval.getCellEvals(), resultFile, listFile.get(0));
 

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -33,8 +34,8 @@ import fr.ign.cogit.GTFunctions.Vectors;
 public class OutputTools {
 
 	public static void main(String[] args) throws IOException, NoSuchAuthorityCodeException, FactoryException, ParseException {
-		VectorizeMupOutput(Rasters.importRaster(new File("/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataAutom/dataAutom-CM20.0-S0.0-GP_915948.0_6677337.0--N5_Ba_Moy_ahpx/SortieExemple/Stability-dataAutom-CM20.0-S0.0-GP_915948.0_6677337.0--N5_Ba_Moy_ahpx_seed_8186048318420992154-evalAnal-20.0.tif")), 
-				new File("/home/mcolomb/tmp/N5BaAutom"),20);
+		VectorizeMupOutput(Rasters.importRaster(new File("/media/mcolomb/Data_2/resultFinal/testAHP/2emevague/StabiliteTestAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N4_Ba_MoyahpE_Moy_seed_42/N4_Ba_MoyahpE_Moy_seed_42-evalAnal-20.0.tif")), 
+				new File("/media/mcolomb/Data_2/resultFinal/compThema/N4BaEMoy"),20);
 
 	}
 

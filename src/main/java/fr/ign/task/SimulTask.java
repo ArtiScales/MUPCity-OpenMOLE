@@ -50,9 +50,9 @@ public class SimulTask {
 		File projFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/2emevague/StabiliteTestAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0");
 
 		String name = "StabiliteTestAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0";
-		saveEvalAnal=false;
+		saveEvalAnal=true;
 		
-		// for yager
+
 		double ahp0 = 0.111;
 		double ahp1 = 0.111;
 		double ahp2 = 0.111;
@@ -62,8 +62,19 @@ public class SimulTask {
 		double ahp6 = 0.111;
 		double ahp7 = 0.111;
 		double ahp8 = 0.111;
+		
+//		 double ahp8 = 0.083;
+//		 double ahp7 = 0.083;
+//		 double ahp6 = 0.083;
+//		 double ahp5 = 0.04;
+//		 double ahp4 = 0.218;
+//		 double ahp3 = 0.218;
+//		 double ahp2 = 0.218;
+//		 double ahp1 = 0.03;
+//		 double ahp0 = 0.027;
 
-		// for moy
+
+		 
 		// double ahp0 = 1;
 		// double ahp1 = 1;
 		// double ahp2 = 1;
@@ -75,14 +86,14 @@ public class SimulTask {
 		// double ahp8 = 1;
 
 		boolean strict = false;
-		boolean mean = true;
-		int nMax = 5;
-		long seed = 42;
+		boolean mean = false;
+		int nMax = 7;
+		long seed = 26;
 		
-		for (int i =0; i <= 100; i = i + 1) {
+//		for (int i =0; i <= 50; i = i + 1) {
 			seed = (long) (Math.random()*100000);
-			run(projFile,new File("/media/mcolomb/Data_2/resultFinal/evals"), name, nMax, strict, prepareAHP(ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8),"ahpE", mean, seed, true);
-		}
+			run(projFile,new File("/media/mcolomb/Data_2/resultFinal/compThema"), name, nMax, strict, prepareAHP(ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8),"ahpE", mean, seed, true);
+//		}
 	}
 
 	public static File run(File decompFile, String name, int nMax, boolean strict, double ahp0, double ahp1, double ahp2, double ahp3, double ahp4, double ahp5, double ahp6,
