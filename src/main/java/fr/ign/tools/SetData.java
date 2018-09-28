@@ -235,7 +235,6 @@ public class SetData {
 
 		int nbFile = listShp.size();
 		for (int i = 0; i < nbFile; i++) {
-			System.out.println(listShp.get(i));
 			if (!listShp.get(i).exists()) {
 				listShp.remove(i);
 				i--;
@@ -383,70 +382,6 @@ public class SetData {
 			iterator.close();
 		}
 		return dfCuted.collection();
-	}
-
-	public static Geometry union(Geometry g1, Geometry g2) {
-		if (g1 instanceof GeometryCollection) {
-			if (g2 instanceof GeometryCollection) {
-				return union((GeometryCollection) g1, (GeometryCollection) g2);
-			} else {
-				List<Geometry> ret = union((GeometryCollection) g1, g2);
-				return g1.getFactory().createGeometryCollection(GeometryFactory.toGeometryArray(ret));
-			}
-		} else {
-			if (g2 instanceof GeometryCollection) {
-				List<Geometry> ret = union((GeometryCollection) g2, g1);
-				return g1.getFactory().createGeometryCollection(GeometryFactory.toGeometryArray(ret));
-			} else {
-				return g1.intersection(g2);
-			}
-		}
-	}
-
-	private static List<Geometry> union(GeometryCollection gc, Geometry g) {
-		List<Geometry> ret = new ArrayList<Geometry>();
-		final int size = gc.getNumGeometries();
-		for (int i = 0; i < size; i++) {
-			Geometry g1 = (Geometry) gc.getGeometryN(i);
-			collect(g1.union(g), ret);
-		}
-		return ret;
-	}
-
-	/**
-	 * Helper method for {@link #union(Geometry, Geometry) union(Geometry, Geometry)}
-	 */
-	private static GeometryCollection union(GeometryCollection gc1, GeometryCollection gc2) {
-		List<Geometry> ret = new ArrayList<Geometry>();
-		final int size = gc1.getNumGeometries();
-		for (int i = 0; i < size; i++) {
-			Geometry g1 = (Geometry) gc1.getGeometryN(i);
-			List<Geometry> partial = union(gc2, g1);
-			ret.addAll(partial);
-		}
-		return gc1.getFactory().createGeometryCollection(GeometryFactory.toGeometryArray(ret));
-	}
-
-	/**
-	 * Adds into the <TT>collector</TT> the Geometry <TT>g</TT>, or, if <TT>g</TT> is a GeometryCollection, every geometry in it.
-	 *
-	 * @param g
-	 *            the Geometry (or GeometryCollection to unroll)
-	 * @param collector
-	 *            the Collection where the Geometries will be added into
-	 */
-	private static void collect(Geometry g, List<Geometry> collector) {
-		if (g instanceof GeometryCollection) {
-			GeometryCollection gc = (GeometryCollection) g;
-			for (int i = 0; i < gc.getNumGeometries(); i++) {
-				Geometry loop = gc.getGeometryN(i);
-				if (!loop.isEmpty())
-					collector.add(loop);
-			}
-		} else {
-			if (!g.isEmpty())
-				collector.add(g);
-		}
 	}
 
 	public static File extractSireneFromDB(File tempFile, Integer[] depList, String DB_URL, String USER, String PASS) throws SQLException, IOException {

@@ -34,8 +34,9 @@ import fr.ign.cogit.GTFunctions.Vectors;
 public class OutputTools {
 
 	public static void main(String[] args) throws IOException, NoSuchAuthorityCodeException, FactoryException, ParseException {
-		VectorizeMupOutput(Rasters.importRaster(new File("/media/mcolomb/Data_2/resultFinal/testAHP/2emevague/StabiliteTestAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N4_Ba_MoyahpE_Moy_seed_42/N4_Ba_MoyahpE_Moy_seed_42-evalAnal-20.0.tif")), 
-				new File("/media/mcolomb/Data_2/resultFinal/compThema/N4BaEMoy"),20);
+		VectorizeMupOutput(Rasters.importRaster(new File(
+				"/media/mcolomb/Data_2/resultFinal/testAHP/2emevague/StabiliteTestAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N4_Ba_MoyahpE_Moy_seed_42/N4_Ba_MoyahpE_Moy_seed_42-evalAnal-20.0.tif")),
+				new File("/media/mcolomb/Data_2/resultFinal/compThema/N4BaEMoy"), 20);
 
 	}
 
@@ -43,8 +44,7 @@ public class OutputTools {
 			throws IOException, NoSuchAuthorityCodeException, FactoryException, ParseException {
 
 		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:2154");
-		ReferencedEnvelope gridBounds = new ReferencedEnvelope(coverage.getEnvelope2D().getMinX(),
-				coverage.getEnvelope2D().getMaxX(), coverage.getEnvelope2D().getMinY(),
+		ReferencedEnvelope gridBounds = new ReferencedEnvelope(coverage.getEnvelope2D().getMinX(), coverage.getEnvelope2D().getMaxX(), coverage.getEnvelope2D().getMinY(),
 				coverage.getEnvelope2D().getMaxY(), sourceCRS);
 
 		SimpleFeatureTypeBuilder sfTypeBuilder = new SimpleFeatureTypeBuilder();
@@ -64,25 +64,25 @@ public class OutputTools {
 		// être calculé une bonne fois pour toute et rester dans un objet dédié. J'ai
 		// fait ça pour que moins de trucs en mémoire soit stocké et peut être pas avoir
 		// l'erreure
-		
-//		SimpleFeatureCollection cellsGridSFC = Grids.createSquareGrid(gridBounds, sizeCell).getFeatures();
-//		SimpleFeature[] salut = cellsGridSFC.toArray(new SimpleFeature[0]);
-//		Stream<SimpleFeature> s = Arrays.stream(salut).filter(sf-> (((float[])(coverage.evaluate(new DirectPosition2D((sf.getBounds().getMaxX() - sf.getBounds().getHeight() / 2),
-//				(sf.getBounds().getMaxY() - sf.getBounds().getHeight() / 2))))[0])>0));
-//		DefaultFeatureCollection geometryCollection = new DefaultFeatureCollection(Arrays.asList(s.toArray()));
-		
-		 SimpleFeatureIterator featIt = Grids.createSquareGrid(gridBounds,
-		 sizeCell).getFeatures().features();
+		// SimpleFeatureCollection cellsGridSFC = Grids.createSquareGrid(gridBounds, sizeCell).getFeatures();
+		// SimpleFeature[] salut = cellsGridSFC.toArray(new SimpleFeature[0]);
+		// Stream<SimpleFeature> s = Arrays.stream(salut).filter(sf-> (((float[])(coverage.evaluate(new DirectPosition2D((sf.getBounds().getMaxX() - sf.getBounds().getHeight() /
+		// 2),
+		// (sf.getBounds().getMaxY() - sf.getBounds().getHeight() / 2))))[0])>0));
+		// DefaultFeatureCollection geometryCollection = new DefaultFeatureCollection(Arrays.asList(s.toArray()));
+
+		SimpleFeatureIterator featIt = Grids.createSquareGrid(gridBounds, sizeCell).getFeatures().features();
 
 		try {
 			while (featIt.hasNext()) {
-	
-				float yo = ((float[]) coverage.evaluate(new DirectPosition2D((featIt.next().getBounds().getMaxX() - featIt.next().getBounds().getHeight() / 2),
-						(featIt.next().getBounds().getMaxY() - featIt.next().getBounds().getHeight() / 2))))[0];
+				SimpleFeature feat = featIt.next();
+
+				float yo = ((float[]) coverage.evaluate(new DirectPosition2D((feat.getBounds().getMaxX() - feat.getBounds().getWidth() / 2), (feat.getBounds().getMaxY() - feat.getBounds().getHeight() / 2))))[0];
+						
 				if (yo > 0) {
 					i = i + 1;
-					sfBuilder.add(featIt.next().getDefaultGeometry());
-					output.add(sfBuilder.buildFeature("id" + i, new Object[]{ yo }));
+					sfBuilder.add(feat.getDefaultGeometry());
+					output.add(sfBuilder.buildFeature("id" + i, new Object[] { yo }));
 				}
 			}
 		} catch (Exception problem) {
@@ -95,12 +95,12 @@ public class OutputTools {
 	}
 
 	/**
-	 * Class to get all the fractal dimensions from the .csv files and copy them to
-	 * a file named {f}/totalDimFractales.csv 
-	 * Eliminates the duplicated simulations
+	 * Class to get all the fractal dimensions from the .csv files and copy them to a file named {f}/totalDimFractales.csv Eliminates the duplicated simulations
 	 * 
-	 * @param f gile containing the different scenario files
-	 * @param echelle : scale of the different parcel sizes
+	 * @param f
+	 *            gile containing the different scenario files
+	 * @param echelle
+	 *            : scale of the different parcel sizes
 	 * @throws IOException
 	 */
 	public static void digOnDimFract(File f, String echelle) throws IOException {
@@ -118,8 +118,7 @@ public class OutputTools {
 							if (line[0].equals("dimension de corrélation")) {
 								if (listLine.get(i - 1)[0].endsWith("evalAnal-20.0.tif")) {
 
-									String nametemp = listLine.get(i - 1)[0].replaceAll(
-											"scenario Stability-dataAutom-CM20.0-S0.0-GP_915948.0_6677337.0--", "");
+									String nametemp = listLine.get(i - 1)[0].replaceAll("scenario Stability-dataAutom-CM20.0-S0.0-GP_915948.0_6677337.0--", "");
 									Pattern dbTiret = Pattern.compile("_");
 									String[] decompName = dbTiret.split(nametemp);
 									String name = (decompName[0] + "_" + decompName[1] + "_" + decompName[2]);

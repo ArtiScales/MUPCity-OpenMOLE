@@ -37,7 +37,7 @@ public class ScenarTools {
 	 */
 	public static String getAHPName(HashMap<String, Double> list) throws FileNotFoundException {
 		for (String nam : list.keySet()) {
-			if (nam.length() > 5) {
+			if (nam.length() > 4) {
 				return nam;
 			}
 		}

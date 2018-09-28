@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -16,6 +17,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.geotools.geometry.DirectPosition2D;
+import org.math.plot.utils.Array;
 
 import fr.ign.analyse.FractalDimention;
 import fr.ign.analyse.RasterAnalyse;
@@ -30,58 +32,73 @@ public class AnalyseTask {
 	// public static String echelle;
 
 	public static void main(String[] args) throws Exception {
-//		 File file = new File("/home/mcolomb/workspace/mupcity-openMole/result/gridExploProjets2");
-//		 runGridSens(file, new File("/home/mcolomb/workspace/mupcity-openMole/data/"), "gridExplo");
+		// File file = new File("/home/mcolomb/workspace/mupcity-openMole/result/gridExploProjets2");
+		// runGridSens(file, new File("/home/mcolomb/workspace/mupcity-openMole/data/"), "gridExplo");
 
-		
-		RasterAnalyse.echelle = "20";
-		RasterAnalyse.statFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/comparaison/N5Ba/stat");
-		 List<File> toCompare = new ArrayList<File>();
-		 toCompare.add(new File("/media/mcolomb/Data_2/resultFinal/testAHP/2emevague/StabiliteTestAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N5_Ba_MoyahpS_Moy_seed_42/N5_Ba_MoyahpS_Moy_seed_42-evalAnal-20.0.tif"));
-		 toCompare.add(new File("/media/mcolomb/Data_2/resultFinal/testAHP/2emevague/StabiliteTestAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N5_Ba_MoyahpE_Moy_seed_42/N5_Ba_MoyahpE_Moy_seed_42-evalAnal-20.0.tif"));
-		 toCompare.add(new File("/media/mcolomb/Data_2/resultFinal/testAHP/2emevague/StabiliteTestAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N5_Ba_MoyahpT_Moy_seed_42/N5_Ba_MoyahpT_Moy_seed_42-evalAnal-20.0.tif"));
+		// RasterAnalyse.echelle = "20";
+		// RasterAnalyse.statFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/comparaison/N5Ba/stat");
+		// List<File> toCompare = new ArrayList<File>();
+		// toCompare.add(new
+		// File("/media/mcolomb/Data_2/resultFinal/testAHP/2emevague/StabiliteTestAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N5_Ba_MoyahpS_Moy_seed_42/N5_Ba_MoyahpS_Moy_seed_42-evalAnal-20.0.tif"));
+		// toCompare.add(new
+		// File("/media/mcolomb/Data_2/resultFinal/testAHP/2emevague/StabiliteTestAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N5_Ba_MoyahpE_Moy_seed_42/N5_Ba_MoyahpE_Moy_seed_42-evalAnal-20.0.tif"));
+		// toCompare.add(new
+		// File("/media/mcolomb/Data_2/resultFinal/testAHP/2emevague/StabiliteTestAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N5_Ba_MoyahpT_Moy_seed_42/N5_Ba_MoyahpT_Moy_seed_42-evalAnal-20.0.tif"));
+		//
+		// compTwoSimus(toCompare,RasterAnalyse.statFile.getParentFile(),"20");
+		//
 
-		 compTwoSimus(toCompare,RasterAnalyse.statFile.getParentFile(),"20");
-		
+		// AHP
+		 File AHPFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/troisiemeVague/");
+		 RasterAnalyse.echelle = "20";
+		 RasterAnalyse.statFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/troisiemeVague/stat");
+		 runStabAHP(AHPFile,new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu") , "StabiliteTestAHP", false);
 
-//		//AHP
-//		File AHPFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/");		
-//		RasterAnalyse.echelle = "20";
-//		RasterAnalyse.statFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/stat");
-//		runStabAHP(AHPFile,new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu") , "StabiliteTestAHP", false);
-		
-		
-//		//cellules par rapport aux zones constructibles
-//		List<File> lF = new ArrayList<File>();
-//		lF.add(new File(
-//				"/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N4_St_Moy_ahpx/SortieExemple/"));
-//		lF.add(new File(
-//				"/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N6_St_Moy_ahpx/SortieExemple/"));
-//		lF.add(new File(
-//				"/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N5_Ba_Moy_ahpx/SortieExemple/"));
-//		lF.add(new File(
-//				"/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N7_Ba_Yag_ahpx/SortieExemple/"));
+//		File AHPFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/troisiemeVague/StabiliteTestAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0");
+//		List<File> dejafa = new ArrayList<File>();
 //
-//		for (File f : lF) {
-//			
-//				for (File ff : f.listFiles()) {
-//					if (ff.getName().contains("evalAnal-20.0.tif")) {
-//					RasterAnalyse.echelle = "20";
-//					RasterAnalyse.statFile = new File("/home/mcolomb/tmp/");
-//
-//					RasterMergeResult salut = RasterAnalyse.mergeRasters(ff);
-//
-//					String[] champ = { "Zones Constructibles", "LIBELLE" };
-//
-//					RasterAnalyse.createStatsDiscrete(
-//							f.getName().replace("_ahpx_seed_6111434047454933700-evalAnal-20.0.tif", "").replace("tability-dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--", ""), salut,
-//							new File("/media/mcolomb/Data_2/donnee/docUrbaLocalTotssUx.shp"), champ);
+//		for (File f : AHPFile.listFiles()) {
+//			if (!f.isDirectory()) {
+//				File dir = new File(f.getParentFile(), f.getName().split("-")[0]);
+//				if (!dejafa.contains(dir)) {
+//					dir.mkdir();
+//					dejafa.add(dir);
 //				}
+//
+//				OutputStream o = new FileOutputStream(new File(dir,f.getName()));
+//				Files.copy(f.toPath(), o);
+//			
 //			}
 //		}
 
-
-
+		// //cellules par rapport aux zones constructibles
+		// List<File> lF = new ArrayList<File>();
+		// lF.add(new File(
+		// "/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N4_St_Moy_ahpx/SortieExemple/"));
+		// lF.add(new File(
+		// "/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N6_St_Moy_ahpx/SortieExemple/"));
+		// lF.add(new File(
+		// "/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N5_Ba_Moy_ahpx/SortieExemple/"));
+		// lF.add(new File(
+		// "/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N7_Ba_Yag_ahpx/SortieExemple/"));
+		//
+		// for (File f : lF) {
+		//
+		// for (File ff : f.listFiles()) {
+		// if (ff.getName().contains("evalAnal-20.0.tif")) {
+		// RasterAnalyse.echelle = "20";
+		// RasterAnalyse.statFile = new File("/home/mcolomb/tmp/");
+		//
+		// RasterMergeResult salut = RasterAnalyse.mergeRasters(ff);
+		//
+		// String[] champ = { "Zones Constructibles", "LIBELLE" };
+		//
+		// RasterAnalyse.createStatsDiscrete(
+		// f.getName().replace("_ahpx_seed_6111434047454933700-evalAnal-20.0.tif", "").replace("tability-dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--", ""), salut,
+		// new File("/media/mcolomb/Data_2/donnee/docUrbaLocalTotssUx.shp"), champ);
+		// }
+		// }
+		// }
 
 		// //compdata
 		// File totFile = new File("/media/mcolomb/Data_2/resultFinal/compData");
@@ -465,11 +482,9 @@ public class AnalyseTask {
 		return resultFile;
 	}
 
-	
 	public static File runStabAHP(File file, File fileDonnee, String name, boolean machineReadable) throws Exception {
 		System.out.println("Initialization");
 		Initialize.init();
-System.out.println("je ne sais pas ce que c'est, mais c'est fait");
 		// folder settings
 		File resultFile = new File(file, "result--" + name);
 		if (machineReadable) {
@@ -479,11 +494,11 @@ System.out.println("je ne sais pas ce que c'est, mais c'est fait");
 		RasterAnalyse.rootFile = file;
 		RasterAnalyse.stabilite = true;
 
-		Analyse	anal = new Analyse(file, name);
-
+		Analyse anal = new Analyse(file, name);
+		System.out.println(anal.ahpCollec);
 		// sélectionne des listes de scénario ayant pour différence la seed
 		for (List<ScenarAnalyse> arL : anal.getScenarDiffSeed()) {
-System.out.println("on trouves "+arL.get(0).getScenarFile());
+			System.out.println("on trouves " + arL.get(0).getScenarFile());
 			// pour tous les fichiers de ces listes
 
 			// pour les trois premières échelles
@@ -512,7 +527,7 @@ System.out.println("on trouves "+arL.get(0).getScenarFile());
 
 				// get the set of files to test
 				for (ScenarAnalyse sC : arL) {
-		
+
 					fileToTest.add(anal.getSimuFile(sC, echelle, "evalAnal"));
 				}
 
@@ -540,7 +555,7 @@ System.out.println("on trouves "+arL.get(0).getScenarFile());
 		}
 		return resultFile;
 	}
-	
+
 	/**
 	 * Overlaoding to use aggregation transition from openMole Creates a new directory <i>mainFile</i> with the use of <i>copyToScenVrac</i> and puts all of the incoming
 	 * <i>file[]</i> in it

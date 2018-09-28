@@ -445,8 +445,8 @@ public class Analyse {
 						for (String str : strictCollec) {
 							List<ScenarAnalyse> sortedList = new ArrayList<ScenarAnalyse>();
 							for (ScenarAnalyse scen : scenProj) {
-								if (scen.getAhp().equals(ahp) && scen.getnMax().equals(n) && scen.isStrict().equals(str) && scen.isYag().equals(yag)) {
-									// if (scen.getAhp().equals(yag) && scen.getnMax().equals(n) && scen.isStrict().equals(str) && scen.isYag().equals(ahp)) { //fausse ligne mais
+								//if (scen.getAhp().equals(ahp) && scen.getnMax().equals(n) && scen.isStrict().equals(str) && scen.isYag().equals(yag)) {
+									 if (scen.getAhp().equals(yag) && scen.getnMax().equals(n) && scen.isStrict().equals(str) && scen.isYag().equals(ahp)) { //fausse ligne mais
 									// une simu manuelle avait des nombres inversées (pourquoi??!)
 									sortedList.add(scen);
 								}
