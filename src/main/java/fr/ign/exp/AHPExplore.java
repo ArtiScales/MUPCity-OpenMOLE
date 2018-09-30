@@ -9,6 +9,7 @@ import java.util.Map;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import fr.ign.analyse.FractalDimention;
+import fr.ign.analyse.RasterAnalyse;
 import fr.ign.task.AnalyseTask;
 import fr.ign.task.ProjectCreationDecompTask;
 import fr.ign.task.SimulTask;
@@ -136,17 +137,31 @@ public class AHPExplore {
 			int nMax = 4;
 			strict = true;
 			for (HashMap<String, Double> list : ahpList) {
-
 				String ahpName = ScenarTools.getAHPName(list);
-				if (ahpName.contains("Yag")) {
-					File fileScenar = SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, list.get("ahp0"), list.get("ahp1"), list.get("ahp2"),
+				
+				//scénario séparé pour avoir une seed répliqué (de 42)
+				SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, list.get("ahp0"), list.get("ahp1"), list.get("ahp2"),
+						list.get("ahp3"), list.get("ahp4"), list.get("ahp5"), list.get("ahp6"), list.get("ahp7"), list.get("ahp8"), ahpName, ScenarTools.setAgregMethod(list),
+						seed, false);
+		
+				for (int ii = 0; ii <= 98; ii++) {
+					seed =  (long) (Math.random()*1000) ;
+					SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, list.get("ahp0"), list.get("ahp1"), list.get("ahp2"),
 							list.get("ahp3"), list.get("ahp4"), list.get("ahp5"), list.get("ahp6"), list.get("ahp7"), list.get("ahp8"), ahpName, ScenarTools.setAgregMethod(list),
 							seed, false);
 					
-					}
+				}
 				}
 			}
-		}
+
+		//analyse the result
+		 RasterAnalyse.echelle = "20";
+		 RasterAnalyse.statFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/troisiemeVague/stat");
+		 AnalyseTask.runStabAHP(folderOut,new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu") , "StabiliteTestAHP", false);
+
+	}
+	
+
 	}
 
 

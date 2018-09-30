@@ -46,13 +46,9 @@ public class AnalyseTask {
 		// File("/media/mcolomb/Data_2/resultFinal/testAHP/2emevague/StabiliteTestAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N5_Ba_MoyahpT_Moy_seed_42/N5_Ba_MoyahpT_Moy_seed_42-evalAnal-20.0.tif"));
 		//
 		// compTwoSimus(toCompare,RasterAnalyse.statFile.getParentFile(),"20");
-		//
 
-		// AHP
-		 File AHPFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/troisiemeVague/");
-		 RasterAnalyse.echelle = "20";
-		 RasterAnalyse.statFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/troisiemeVague/stat");
-		 runStabAHP(AHPFile,new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu") , "StabiliteTestAHP", false);
+		
+		
 
 //		File AHPFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/troisiemeVague/StabiliteTestAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0");
 //		List<File> dejafa = new ArrayList<File>();

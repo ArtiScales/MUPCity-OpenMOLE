@@ -204,6 +204,9 @@ public class ProjectCreationDecompTask {
 			project.setLayer(Project.LAYERS.get(Project.Layers.RESTRICT.ordinal()), restrictFile, emptyAttrs);
 		}
 		project.setDistType((network) ? OriginDistance.NetworkDistance.class : OriginDistance.EuclideanDistance.class);
+System.out.println("    " );
+		System.out.println("  SRC du projet : " + project.getCRS() );
+System.out.println("    " );
 		System.out.println("Saving project");
 		project.save();
 

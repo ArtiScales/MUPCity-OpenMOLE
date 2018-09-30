@@ -115,7 +115,7 @@ public class Initialize {
 
 		// Fix issue with tomcat and JreMemoryLeakPreventionListener causing issues with
 		// IIORegistry leading to imageio plugins not being properly initialized
-		System.out.println("scanForPlugins");
+//		System.out.println("scanForPlugins");
 		ImageIO.scanForPlugins();
 		IIORegistry registry = IIORegistry.getDefaultInstance();
 		printRegistry(registry);
@@ -125,7 +125,7 @@ public class Initialize {
 		ImageIOExt.allowNativeCodec("png", ImageReaderSpi.class, false);
 		ImageIOExt.allowNativeCodec("png", ImageWriterSpi.class, true);
 
-		System.out.println("allowNativeCodec");
+//		System.out.println("allowNativeCodec");
 		printRegistry(registry);
 
 		// remove the ImageIO JPEG200 readers/writes, they are outdated and not quite
@@ -158,7 +158,7 @@ public class Initialize {
 		// System.out.println("registerApplicationClasspathSpis");
 		// registry.registerApplicationClasspathSpis();
 		// printRegistry(registry);
-		System.out.println("unregister Stuff");
+//		System.out.println("unregister Stuff");
 		 unregisterImageIO(ImageReaderSpi.class);
 		 unregisterImageIO(ImageWriterSpi.class);
 		 unregisterImageIO(ImageInputStreamSpi.class);
@@ -613,7 +613,7 @@ public class Initialize {
 		// com.sun.imageio.spi.OutputStreamImageOutputStreamSpi@4e62e3d2
 		// Service Provider = com.sun.imageio.spi.RAFImageOutputStreamSpi@6b9733c2
 
-		System.out.println("register Stuff");
+	//	System.out.println("register Stuff");
 		registry.registerServiceProvider(new it.geosolutions.imageioimpl.plugins.tiff.TIFFImageWriterSpi());
 		registry.registerServiceProvider(new it.geosolutions.imageioimpl.plugins.tiff.TIFFImageReaderSpi());
 		registry.registerServiceProvider(new it.geosolutions.imageio.stream.output.spi.FileImageOutputStreamExtImplSpi());
@@ -681,10 +681,10 @@ public class Initialize {
 		Iterator<Class<?>> it = registry.getCategories();
 		while (it.hasNext()) {
 			Class<?> category = it.next();
-			System.out.println("Category = " + category);
+	//		System.out.println("Category = " + category);
 			Iterator<?> spIt = registry.getServiceProviders(category, true);
 			while (spIt.hasNext()) {
-				System.out.println("\tService Provider = " + spIt.next());
+	//			System.out.println("\tService Provider = " + spIt.next());
 			}
 		}
 	}

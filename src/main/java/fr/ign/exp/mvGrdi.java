@@ -14,7 +14,6 @@ import fr.ign.tools.ScenarTools;
 public class mvGrdi {
 
 	public static void main(String[] args) throws Exception {
-		// TODO Auto-generated method stub
 		DataSetSelec.predefSet();
 		Map<String, String> dataHT = DataSetSelec.get("Data1");
 		String name = "GridMouv";
