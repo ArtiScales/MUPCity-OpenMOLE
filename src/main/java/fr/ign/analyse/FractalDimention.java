@@ -34,22 +34,22 @@ import fr.ign.cogit.GTFunctions.Csv;
 
 public class FractalDimention {
 	public static void main(String[] args) throws Exception {
-		int resolution = 5;
-		File fileOut = new File("/home/mcolomb/tmp/fractDimS.tif");
-		fileOut.mkdirs();
-		File batiFile = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu/batimentPro.shp");
-		// File rootFile = new File("/media/mcolomb/Data_2/resultExplo/Stability/N5MoySt");
-		// getCorrFracDimfromSimu(batiFile, rootFile, fileOut, resolution);
-		File testFile = new File(
-				"/media/mcolomb/Data_2/resultFinal/testAHP/Stabilite-testAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N5_Ba_MoyahpS_Moy_seed_42/N5_Ba_MoyahpS_Moy_seed_42-evalAnal-20.0.tif");
-		getCorrFracDim(batiFile, testFile, fileOut, resolution, "seed_8600511651180259677");
-		fileOut = new File("/home/mcolomb/tmp/fractDimT.tif");
-		testFile = new File(
-				"/media/mcolomb/Data_2/resultFinal/testAHP/Stabilite-testAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N5_Ba_MoyahpT_Moy_seed_42/N5_Ba_MoyahpT_Moy_seed_42-evalAnal-20.0.tif");
-		getCorrFracDim(batiFile, testFile, fileOut, resolution, "seed_8600511651180259677");
+//		int resolution = 5;
+//		File fileOut = new File("/home/mcolomb/tmp/fractDimS.tif");
+//		fileOut.mkdirs();
+//		File batiFile = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu/batimentPro.shp");
+//		// File rootFile = new File("/media/mcolomb/Data_2/resultExplo/Stability/N5MoySt");
+//		// getCorrFracDimfromSimu(batiFile, rootFile, fileOut, resolution);
+//		File testFile = new File("");
+//		getCorrFracDim(batiFile, testFile, fileOut, resolution, "seed_8600511651180259677");
+//		fileOut = new File("/home/mcolomb/tmp/fractDimT.tif");
+//		testFile = new File(
+//				"/media/mcolomb/Data_2/resultFinal/testAHP/Stabilite-testAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N5_Ba_MoyahpT_Moy_seed_42/N5_Ba_MoyahpT_Moy_seed_42-evalAnal-20.0.tif");
+//		getCorrFracDim(batiFile, testFile, fileOut, resolution, "seed_8600511651180259677");
+		
+		getCorrFracDim(new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu/batimentPro.shp"),new File("/home/mcolomb/tmp/cra.tif"),new File("//home/mcolomb/tmp/"),20,"lol");
 	}
-
-	/**
+		/**
 	 * get the fractal dimension (calculated with the correlation method) of a MUP-City output by mergini it with a build file
 	 * 
 	 * @param batiFile

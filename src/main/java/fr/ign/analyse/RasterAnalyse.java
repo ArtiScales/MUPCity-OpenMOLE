@@ -8,7 +8,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.apache.commons.math3.stat.correlation.Covariance;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -70,44 +69,49 @@ public class RasterAnalyse {
 	public static boolean saveEvalTab = false;
 
 	public static void main(String[] args) throws Exception {
-		rootFile = new File("/media/mcolomb/Data_2/resultFinal/evals");
+		rootFile = new File("/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite");
 		echelle = "20";
-		saveEvalTab = true;
+		// saveEvalTab = true;
+		//
+		// List<File> listFile = new ArrayList<File>();
+		// RasterMergeResult rmr = new RasterMergeResult();
+		//
+		// for (File f : rootFile.listFiles()) {
+		// if (f.getName().endsWith("eval-20.0.tif") && f.getName().contains("ahpS")) {
+		// listFile.add(f);
+		// }
+		// }
+		//
+		//
+		// RasterMergeResult resultEval = mergeRasters(listFile.subList(0, 50));
+		//// list.add(resultEval);
+		//// RasterMergeResult resultEval2 = mergeRasters(listFile.subList(34, 67));
+		//// list.add(resultEval2);
+		//// RasterMergeResult resultEval3 = mergeRasters(listFile.subList(68, 100));
+		//// list.add(resultEval3);
+		//// RasterMergeResult.merge(list);
+		// File resultFile = new File(rootFile, "resultYag");
+		// resultFile.mkdir();
+		// HighAndLowEvals(resultEval.getCellEvals(), resultFile, listFile.get(0));
 
-		List<File> listFile = new ArrayList<File>();
-		RasterMergeResult rmr = new RasterMergeResult();
+		Hashtable<String, Hashtable<String, Double>> resultAmenite = new Hashtable<String, Hashtable<String, Double>>();
 
 		for (File f : rootFile.listFiles()) {
-			if (f.getName().endsWith("eval-20.0.tif") && f.getName().contains("ahpS")) {
-				listFile.add(f);
+			if (f.isDirectory() && f.getName().startsWith("dataManu")) {
+				for (File ff : f.listFiles()) {
+					if (ff.getName().equals("SortieExemple")) {
+						for (File fff : ff.listFiles()) {
+							if (fff.getName().endsWith("evalAnal-" + echelle + ".0.tif")) {
+								String nameScenar = fff.getName().replace("StabiliteTestAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0--", "").replace("evalAnal-" + echelle + ".0.tif", "");
+								resultAmenite.put(nameScenar, getDistanceFromServices(fff, nameScenar));
+							}
+						}
+					}
+				}
 			}
 		}
 
-		
-		RasterMergeResult resultEval = mergeRasters(listFile.subList(0, 50));
-//		list.add(resultEval);
-//		RasterMergeResult resultEval2 = mergeRasters(listFile.subList(34, 67));
-//		list.add(resultEval2);
-//		RasterMergeResult resultEval3 = mergeRasters(listFile.subList(68, 100));
-//		list.add(resultEval3);
-//		RasterMergeResult.merge(list);
-		File resultFile = new File(rootFile, "resultYag");
-		resultFile.mkdir();
-		HighAndLowEvals(resultEval.getCellEvals(), resultFile, listFile.get(0));
-
-		// Hashtable<String, Hashtable<String, Double>> resultAmenite = new Hashtable<String, Hashtable<String, Double>>();
-		//
-		// File mupFile = new File(rootFile, "StabiliteTestAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0");
-		// for (File f : mupFile.listFiles()) {
-		// if (f.getName().startsWith("N") && f.getName().endsWith("_42") && f.isDirectory()) {
-		// for (File ff : f.listFiles()) {
-		// if (ff.getName().endsWith(echelle + ".0.tif")) {
-		// resultAmenite.put(f.getName(), getDistanceFromServices(ff, f.getName().replace("scenario ", "").replace("seed_50042", "").replace("_",",")));
-		// }
-		// }
-		// }
-		// }
-		// Csv.generateCsvFileMultTab(resultAmenite, rootFile, "distanceAmenite");
+		Csv.generateCsvFileMultTab(resultAmenite, rootFile, "distanceAmenite");
 		//
 		// Hashtable<String, Hashtable<String, Double>> resultTC = new Hashtable<String, Hashtable<String, Double>>();
 		//

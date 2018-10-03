@@ -27,7 +27,7 @@ public class mvGrdi {
 		double shiftX = 0;
 		double shiftY = 0;
 
-		double minSize = 15;
+		double minSize = 20;
 		double maxSize = 14580;
 		// double maxSize = 200;
 		double seuilDensBuild = 0;
@@ -51,34 +51,37 @@ public class mvGrdi {
 
 		System.out.println("----------Simulation task----------");
 		SimulTask.saveEval = false;
+		SimulTask.saveWholeProj = true;
 
-		for (minSize = 10; minSize < 20; minSize++) {
-			for (int xSlide = -1; xSlide <= 1; xSlide++) {
-				for (int ySlide = -1; ySlide <= 1; ySlide++) {
-					double xmin = 915948 + xSlide * minSize;
-					double ymin = 6677337 + ySlide * minSize;
+		for (int xSlide = -1; xSlide <= 1; xSlide++) {
+			for (int ySlide = -1; ySlide <= 1; ySlide++) {
+				double xmin = 915948 + xSlide * minSize;
+				double ymin = 6677337 + ySlide * minSize;
 
-					MutablePair<String, File> projectFile = ProjectCreationDecompTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT, maxSize,
-							minSize, seuilDensBuild, false);
-					for (int g = 0; g < 2; g++) {
-						int nMax = 4;
-						boolean strict = true;
-						switch (g) {
-						case 1:
-							nMax = 5;
-							strict = false;
-							break;
-						case 2:
-							nMax = 6;
-							strict = true;
-							break;
-						}
-
-						File fileScenar = SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, ahpE_Moy.get("ahp0"), ahpE_Moy.get("ahp1"),
-								ahpE_Moy.get("ahp2"), ahpE_Moy.get("ahp3"), ahpE_Moy.get("ahp4"), ahpE_Moy.get("ahp5"), ahpE_Moy.get("ahp6"), ahpE_Moy.get("ahp7"),
-								ahpE_Moy.get("ahp8"), ahpName, true, seed, false);
-
+				
+				MutablePair<String, File> projectFile = ProjectCreationDecompTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT, maxSize,
+						minSize, seuilDensBuild, false);
+				
+				System.out.println(projectFile);
+				
+				for (int g = 0; g < 2; g++) {
+					int nMax = 4;
+					boolean strict = true;
+					switch (g) {
+					case 1:
+						nMax = 5;
+						strict = false;
+						break;
+					case 2:
+						nMax = 6;
+						strict = true;
+						break;
 					}
+
+					SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, ahpE_Moy.get("ahp0"), ahpE_Moy.get("ahp1"), ahpE_Moy.get("ahp2"),
+							ahpE_Moy.get("ahp3"), ahpE_Moy.get("ahp4"), ahpE_Moy.get("ahp5"), ahpE_Moy.get("ahp6"), ahpE_Moy.get("ahp7"), ahpE_Moy.get("ahp8"), ahpName, true, seed,
+							false);
+
 				}
 			}
 		}

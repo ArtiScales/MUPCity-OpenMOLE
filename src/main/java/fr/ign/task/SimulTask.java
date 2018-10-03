@@ -52,12 +52,12 @@ public class SimulTask {
 	public static String nameProj;
 
 	public static void main(String[] args) throws Exception {
-		File projFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/2emevague/StabiliteTestAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0");
 
 		String name = "StabiliteTestAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0";
 		saveEvalAnal = true;
 
 		// setting on our six ahp objects
+		HashMap<String, Double> toUse = new HashMap<String, Double>();
 		HashMap<String, Double> ahpE_Moy = new HashMap<String, Double>();
 		HashMap<String, Double> ahpS_Moy = new HashMap<String, Double>();
 		HashMap<String, Double> ahpT_Moy = new HashMap<String, Double>();
@@ -98,6 +98,39 @@ public class SimulTask {
 		ahpS_Yag.put("ahp0", 0.243);
 		ahpS_Yag.put("ahpS_Yag", 99.0);
 
+		ahpE_Moy.put("ahp8", 0.111);
+		ahpE_Moy.put("ahp7", 0.111);
+		ahpE_Moy.put("ahp6", 0.111);
+		ahpE_Moy.put("ahp5", 0.111);
+		ahpE_Moy.put("ahp4", 0.111);
+		ahpE_Moy.put("ahp3", 0.111);
+		ahpE_Moy.put("ahp2", 0.111);
+		ahpE_Moy.put("ahp1", 0.111);
+		ahpE_Moy.put("ahp0", 0.111);
+		ahpE_Moy.put("ahpE_Moy", 99.0);
+
+		ahpT_Moy.put("ahp8", 0.051);
+		ahpT_Moy.put("ahp7", 0.051);
+		ahpT_Moy.put("ahp6", 0.051);
+		ahpT_Moy.put("ahp5", 0.403);
+		ahpT_Moy.put("ahp4", 0.133);
+		ahpT_Moy.put("ahp3", 0.133);
+		ahpT_Moy.put("ahp2", 0.133);
+		ahpT_Moy.put("ahp1", 0.022);
+		ahpT_Moy.put("ahp0", 0.022);
+		ahpT_Moy.put("ahpT_Moy", 99.0);
+
+		ahpS_Moy.put("ahp8", 0.083);
+		ahpS_Moy.put("ahp7", 0.083);
+		ahpS_Moy.put("ahp6", 0.083);
+		ahpS_Moy.put("ahp5", 0.04);
+		ahpS_Moy.put("ahp4", 0.218);
+		ahpS_Moy.put("ahp3", 0.218);
+		ahpS_Moy.put("ahp2", 0.218);
+		ahpS_Moy.put("ahp1", 0.03);
+		ahpS_Moy.put("ahp0", 0.027);
+		ahpS_Moy.put("ahpS_Moy", 99.0);
+
 		// list of AHP to loop in
 		List<HashMap<String, Double>> ahpList = new ArrayList<HashMap<String, Double>>();
 		ahpList.add(ahpE_Yag);
@@ -106,21 +139,57 @@ public class SimulTask {
 
 		long seed = 42L;
 
-		boolean strict = false;
-
 		System.out.println("----------Simulation task----------");
-		SimulTask.saveEval = false;
+		SimulTask.saveEval = true;
 
-		int nMax = 7;
-		strict = false;
-		for (HashMap<String, Double> list : ahpList) {
-			String ahpName = ScenarTools.getAHPName(list);
+		//autom
+		File projFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/2emevague/StabiliteTestAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0");
 
-			for (int i = 0; i < 100; i = i + 1) {
+		for (int j = 0; j <= 3; j++) {
+			switch (j) {
+			
+			case 1:
+				projFile = new File("");
+				break;
+			//
+			case 2:
+				projFile = new File("");
+				break;
+			case 3:
+				projFile = new File("");
+				break;
+
+			}
+			for (int i = 0; i <= 3; i++) {
+
+				toUse = ahpE_Moy;
+
+				int nMax = 4;
+				boolean strict = true;
+				boolean mean = true;
+				switch (i) {
+				case 1:
+					nMax = 5;
+					strict = false;
+					break;
+				case 2:
+					nMax = 6;
+					strict = true;
+					break;
+				case 3:
+					nMax = 7;
+					strict = false;
+					mean = false;
+					toUse = ahpE_Yag;
+					break;
+
+				}
+
+				String ahpName = ScenarTools.getAHPName(toUse);
 				seed = (long) (Math.random() * 100000);
-				SimulTask.run(projFile, new File("/media/mcolomb/Data_2/resultFinal/testAHP/troisiemeVague"), name, nMax, strict, list.get("ahp0"), list.get("ahp1"),
-						list.get("ahp2"), list.get("ahp3"), list.get("ahp4"), list.get("ahp5"), list.get("ahp6"), list.get("ahp7"), list.get("ahp8"), ahpName,
-						ScenarTools.setAgregMethod(list), seed, false);
+				SimulTask.run(projFile, new File("/media/mcolomb/Data_2/resultFinal/testAHP/troisiemeVague"), name, nMax, strict, toUse.get("ahp0"), toUse.get("ahp1"),
+						toUse.get("ahp2"), toUse.get("ahp3"), toUse.get("ahp4"), toUse.get("ahp5"), toUse.get("ahp6"), toUse.get("ahp7"), toUse.get("ahp8"), ahpName, mean, seed,
+						false);
 			}
 		}
 
@@ -148,7 +217,7 @@ public class SimulTask {
 	public static File run(File projectFile, File scenarOut, String name, int nMax, boolean strict, AHP ahp, String ahpName, boolean mean, long seed, boolean machineReadable)
 			throws Exception {
 		System.out.println("Initialization of " + projectFile);
-		Initialize.init();
+		//Initialize.init();
 		System.out.println("Simulation of " + name);
 		setName(name);
 		Project project = Project.load(new File(projectFile, name + ".xml"));

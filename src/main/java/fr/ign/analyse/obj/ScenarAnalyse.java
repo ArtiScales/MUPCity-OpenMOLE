@@ -120,6 +120,9 @@ public class ScenarAnalyse extends ProjetAnalyse {
 	public String getShortScenarName() {
 		return nMax + "_" + strict + "_" + yag + "_" + ahp + "_seed_" + seed;
 	}
+	public String getShortScenarNameWthSeed() {
+		return nMax + "_" + strict + "_" + yag + "_" + ahp;
+	}
 
 	public String getSeed() {
 		return seed;

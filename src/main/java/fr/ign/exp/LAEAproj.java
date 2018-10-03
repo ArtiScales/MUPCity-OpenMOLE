@@ -17,8 +17,8 @@ public class LAEAproj {
 		DataSetSelec.predefSet();
 		Map<String, String> dataHT = DataSetSelec.get("Data1");
 		String name = "LAEA";
-		File folderIn = new File("./stabilite/LAEA/out");
-		File folderOut = new File("./result/sens/GridMouv");
+		File folderIn = new File("./stabilite/LAEA");
+		File folderOut = new File("./result/sens/proj");
 		File discreteFile = new File(folderIn, "admin_typo.shp");
 		File buildFile = new File(folderIn, "batimentPro.shp");
 		double width = 26590;
@@ -29,7 +29,7 @@ public class LAEAproj {
 		double xmin = 915948;
 		double ymin = 6677337;
 
-		double minSize = 15;
+		double minSize = 20;
 		double maxSize = 14580;
 		// double maxSize = 200;
 		double seuilDensBuild = 0;
@@ -60,12 +60,12 @@ public class LAEAproj {
 		ahpE_Yag.put("ahp0", 1.0);
 		ahpE_Yag.put("ahpE_Yag", 99.0);
 
-		long seed = 42L;
+
 		MutablePair<String, File> projectFile = ProjectCreationDecompTask.run(name, folderIn, folderOut, xmin, ymin,
 				width, height, shiftX, shiftY, dataHT, maxSize, minSize, seuilDensBuild, false);
 		System.out.println("----------Simulation task----------");
-		SimulTask.saveEval = false;
-
+		SimulTask.saveEval = true;
+		SimulTask.saveWholeProj = true;
 		for (int i = 0; i <= 3; i++) {
 
 			toUse = ahpE_Moy;
@@ -90,14 +90,17 @@ public class LAEAproj {
 				break;
 
 			}
-
+			System.out.println("nous sommes là : "+toUse);
+			long seed = 42L;
 			String ahpName = ScenarTools.getAHPName(toUse);
 			// scénario séparé pour avoir une seed répliqué (de 42)
 			SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, toUse.get("ahp0"),
 					toUse.get("ahp1"), toUse.get("ahp2"), toUse.get("ahp3"), toUse.get("ahp4"), toUse.get("ahp5"),
 					toUse.get("ahp6"), toUse.get("ahp7"), toUse.get("ahp8"), ahpName, mean, seed, false);
 
-			for (int ii = 0; ii <= 99; ii++) {
+			
+			for (int ii = 0; ii < 99; ii++) {
+				System.out.println("ii is "+ii);
 				seed = (long) (Math.random() * 1000);
 				SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, toUse.get("ahp0"),
 						toUse.get("ahp1"), toUse.get("ahp2"), toUse.get("ahp3"), toUse.get("ahp4"), toUse.get("ahp5"),
