@@ -34,13 +34,13 @@ import fr.ign.cogit.GTFunctions.Vectors;
 public class OutputTools {
 
 	public static void main(String[] args) throws IOException, NoSuchAuthorityCodeException, FactoryException, ParseException {
-		VectorizeMupOutput(Rasters.importRaster(new File(
+		vectorizeMupOutput(Rasters.importRaster(new File(
 				"/media/mcolomb/Data_2/resultFinal/testAHP/2emevague/StabiliteTestAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N4_Ba_MoyahpE_Moy_seed_42/N4_Ba_MoyahpE_Moy_seed_42-evalAnal-20.0.tif")),
 				new File("/media/mcolomb/Data_2/resultFinal/compThema/N4BaEMoy"), 20);
 
 	}
 
-	public static File VectorizeMupOutput(GridCoverage2D coverage, File destFile, double sizeCell)
+	public static File vectorizeMupOutput(GridCoverage2D coverage, File destFile, double sizeCell)
 			throws IOException, NoSuchAuthorityCodeException, FactoryException, ParseException {
 
 		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:2154");
@@ -138,6 +138,20 @@ public class OutputTools {
 
 		}
 		Csv.simpleCSVWriter(finalLines, new File(f, "totalDimFractales"), false);
+	}
+	
+	public static String niceScenarName(int nmax, boolean strict, boolean mean, String ahpName, long seed) {
+		
+		String strStrict = "Ba";
+		if (strict) {
+			strStrict="St";
+		}
+		
+		String result = "N"+nmax+"_"+strStrict+"_"+ahpName+"_"+"seed"+"_"+seed;
+		
+		
+		
+		return result;
 	}
 
 }

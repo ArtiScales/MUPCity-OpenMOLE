@@ -30,7 +30,7 @@ public class DataSetSelec {
 		dataHTtemp.put("ptTram", "tramPro.shp");
 		dataHTtemp.put("ptTrain", "trainPro.shp");
 		dataHTtemp.put("nU", "nonUrbaPro.shp");
-		dataHTtemp.put("name", "Autom");
+		dataHTtemp.put("name", "Manu");
 		dataHT.put("Data1", dataHTtemp);
 
 		// Data1.1
@@ -42,7 +42,7 @@ public class DataSetSelec {
 		dataHTtemp.put("ptTram", "tramPro.shp");
 		dataHTtemp.put("ptTrain", "trainPro.shp");
 		dataHTtemp.put("nU", "nonUrbaPhyPro.shp");
-		dataHTtemp.put("name", "Data1.1");
+		dataHTtemp.put("name", "ManuPhy");
 		dataHT.put("Data1.1", dataHTtemp);
 
 		// Data1.2
@@ -53,7 +53,7 @@ public class DataSetSelec {
 		dataHTtemp.put("lei", "loisirPro.shp");
 		dataHTtemp.put("ptTram", "tramPro.shp");
 		dataHTtemp.put("ptTrain", "trainPro.shp");
-		dataHTtemp.put("name", "Data1.2");
+		dataHTtemp.put("name", "ManuRien");
 		dataHT.put("Data1.2", dataHTtemp);
 
 		// Data2
@@ -65,7 +65,7 @@ public class DataSetSelec {
 		dataHTtemp.put("ptTram", "tramSys.shp");
 		dataHTtemp.put("ptTrain", "trainSys.shp");
 		dataHTtemp.put("nU", "nonUrbaSys.shp");
-		dataHTtemp.put("name", "Data2");
+		dataHTtemp.put("name", "Autom");
 		dataHT.put("Data2", dataHTtemp);
 
 		dataHTtemp = new Hashtable<String, String>();
@@ -99,7 +99,7 @@ public class DataSetSelec {
 		dataHTtemp.put("ptTram", "tramSys.shp");
 		dataHTtemp.put("ptTrain", "trainSys.shp");
 		dataHTtemp.put("nU", "nonUrbaPhySys.shp");
-		dataHTtemp.put("name", "Data2.1");
+		dataHTtemp.put("name", "AutomPhy");
 		dataHT.put("Data2.1", dataHTtemp);
 
 		// Data2.2
@@ -110,7 +110,7 @@ public class DataSetSelec {
 		dataHTtemp.put("lei", "loisirSys.shp");
 		dataHTtemp.put("ptTram", "tramSys.shp");
 		dataHTtemp.put("ptTrain", "trainSys.shp");
-		dataHTtemp.put("name", "Data2.2");
+		dataHTtemp.put("name", "AutomRien");
 		dataHT.put("Data2.2", dataHTtemp);
 
 		// Data3

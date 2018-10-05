@@ -11,19 +11,19 @@ import fr.ign.task.SimulTask;
 import fr.ign.tools.DataSetSelec;
 import fr.ign.tools.ScenarTools;
 
-public class mouvGrid {
+public class mouvData {
 
 	public static void main(String[] args) throws Exception {
+		// TODO Auto-generated method stub
 		DataSetSelec.predefSet();
 		Map<String, String> dataHT = DataSetSelec.get("Data1");
-		String name = "GridMouv";
+		String name = "dataMouv";
 		File folderIn = new File("./stabilite/dataManu");
-		File folderOut = new File("./result/sens/GridMouv");
+		File folderOut = new File("./result/sens/dataMouv");
 		double width = 26590;
 		double height = 26590;
-
-		double shiftX = 0;
-		double shiftY = 0;
+		double xmin = 915948;
+		double ymin = 6677337;
 
 		double minSize = 20;
 		double maxSize = 14580;
@@ -65,10 +65,8 @@ public class mouvGrid {
 
 		for (int xSlide = -1; xSlide <= 1; xSlide++) {
 			for (int ySlide = -1; ySlide <= 1; ySlide++) {
-				double xmin = 915948 + xSlide * minSize;
-				double ymin = 6677337 + ySlide * minSize;
 
-				MutablePair<String, File> projectFile = ProjectCreationDecompTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT, maxSize,
+				MutablePair<String, File> projectFile = ProjectCreationDecompTask.run(name, folderIn, folderOut, xmin, ymin, width, height, xSlide, ySlide, dataHT, maxSize,
 						minSize, seuilDensBuild, false);
 
 				toUse = ahpE_Moy;
@@ -102,5 +100,4 @@ public class mouvGrid {
 			}
 		}
 	}
-
 }

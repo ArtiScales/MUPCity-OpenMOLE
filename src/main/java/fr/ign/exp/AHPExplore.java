@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.MutablePair;
 
-import fr.ign.analyse.FractalDimention;
 import fr.ign.analyse.RasterAnalyse;
 import fr.ign.task.AnalyseTask;
 import fr.ign.task.ProjectCreationDecompTask;
@@ -25,8 +24,6 @@ public class AHPExplore {
 		String name = "StabiliteTestAHP";
 		File folderIn = new File("./stabilite/dataManu");
 		File folderOut = new File("./result/testAHP/2emevague");
-		File discreteFile = new File(folderIn, "admin_typo.shp");
-		File buildFile = new File(folderIn, "batimentPro.shp");
 		double width = 26590;
 		double height = 26590;
 		// double width = 200;
@@ -59,7 +56,7 @@ public class AHPExplore {
 		ahpE_Yag.put("ahp2", 1.0);
 		ahpE_Yag.put("ahp1", 1.0);
 		ahpE_Yag.put("ahp0", 1.0);
-		ahpE_Yag.put("ahpE_Yag", 99.0);
+		ahpE_Yag.put("Yag_ahpE", 99.0);
 
 		ahpT_Yag.put("ahp8", 0.458);
 		ahpT_Yag.put("ahp7", 0.458);
@@ -70,7 +67,7 @@ public class AHPExplore {
 		ahpT_Yag.put("ahp2", 1.199);
 		ahpT_Yag.put("ahp1", 0.202);
 		ahpT_Yag.put("ahp0", 0.202);
-		ahpT_Yag.put("ahpT_Yag", 99.0);
+		ahpT_Yag.put("Yag_ahpT", 99.0);
 
 		ahpS_Yag.put("ahp8", 0.745);
 		ahpS_Yag.put("ahp7", 0.745);
@@ -81,7 +78,7 @@ public class AHPExplore {
 		ahpS_Yag.put("ahp2", 1.965);
 		ahpS_Yag.put("ahp1", 0.269);
 		ahpS_Yag.put("ahp0", 0.243);
-		ahpS_Yag.put("ahpS_Yag", 99.0);
+		ahpS_Yag.put("Yag_ahpS", 99.0);
 
 		ahpE_Moy.put("ahp8", 0.111);
 		ahpE_Moy.put("ahp7", 0.111);
@@ -92,7 +89,7 @@ public class AHPExplore {
 		ahpE_Moy.put("ahp2", 0.111);
 		ahpE_Moy.put("ahp1", 0.111);
 		ahpE_Moy.put("ahp0", 0.111);
-		ahpE_Moy.put("ahpE_Moy", 99.0);
+		ahpE_Moy.put("Moy_ahpE", 99.0);
 
 		ahpT_Moy.put("ahp8", 0.051);
 		ahpT_Moy.put("ahp7", 0.051);
@@ -103,7 +100,7 @@ public class AHPExplore {
 		ahpT_Moy.put("ahp2", 0.133);
 		ahpT_Moy.put("ahp1", 0.022);
 		ahpT_Moy.put("ahp0", 0.022);
-		ahpT_Moy.put("ahpT_Moy", 99.0);
+		ahpT_Moy.put("Moy_ahpT", 99.0);
 
 		ahpS_Moy.put("ahp8", 0.083);
 		ahpS_Moy.put("ahp7", 0.083);
@@ -114,7 +111,7 @@ public class AHPExplore {
 		ahpS_Moy.put("ahp2", 0.218);
 		ahpS_Moy.put("ahp1", 0.03);
 		ahpS_Moy.put("ahp0", 0.027);
-		ahpS_Moy.put("ahpS_Moy", 99.0);
+		ahpS_Moy.put("Moy_ahpS", 99.0);
 
 		// list of AHP to loop in
 		List<HashMap<String, Double>> ahpList = new ArrayList<HashMap<String, Double>>();
@@ -138,30 +135,24 @@ public class AHPExplore {
 			strict = true;
 			for (HashMap<String, Double> list : ahpList) {
 				String ahpName = ScenarTools.getAHPName(list);
-				
-				//scénario séparé pour avoir une seed répliqué (de 42)
-				SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, list.get("ahp0"), list.get("ahp1"), list.get("ahp2"),
-						list.get("ahp3"), list.get("ahp4"), list.get("ahp5"), list.get("ahp6"), list.get("ahp7"), list.get("ahp8"), ahpName, ScenarTools.setAgregMethod(list),
-						seed, false);
-		
+
+				// scénario séparé pour avoir une seed répliqué (de 42)
+				SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, list.get("ahp0"), list.get("ahp1"), list.get("ahp2"), list.get("ahp3"), list.get("ahp4"),
+						list.get("ahp5"), list.get("ahp6"), list.get("ahp7"), list.get("ahp8"), ahpName, ScenarTools.setAgregMethod(list), seed, false);
+
 				for (int ii = 0; ii <= 98; ii++) {
-					seed =  (long) (Math.random()*1000) ;
-					SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, list.get("ahp0"), list.get("ahp1"), list.get("ahp2"),
-							list.get("ahp3"), list.get("ahp4"), list.get("ahp5"), list.get("ahp6"), list.get("ahp7"), list.get("ahp8"), ahpName, ScenarTools.setAgregMethod(list),
-							seed, false);
-					
-				}
+					seed = (long) (Math.random() * 1000);
+					SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, list.get("ahp0"), list.get("ahp1"), list.get("ahp2"), list.get("ahp3"),
+							list.get("ahp4"), list.get("ahp5"), list.get("ahp6"), list.get("ahp7"), list.get("ahp8"), ahpName, ScenarTools.setAgregMethod(list), seed, false);
 				}
 			}
+		}
 
-		//analyse the result
-		 RasterAnalyse.echelle = "20";
-		 RasterAnalyse.statFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/troisiemeVague/stat");
-		 AnalyseTask.runStabAHP(folderOut,new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu") , "StabiliteTestAHP", false);
-
-	}
-	
+		// analyse the result
+		RasterAnalyse.echelle = "20";
+		RasterAnalyse.statFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/troisiemeVague/stat");
+		AnalyseTask.runStabAHP(folderOut, new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu"), "StabiliteTestAHP", false);
 
 	}
 
-
+}

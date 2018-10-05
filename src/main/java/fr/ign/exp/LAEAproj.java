@@ -6,9 +6,11 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.MutablePair;
 
+import fr.ign.task.AnalyseTask;
 import fr.ign.task.ProjectCreationDecompTask;
 import fr.ign.task.SimulTask;
 import fr.ign.tools.DataSetSelec;
+import fr.ign.tools.OutputTools;
 import fr.ign.tools.ScenarTools;
 
 public class LAEAproj {
@@ -47,7 +49,7 @@ public class LAEAproj {
 		ahpE_Moy.put("ahp2", 0.111);
 		ahpE_Moy.put("ahp1", 0.111);
 		ahpE_Moy.put("ahp0", 0.111);
-		ahpE_Moy.put("ahpE_Moy", 99.0);
+		ahpE_Moy.put("Moy_ahpE", 99.0);
 
 		ahpE_Yag.put("ahp8", 1.0);
 		ahpE_Yag.put("ahp7", 1.0);
@@ -58,7 +60,7 @@ public class LAEAproj {
 		ahpE_Yag.put("ahp2", 1.0);
 		ahpE_Yag.put("ahp1", 1.0);
 		ahpE_Yag.put("ahp0", 1.0);
-		ahpE_Yag.put("ahpE_Yag", 99.0);
+		ahpE_Yag.put("Yag_ahpE", 99.0);
 
 
 		MutablePair<String, File> projectFile = ProjectCreationDecompTask.run(name, folderIn, folderOut, xmin, ymin,
@@ -93,7 +95,7 @@ public class LAEAproj {
 			System.out.println("nous sommes là : "+toUse);
 			long seed = 42L;
 			String ahpName = ScenarTools.getAHPName(toUse);
-			// scénario séparé pour avoir une seed répliqué (de 42)
+			// scénario séparé pour avoir une seed répliqué qui soit la même pour toutes les simulation (ici, de 42)
 			SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, toUse.get("ahp0"),
 					toUse.get("ahp1"), toUse.get("ahp2"), toUse.get("ahp3"), toUse.get("ahp4"), toUse.get("ahp5"),
 					toUse.get("ahp6"), toUse.get("ahp7"), toUse.get("ahp8"), ahpName, mean, seed, false);
@@ -102,13 +104,12 @@ public class LAEAproj {
 			for (int ii = 0; ii < 99; ii++) {
 				System.out.println("ii is "+ii);
 				seed = (long) (Math.random() * 1000);
-				SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, toUse.get("ahp0"),
+				SimulTask.run(projectFile.getRight(),projectFile.getLeft(), nMax, strict, toUse.get("ahp0"),
 						toUse.get("ahp1"), toUse.get("ahp2"), toUse.get("ahp3"), toUse.get("ahp4"), toUse.get("ahp5"),
 						toUse.get("ahp6"), toUse.get("ahp7"), toUse.get("ahp8"), ahpName, mean, seed, false);
-
 			}
 		}
-
+		AnalyseTask.runStab(folderOut,folderIn, name, false);
 	}
 
 }

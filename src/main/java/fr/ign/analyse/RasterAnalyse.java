@@ -257,7 +257,6 @@ public class RasterAnalyse {
 		Hashtable<String, Hashtable<String, Double[]>> distLeisure = new Hashtable<String, Hashtable<String, Double[]>>();
 		Hashtable<String, Hashtable<String, Double[]>> distTC = new Hashtable<String, Hashtable<String, Double[]>>();
 		if (isResultFile) {
-			// TODO refaire le parcours pour un fichier de résultat
 			for (File f : rootFile.listFiles()) {
 				if (f.isDirectory() && f.getName().startsWith("result")) {
 					for (File ff : f.listFiles()) {

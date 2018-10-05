@@ -8,21 +8,21 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.MutablePair;
 
+import fr.ign.task.AnalyseTask;
 import fr.ign.task.ProjectCreationDecompTask;
 import fr.ign.task.SimulTask;
 import fr.ign.tools.DataSetSelec;
 import fr.ign.tools.ScenarTools;
 
-public class EffetSeuil {
+public class minCellSize {
 
-	public static void main() throws Exception {
-
-		String name = "diffSeuils";
+	public static void main(String[] args) throws Exception {
+		String name = "cellSize";
 		SimulTask.saveEvalAnal = true;
 		SimulTask.saveWholeProj = true;
 
 		File folderIn = new File("./stabilite/");
-		File folderOut = new File("./result/sens/diffSeuils");
+		File folderOut = new File("./result/sens/cellSize");
 		Map<String, String> dataHT = DataSetSelec.get("Data1");
 		double width = 26590;
 		double height = 26590;
@@ -31,8 +31,7 @@ public class EffetSeuil {
 		double shiftY = 0;
 		double xmin = 915948;
 		double ymin = 6677337;
-
-		double minSize = 20;
+		double buildDensityThreshold = 0;
 		double maxSize = 14580;
 
 		// setting on our six ahp objects
@@ -75,12 +74,12 @@ public class EffetSeuil {
 		// autom
 
 		toUse = ahpS_Moy;
-		for (double buildDensityThreshold = 0.000001; buildDensityThreshold <= 0.01; buildDensityThreshold = buildDensityThreshold * 10) {
+		for (double minSize = 10; minSize <= 20; minSize++) {
 
 			MutablePair<String, File> projectFile = ProjectCreationDecompTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT, maxSize, minSize,
 					buildDensityThreshold, false);
 
-			for (int i = 0; i <= 3; i++) {
+			for (int i = 1; i <= 3; i++) {
 
 				int nMax = 4;
 				boolean strict = true;
@@ -106,7 +105,7 @@ public class EffetSeuil {
 						toUse.get("ahp4"), toUse.get("ahp5"), toUse.get("ahp6"), toUse.get("ahp7"), toUse.get("ahp8"), ahpName, mean, seed, false);
 			}
 		}
-
+		AnalyseTask.runSizeCellExplo(folderOut, folderIn, name, false);
 	}
 
 }

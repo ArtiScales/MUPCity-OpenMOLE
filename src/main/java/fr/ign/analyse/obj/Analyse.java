@@ -161,9 +161,8 @@ public class Analyse {
 						String nMax = decompScenar[0];
 						String strict = decompScenar[1];
 
-						// Warning there may be an inerversion??
-						String yag = decompScenar[3];
-						String ahp = decompScenar[2];
+						String yag = decompScenar[2];
+						String ahp = decompScenar[3];
 						String seed = decompScenar[5];
 
 						ScenarAnalyse sC = new ScenarAnalyse(false, f, ff, size, grid, seuil, data, nMax, ahp, strict, yag, seed);
@@ -193,17 +192,17 @@ public class Analyse {
 		String[] decompNameProj = tiret.split(nameProj);
 		// nom de l'explo
 		nameExplo = decompNameProj[0];
-
-		// Set les différentes tailles minimales de cellules
-		String minCell = decompNameProj[2].replace(".0", "").replace("CM", "");
-		if (!cellMinCollec.contains(minCell)) {
-			cellMinCollec.add(minCell);
-		}
 		// Set les différents jeux de données
 		String data = decompNameProj[1];
 		if (!dataCollec.contains(data)) {
 			dataCollec.add(data);
 		}
+		// Set les différentes tailles minimales de cellules
+		String minCell = decompNameProj[2].replace(".0", "").replace("CM", "");
+		if (!cellMinCollec.contains(minCell)) {
+			cellMinCollec.add(minCell);
+		}
+
 		// Set les differents seuils et grilles
 		String seui = null;
 		String grille = null;
@@ -245,7 +244,8 @@ public class Analyse {
 	private void makeFileCollection(File fileFile) {
 		Pattern tiret = Pattern.compile("-");
 		String[] fileCar = tiret.split(fileFile.getName());
-		makeFileCollection(fileCar[1], fileCar[2].replace(".0.tif", ""));
+		String echelle = fileCar[2].replace(".0.tif", "").replace(".aux.xml", "");
+		makeFileCollection(fileCar[1], echelle);
 	}
 
 	public void makeFileCollection(String mean, String ech) {
@@ -295,9 +295,28 @@ public class Analyse {
 		return scenarCollec;
 	}
 
+	public List<Set<ScenarAnalyse>> getProjetBySizeCell() throws FileNotFoundException {
+		List<Set<ProjetAnalyse>> listGen = new ArrayList<Set<ProjetAnalyse>>();
+		for (String seuil : seuilCollec) {
+			for (String grid : gridCollec) {
+				for (String data : dataCollec) {
+					Set<ProjetAnalyse> particularList = new HashSet<ProjetAnalyse>();
+					for (ProjetAnalyse pa : projetCollec) {
+						if (pa.getSeuil().equals(seuil) && pa.getData().equals(data) && pa.getGrid().equals(grid)) {
+							particularList.add(pa);
+						}
+					}
+					listGen.add(particularList);
+				}
+			}
+		}
+		return getScenars(listGen);
+	}
+	
+	
 	public List<Set<ScenarAnalyse>> getProjetBySeuil() throws FileNotFoundException {
 		List<Set<ProjetAnalyse>> listGen = new ArrayList<Set<ProjetAnalyse>>();
-		for (String cellMin : cellMinCollec)
+		for (String cellMin : cellMinCollec) {
 			for (String grid : gridCollec) {
 				for (String data : dataCollec) {
 					Set<ProjetAnalyse> particularList = new HashSet<ProjetAnalyse>();
@@ -309,6 +328,7 @@ public class Analyse {
 					listGen.add(particularList);
 				}
 			}
+		}
 		return getScenars(listGen);
 	}
 
@@ -442,12 +462,11 @@ public class Analyse {
 			for (String yag : yagCollec) {
 				for (String n : nMaxCollec) {
 					for (String ahp : ahpCollec) {
+
 						for (String str : strictCollec) {
 							List<ScenarAnalyse> sortedList = new ArrayList<ScenarAnalyse>();
 							for (ScenarAnalyse scen : scenProj) {
-								//if (scen.getAhp().equals(ahp) && scen.getnMax().equals(n) && scen.isStrict().equals(str) && scen.isYag().equals(yag)) {
-									 if (scen.getAhp().equals(yag) && scen.getnMax().equals(n) && scen.isStrict().equals(str) && scen.isYag().equals(ahp)) { //fausse ligne mais
-									// une simu manuelle avait des nombres inversées (pourquoi??!)
+								if (scen.getAhp().equals(ahp) && scen.getnMax().equals(n) && scen.isStrict().equals(str) && scen.isYag().equals(yag)) {
 									sortedList.add(scen);
 								}
 							}
