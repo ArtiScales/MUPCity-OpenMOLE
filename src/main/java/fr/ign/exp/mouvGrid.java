@@ -11,7 +11,7 @@ import fr.ign.task.SimulTask;
 import fr.ign.tools.DataSetSelec;
 import fr.ign.tools.ScenarTools;
 
-public class mvGrdi {
+public class mouvGrid {
 
 	public static void main(String[] args) throws Exception {
 		DataSetSelec.predefSet();
@@ -34,6 +34,8 @@ public class mvGrdi {
 
 		// setting on our six ahp objects
 		HashMap<String, Double> ahpE_Moy = new HashMap<String, Double>();
+		HashMap<String, Double> toUse = new HashMap<String, Double>();
+		HashMap<String, Double> ahpE_Yag = new HashMap<String, Double>();
 
 		ahpE_Moy.put("ahp8", 0.111);
 		ahpE_Moy.put("ahp7", 0.111);
@@ -46,7 +48,17 @@ public class mvGrdi {
 		ahpE_Moy.put("ahp0", 0.111);
 		ahpE_Moy.put("ahpE_Moy", 99.0);
 
-		String ahpName = ScenarTools.getAHPName(ahpE_Moy);
+		ahpE_Yag.put("ahp8", 1.0);
+		ahpE_Yag.put("ahp7", 1.0);
+		ahpE_Yag.put("ahp6", 1.0);
+		ahpE_Yag.put("ahp5", 1.0);
+		ahpE_Yag.put("ahp4", 1.0);
+		ahpE_Yag.put("ahp3", 1.0);
+		ahpE_Yag.put("ahp2", 1.0);
+		ahpE_Yag.put("ahp1", 1.0);
+		ahpE_Yag.put("ahp0", 1.0);
+		ahpE_Yag.put("ahpE_Yag", 99.0);
+
 		long seed = 42L;
 
 		System.out.println("----------Simulation task----------");
@@ -58,16 +70,16 @@ public class mvGrdi {
 				double xmin = 915948 + xSlide * minSize;
 				double ymin = 6677337 + ySlide * minSize;
 
-				
 				MutablePair<String, File> projectFile = ProjectCreationDecompTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT, maxSize,
 						minSize, seuilDensBuild, false);
-				
-				System.out.println(projectFile);
-				
-				for (int g = 0; g < 2; g++) {
-					int nMax = 4;
-					boolean strict = true;
-					switch (g) {
+
+				toUse = ahpE_Moy;
+
+				int nMax = 4;
+				boolean strict = true;
+				boolean mean = true;
+				for (int i = 0; i <= 3; i++) {
+					switch (i) {
 					case 1:
 						nMax = 5;
 						strict = false;
@@ -76,14 +88,21 @@ public class mvGrdi {
 						nMax = 6;
 						strict = true;
 						break;
+					case 3:
+						nMax = 7;
+						strict = false;
+						mean = false;
+						toUse = ahpE_Yag;
+						break;
 					}
+					String ahpName = ScenarTools.getAHPName(toUse);
 
-					SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, ahpE_Moy.get("ahp0"), ahpE_Moy.get("ahp1"), ahpE_Moy.get("ahp2"),
-							ahpE_Moy.get("ahp3"), ahpE_Moy.get("ahp4"), ahpE_Moy.get("ahp5"), ahpE_Moy.get("ahp6"), ahpE_Moy.get("ahp7"), ahpE_Moy.get("ahp8"), ahpName, true, seed,
-							false);
+					SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, toUse.get("ahp0"), toUse.get("ahp1"), toUse.get("ahp2"), toUse.get("ahp3"),
+							toUse.get("ahp4"), toUse.get("ahp5"), toUse.get("ahp6"), toUse.get("ahp7"), toUse.get("ahp8"), ahpName, true, seed, false);
 
 				}
 			}
 		}
 	}
+
 }

@@ -69,8 +69,11 @@ public class RasterAnalyse {
 	public static boolean saveEvalTab = false;
 
 	public static void main(String[] args) throws Exception {
-		rootFile = new File("/media/mcolomb/Data_2/resultFinal/stab/result--Stabilite");
+		rootFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/comparaison");
 		echelle = "20";
+
+		getEvals("compAHP",false);
+
 		// saveEvalTab = true;
 		//
 		// List<File> listFile = new ArrayList<File>();
@@ -94,24 +97,6 @@ public class RasterAnalyse {
 		// resultFile.mkdir();
 		// HighAndLowEvals(resultEval.getCellEvals(), resultFile, listFile.get(0));
 
-		Hashtable<String, Hashtable<String, Double>> resultAmenite = new Hashtable<String, Hashtable<String, Double>>();
-
-		for (File f : rootFile.listFiles()) {
-			if (f.isDirectory() && f.getName().startsWith("dataManu")) {
-				for (File ff : f.listFiles()) {
-					if (ff.getName().equals("SortieExemple")) {
-						for (File fff : ff.listFiles()) {
-							if (fff.getName().endsWith("evalAnal-" + echelle + ".0.tif")) {
-								String nameScenar = fff.getName().replace("StabiliteTestAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0--", "").replace("evalAnal-" + echelle + ".0.tif", "");
-								resultAmenite.put(nameScenar, getDistanceFromServices(fff, nameScenar));
-							}
-						}
-					}
-				}
-			}
-		}
-
-		Csv.generateCsvFileMultTab(resultAmenite, rootFile, "distanceAmenite");
 		//
 		// Hashtable<String, Hashtable<String, Double>> resultTC = new Hashtable<String, Hashtable<String, Double>>();
 		//
@@ -255,10 +240,129 @@ public class RasterAnalyse {
 
 	}
 
-	public static Hashtable<String, Double> getDistanceFromTC(File mupOutputFile, String nameScenario)
+	/**
+	 * calculate the accessibility from multiple points using the evaluation raster already calculated by MUP-City.
+	 * Write multiple statistical .csv file on the static rootFile folder
+	 * 
+	 * @param nameExplo : the given name of your MUP-City's project
+	 * @param isResultFile : if the folder is organized as a analysis result one or as a normal one
+	 * @throws NoSuchAuthorityCodeException
+	 * @throws IOException
+	 * @throws FactoryException
+	 * @throws ParseException
+	 */
+	public static void getEvals(String nameExplo, boolean isResultFile) throws NoSuchAuthorityCodeException, IOException, FactoryException, ParseException {
+
+		Hashtable<String, Hashtable<String, Double[]>> distServices = new Hashtable<String, Hashtable<String, Double[]>>();
+		Hashtable<String, Hashtable<String, Double[]>> distLeisure = new Hashtable<String, Hashtable<String, Double[]>>();
+		Hashtable<String, Hashtable<String, Double[]>> distTC = new Hashtable<String, Hashtable<String, Double[]>>();
+		if (isResultFile) {
+			// TODO refaire le parcours pour un fichier de résultat
+			for (File f : rootFile.listFiles()) {
+				if (f.isDirectory() && f.getName().startsWith("result")) {
+					for (File ff : f.listFiles()) {
+						if (ff.getName().startsWith(nameExplo)) {
+							for (File fff : ff.listFiles()) {
+								if (fff.getName().equals("SortieExemple")) {
+									for (File ffff : fff.listFiles()) {
+										if (ffff.getName().endsWith("evalAnal-" + echelle + ".0.tif")) {
+											String nameScenar = ffff.getName().split("--")[1].replace("evalAnal-" + echelle + ".0.tif", "");
+											distServices.put(nameScenar, getDistanceFromServices(fff, nameScenar));
+											distLeisure.put(nameScenar, getDistanceFromLeisure(fff, nameScenar));
+											distTC.put(nameScenar, getDistanceFromTC(fff, nameScenar));
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		} else {
+			for (File f : rootFile.listFiles()) {
+				if (f.isDirectory() && f.getName().startsWith(nameExplo)) {
+					for (File ff : f.listFiles()) {
+						if (ff.getName().startsWith("N")) {
+							for (File fff : ff.listFiles()) {
+								if (fff.getName().endsWith("evalAnal-" + echelle + ".0.tif")) {
+									String nameScenar = fff.getName().replace("evalAnal-" + echelle + ".0.tif", "");
+									distServices.put(nameScenar, getDistanceFromServices(fff, nameScenar));
+									distLeisure.put(nameScenar, getDistanceFromLeisure(fff, nameScenar));
+									distTC.put(nameScenar, getDistanceFromTC(fff, nameScenar));
+								}
+							}
+						}
+					}
+				}
+
+			}
+		}
+		Csv.generateCsvFileMultTab(distTC, nameExplo+"-distanceTC","mean,standart deviation", rootFile);
+		Csv.needFLine = true;
+		Csv.generateCsvFileMultTab(distLeisure, nameExplo+"-distanceLeisure","mean,standart deviation", rootFile);
+		Csv.needFLine = true;
+		Csv.generateCsvFileMultTab(distServices, nameExplo+"-distanceServices","mean,standart deviation", rootFile);
+	}
+
+	/**
+	 * calculate distances of Mup-City's outputs from frequency-hierarchized shops and services
+	 * 
+	 * @param mupOutputFile
+	 * @param nameEval
+	 * @return a Double tableau containing [0] mean and [1] standard deviation of the distances
+	 * @throws IOException
+	 */
+	public static Hashtable<String, Double[]> getDistanceFromLeisure(File mupOutputFile, String nameScenario)
 			throws NoSuchAuthorityCodeException, IOException, FactoryException, ParseException {
 
-		Hashtable<String, Double> result = new Hashtable<String, Double>();
+		Hashtable<String, Double[]> result = new Hashtable<String, Double[]>();
+
+		String[] nameFac = { "lei1", "lei2", "lei3" };
+
+		for (String name : nameFac) {
+			result.put(nameScenario + "-" + name, getDistanceFromDot(mupOutputFile, name));
+		}
+		return result;
+	}
+
+	/**
+	 * calculate distances of Mup-City's outputs from frequency-hierarchized shops and services
+	 * 
+	 * @param mupOutputFile
+	 * @param nameEval
+	 * @return a Double tableau containing [0] mean and [1] standard deviation of the distances
+	 * @throws IOException
+	 */
+	public static Hashtable<String, Double[]> getDistanceFromServices(File mupOutputFile, String nameScenario)
+			throws NoSuchAuthorityCodeException, IOException, FactoryException, ParseException {
+
+		Hashtable<String, Double[]> result = new Hashtable<String, Double[]>();
+
+		String[] nameFac = { "fac1", "fac2", "fac3" };
+
+		for (String name : nameFac) {
+			result.put(nameScenario + "-" + name, getDistanceFromDot(mupOutputFile, name));
+		}
+		return result;
+	}
+
+	/**
+	 * calculate distances of Mup-City's outputs from public transports
+	 * 
+	 * @param networkFile
+	 * @param buildFile
+	 * @param mupOutputFile
+	 * @param echelle
+	 * @return a Double tableau containing [0] mean and [1] standard deviation of the distances
+	 * @throws NoSuchAuthorityCodeException
+	 * @throws IOException
+	 * @throws FactoryException
+	 * @throws ParseException
+	 */
+	public static Hashtable<String, Double[]> getDistanceFromTC(File mupOutputFile, String nameScenario)
+			throws NoSuchAuthorityCodeException, IOException, FactoryException, ParseException {
+
+		Hashtable<String, Double[]> result = new Hashtable<String, Double[]>();
 
 		String[] nameFac = { "pt" };
 
@@ -269,31 +373,14 @@ public class RasterAnalyse {
 	}
 
 	/**
+	 * calculate distances of Mup-City's outputs from divers kind of ponctual objects based on MUP-City's evaluation rasters
 	 * 
-	 * @param networkFile
-	 * @param buildFile
 	 * @param mupOutputFile
-	 * @param echelle
-	 * @return
-	 * @throws NoSuchAuthorityCodeException
+	 * @param nameEval
+	 * @return a Double tableau containing [0] mean and [1] standard deviation of the distances
 	 * @throws IOException
-	 * @throws FactoryException
-	 * @throws ParseException
 	 */
-	public static Hashtable<String, Double> getDistanceFromServices(File mupOutputFile, String nameScenario)
-			throws NoSuchAuthorityCodeException, IOException, FactoryException, ParseException {
-
-		Hashtable<String, Double> result = new Hashtable<String, Double>();
-
-		String[] nameFac = { "fac1", "fac2", "fac3" };
-
-		for (String name : nameFac) {
-			result.put(nameScenario + "-" + name, getDistanceFromDot(mupOutputFile, name));
-		}
-		return result;
-	}
-
-	public static Double getDistanceFromDot(File mupOutputFile, String nameEval) throws IOException {
+	public static Double[] getDistanceFromDot(File mupOutputFile, String nameEval) throws IOException {
 
 		File gridFoler = ScenarTools.getGridFolderWhereEver(rootFile);
 
@@ -319,8 +406,11 @@ public class RasterAnalyse {
 				}
 			}
 		}
+		Double[] result = new Double[2];
+		result[0] = facDS.getMean();
+		result[1] = facDS.getStandardDeviation();
 
-		return facDS.getMean();
+		return result;
 	}
 
 	/**
