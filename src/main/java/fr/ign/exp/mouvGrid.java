@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.MutablePair;
 
+import fr.ign.task.AnalyseTask;
 import fr.ign.task.ProjectCreationDecompTask;
 import fr.ign.task.SimulTask;
 import fr.ign.tools.DataSetSelec;
@@ -14,6 +15,7 @@ import fr.ign.tools.ScenarTools;
 public class mouvGrid {
 
 	public static void main(String[] args) throws Exception {
+
 		DataSetSelec.predefSet();
 		Map<String, String> dataHT = DataSetSelec.get("Data1");
 		String name = "GridMouv";
@@ -68,8 +70,8 @@ public class mouvGrid {
 				double xmin = 915948 + xSlide * minSize;
 				double ymin = 6677337 + ySlide * minSize;
 
-				MutablePair<String, File> projectFile = ProjectCreationDecompTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT, maxSize,
-						minSize, seuilDensBuild, false);
+				MutablePair<String, File> projectFile = ProjectCreationDecompTask.run(name, folderIn, folderOut, xmin,
+						ymin, width, height, shiftX, shiftY, dataHT, maxSize, minSize, seuilDensBuild, false);
 
 				toUse = ahpE_Moy;
 
@@ -95,12 +97,43 @@ public class mouvGrid {
 					}
 					String ahpName = ScenarTools.getAHPName(toUse);
 
-					SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, toUse.get("ahp0"), toUse.get("ahp1"), toUse.get("ahp2"), toUse.get("ahp3"),
-							toUse.get("ahp4"), toUse.get("ahp5"), toUse.get("ahp6"), toUse.get("ahp7"), toUse.get("ahp8"), ahpName, mean, seed, false);
+					SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, toUse.get("ahp0"),
+							toUse.get("ahp1"), toUse.get("ahp2"), toUse.get("ahp3"), toUse.get("ahp4"),
+							toUse.get("ahp5"), toUse.get("ahp6"), toUse.get("ahp7"), toUse.get("ahp8"), ahpName, mean,
+							seed, false);
+
+				}
+			}
+		}
+		AnalyseTask.runGridExplo(folderOut, name, false);
+	}
+
+	public static void renameFiles() {
+		File base = new File("/home/yo/Documents/these/resultFinal/sens/GridMouv/");
+		for (File f : base.listFiles()) {
+			if (f.getName().startsWith("Grid")) {
+				for (File ff : f.listFiles()) {
+					if (ff.getName().startsWith("N")) {
+						String[] chaine = ff.getName().split("_");
+						String rename = chaine[0] + "_" + chaine[1] + "_" + chaine[3] + "_"
+								+ chaine[2].replace("Yag", "").replace("Moy", "") + "_" + chaine[4] + "_" + chaine[5];
+
+						for (File fff : ff.listFiles()) {
+							if (fff.getName().startsWith("N")) {
+								String[] chaine2 = fff.getName().split("-");
+								String rename2 = rename + "-" + chaine2[1] + "-" + chaine2[2];
+								fff.renameTo(new File(fff.getParentFile(), rename2));
+							}
+						}
+						System.out.println(rename);
+						ff.renameTo(new File(ff.getParent(), rename));
+					}
 
 				}
 			}
 		}
 	}
+	
+	
 
 }

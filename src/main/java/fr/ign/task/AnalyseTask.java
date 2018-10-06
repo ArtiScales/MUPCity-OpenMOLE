@@ -30,12 +30,13 @@ public class AnalyseTask {
 	// public static String echelle;
 
 	public static void main(String[] args) throws Exception {
-		File file = new File("/media/mcolomb/Data_2/resultFinal/sens/proj");
+		File file = new File("/home/yo/Documents/these/resultFinal/sens/GridMouv/");
+		RasterAnalyse.rootFile = file;
 		RasterAnalyse.echelle = "20";
 		//
 		// runStab(file, new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/LAEA"), "LAEA", false);
 
-		runGridExplo(file, new File("/home/mcolomb/workspace/mupcity-openMole/data/"), "GridMouv", false);
+		runGridExplo(file,"GridMouv", false);
 
 		// List<File> toCompare = new ArrayList<File>();
 		// toCompare.add(new
@@ -233,10 +234,10 @@ public class AnalyseTask {
 		return projName;
 	}
 
-	public static File runGridExplo(File file, File fileDonnee, String name, boolean machineReadable) throws Exception {
+	public static File runGridExplo(File file, String name, boolean machineReadable) throws Exception {
 
 		// folder settings
-		File discreteFile = getDiscrete(fileDonnee);
+
 		File resultFile = new File(file, "result--" + name);
 		if (machineReadable) {
 			resultFile = new File(file.getParentFile(), "result--" + name);
@@ -244,7 +245,8 @@ public class AnalyseTask {
 
 		resultFile.mkdir();
 		RasterAnalyse.rootFile = file;
-
+RasterAnalyse.cutBorder=true;
+RasterAnalyse.saveEvalTab=true;
 		// toutes les listes des projets à tester
 		Analyse anal = new Analyse();
 		if (machineReadable) {
@@ -254,38 +256,42 @@ public class AnalyseTask {
 		}
 
 		for (String echelle : anal.getEchelleRange(3)) {
-
-			int ech = Integer.valueOf(echelle);
 			RasterAnalyse.echelle = echelle;
-			List<File> fileToTestAndSave = new ArrayList<File>();
 			// pour l'analyse des différents seuils
 
 			for (Set<ScenarAnalyse> scenarPerGrid : anal.getProjetByGrid()) {
 // TODO that thing is nicer but it doesn't work.. 
 				//String exProjName = ((ProjetAnalyse) scenarPerGrid.iterator().next()).getNiceName();
 
-				String exProjName = scenarPerGrid.iterator().next().getNiceName().split("--")[0];
+				String exScenarName = scenarPerGrid.iterator().next().getNiceName().split("--")[1];
+				File eachResultFile = new File(resultFile, exScenarName);
 
-				File eachResultFile = new File(resultFile, exProjName);
-				eachResultFile.mkdirs();
 				File statFile = new File(eachResultFile, "stat");
 				RasterAnalyse.statFile = statFile;
 				File rastFile = new File(eachResultFile, "raster");
-				rastFile.mkdir();
+				rastFile.mkdirs();
+				
 				// get the set of files to test
 				List<File> fileToTest = new ArrayList<File>();
 				for (ScenarAnalyse sC : scenarPerGrid) {
 					fileToTest.add(anal.getSimuFile(sC, echelle, "evalAnal"));
+					//get the middle grid info 
+					if (sC.getGrid().equals(anal.getMiddleGrid())){
+						System.out.println("middle grid : " + anal.getSimuFile(sC, echelle, "evalAnal"));
+						RasterAnalyse.middleGridRaster = anal.getSimuFile(sC, echelle, "evalAnal");
+						RasterMerge.middleGridRaster = anal.getSimuFile(sC, echelle, "evalAnal");
+					}
 				}
 				// merge the different input rasters
+				
 				RasterMergeResult mergedResult = RasterAnalyse.mergeRasters(fileToTest);
 
-				RasterAnalyse.createStatsDescriptive("analyse-grid---" + exProjName, mergedResult);
+				RasterAnalyse.createStatsDescriptive("analyse-grid---" + exScenarName, mergedResult);
 				// // discrete statistics
 				// RasterAnalyse.createStatsDiscrete(exProjName, mergedResult, discreteFile);
 
 				// create a merged raster
-				RasterMerge.merge(fileToTest, new File(rastFile, exProjName + "-rasterMerged-" + echelle + ".tif"), Integer.parseInt(echelle));
+				RasterMerge.merge(fileToTest, new File(rastFile, exScenarName + "-"+ name + "-rasterMerged-" + echelle + ".tif"), Integer.parseInt(echelle),true);
 			}
 		}
 

@@ -24,9 +24,12 @@ import org.thema.data.IOImage;
 
 import fr.ign.analyse.obj.Analyse;
 import fr.ign.analyse.obj.ScenarAnalyse;
+import fr.ign.cogit.GTFunctions.Rasters;
 
 public class RasterMerge {
 
+	public static File middleGridRaster;
+	
 	public static void main(String[] args) throws Exception {
 
 		// File fileIn = new File("/media/mcolomb/Data_2/resultExplo/testNov/exOct");
@@ -96,6 +99,15 @@ public class RasterMerge {
 		return merge(folderIn, fileOut, ech, false);
 	}
 
+	/**
+	 * 
+	 * @param folderIn : list of raster file to merge
+	 * @param fileOut : file where the raster is merged
+	 * @param ech : size of the last decomposed cell
+	 * @param crop : if true, the envelope is croped by the lenght of a cell size
+	 * @return the merged file
+	 * @throws Exception
+	 */
 	public static File merge(List<File> folderIn, File fileOut, int ech, boolean crop) throws Exception {
 
 		// just to make sure
@@ -123,6 +135,9 @@ public class RasterMerge {
 		GeoTiffReader readerSet = new GeoTiffReader(folderIn.get(0));
 		GridCoverage2D coverageSet = readerSet.read(params);
 		Envelope2D env = coverageSet.getEnvelope2D();
+		if (crop) {
+			env = Rasters.importRaster(middleGridRaster).getEnvelope2D();
+		}
 
 		float[][] imagePixelData = new float[(int) Math.floor(env.getWidth() / ech)][(int) Math.floor(env.getHeight() / ech)];
 

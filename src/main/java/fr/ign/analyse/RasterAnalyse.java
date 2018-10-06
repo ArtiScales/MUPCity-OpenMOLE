@@ -47,6 +47,7 @@ import fr.ign.analyse.obj.Analyse;
 import fr.ign.analyse.obj.ScenarAnalyse;
 import fr.ign.analyse.obj.ScenarAnalyseFile;
 import fr.ign.cogit.GTFunctions.Csv;
+import fr.ign.cogit.GTFunctions.Rasters;
 import fr.ign.tools.ScenarTools;
 
 public class RasterAnalyse {
@@ -64,6 +65,9 @@ public class RasterAnalyse {
 	public static File statFile;
 	public static boolean stabilite = false;
 	public static boolean cutBorder = false;
+	// if cutBorder true, then there's a grid move and the middle grid is needed
+	public static File middleGridRaster;
+	
 	public static String echelle;
 	public static boolean firstline = true;
 	public static boolean saveEvalTab = false;
@@ -385,9 +389,9 @@ public class RasterAnalyse {
 
 		DescriptiveStatistics facDS = new DescriptiveStatistics();
 
-		GridCoverage2D coverageMup = importRaster(mupOutputFile);
+		GridCoverage2D coverageMup = Rasters.importRaster(mupOutputFile);
 
-		GridCoverage2D coverageServiceQuot = importRaster(new File(gridFoler, nameEval + "-" + echelle + ".0.tif"));
+		GridCoverage2D coverageServiceQuot = Rasters.importRaster(new File(gridFoler, nameEval + "-" + echelle + ".0.tif"));
 		Envelope2D env = coverageMup.getEnvelope2D();
 		double Xmin = env.getMinX();
 		double Xmax = env.getMaxX();
@@ -521,7 +525,7 @@ public class RasterAnalyse {
 				scenar = scenar + 2;
 				int size = Integer.valueOf(echelle);
 
-				SimpleFeatureCollection output = createMupOutput(importRaster(file2Anal), size);
+				SimpleFeatureCollection output = createMupOutput(Rasters.importRaster(file2Anal), size);
 				Hashtable<String, Double> entitySurf = new Hashtable<String, Double>();
 				Hashtable<String, Double> entityNumber = new Hashtable<String, Double>();
 				SimpleFeatureIterator discreteIt2 = discrete.features();
@@ -599,19 +603,6 @@ public class RasterAnalyse {
 		return mergeRasters(inList);
 	}
 
-	public static GridCoverage2D importRaster(File f) throws IOException {
-		// setting of useless parameters
-		ParameterValue<OverviewPolicy> policy = AbstractGridFormat.OVERVIEW_POLICY.createValue();
-		policy.setValue(OverviewPolicy.IGNORE);
-		ParameterValue<String> gridsize = AbstractGridFormat.SUGGESTED_TILE_SIZE.createValue();
-		ParameterValue<Boolean> useJaiRead = AbstractGridFormat.USE_JAI_IMAGEREAD.createValue();
-		useJaiRead.setValue(false);
-		GeneralParameterValue[] params = new GeneralParameterValue[] { policy, gridsize, useJaiRead };
-		System.out.println("importing " + f);
-		GridCoverage2DReader reader = new GeoTiffReader(f);
-		return reader.read(params);
-	}
-
 	/**
 	 * Overload to praticcaly put a single raster into a RasterMergeResult format
 	 * 
@@ -656,11 +647,19 @@ public class RasterAnalyse {
 
 		// loop on the different cells
 		for (File f : listRepliFile) {
-			GridCoverage2D coverage = importRaster(f);
+			GridCoverage2D coverage = Rasters.importRaster(f);
 
 			if (env == null) {
+				if (cutBorder) {
+				env = Rasters.importRaster(middleGridRaster).getEnvelope2D();
+				}
+				else {
 				env = coverage.getEnvelope2D();
+				}
 			}
+			
+			
+			
 			int compteurNombre = 0;
 			nbDeScenar = nbDeScenar + 1;
 
@@ -678,7 +677,6 @@ public class RasterAnalyse {
 				Ymin = Ymin + ecart;
 				Ymax = Ymax - ecart;
 			}
-
 			for (double r = Xmin + Double.parseDouble(echelle) / 2; r <= Xmax; r = r + Double.parseDouble(echelle)) {
 				// those values are the bounds from project (and upped to correspond to a
 				// multiple of 180 to analyse all the cells in the project)

@@ -18,7 +18,7 @@ public class mouvData {
 		DataSetSelec.predefSet();
 		Map<String, String> dataHT = DataSetSelec.get("Data1");
 		String name = "dataMouv";
-		File folderIn = new File("./stabilite/dataManu");
+		File folderIn = new File("./data/stabilite/dataManu");
 		File folderOut = new File("./result/sens/dataMouv");
 		double width = 26590;
 		double height = 26590;

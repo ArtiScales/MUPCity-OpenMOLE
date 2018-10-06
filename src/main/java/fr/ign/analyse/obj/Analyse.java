@@ -550,4 +550,34 @@ public class Analyse {
 		return resultList;
 	}
 
+	/**
+	 * How grid calculation is calculated, there must be one that's in the middle, and knowing which one is this is mandatory for the analysis
+	 * @return the name of the middle grid
+	 */
+	public String getMiddleGrid() {
+		List<Double> lX = new ArrayList<Double>();
+		List<Double> lY = new ArrayList<Double>();
+		
+		for (String grid : gridCollec) {
+			Double x = Double.valueOf(grid.split("_")[0]);
+			Double y = Double.valueOf(grid.split("_")[1]);
+			if (!lX.contains(x)) {
+				lX.add(x);
+			}
+			if (!lY.contains(y)) {
+				lY.add(y);
+			}
+		}
+		double sumX = 0;
+		double sumY=0;
+		for (double x :lX) {
+			sumX = sumX + x;
+		}
+		for (double y :lY) {
+			sumY = sumY + y;
+		}
+		
+	return (sumX / lX.size()) + "_" + (sumY / lY.size()) ;
+		
+	}
 }
