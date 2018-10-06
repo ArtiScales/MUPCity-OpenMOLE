@@ -10,33 +10,31 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.coverage.grid.io.AbstractGridFormat;
 import org.geotools.coverage.grid.io.OverviewPolicy;
-import org.geotools.data.DataSourceException;
-import org.geotools.gce.geotiff.GeoTiffFormat;
 import org.geotools.gce.geotiff.GeoTiffReader;
-import org.geotools.gce.geotiff.GeoTiffWriteParams;
-import org.geotools.gce.geotiff.GeoTiffWriter;
 import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.Envelope2D;
 import org.opengis.parameter.GeneralParameterValue;
 import org.opengis.parameter.ParameterValue;
-import org.opengis.parameter.ParameterValueGroup;
 import org.thema.data.IOImage;
 
 import fr.ign.analyse.obj.Analyse;
 import fr.ign.analyse.obj.ScenarAnalyse;
-import fr.ign.cogit.GTFunctions.Rasters;
 
 public class RasterMerge {
 
 	public static File middleGridRaster;
-	
+
 	public static void main(String[] args) throws Exception {
 
 		// File fileIn = new File("/media/mcolomb/Data_2/resultExplo/testNov/exOct");
-		// File fileOut = new File("/media/mcolomb/Data_2/resultExplo/testNov/exOct/raster/remerged.tif");
-		File file1 = new File("/media/mcolomb/Data_2/resultExplo/testNov/exOct/N6_Ba_Yag_ahpx_seed_42/N6_Ba_Yag_ahpx_seed_42-eval_anal-20.0.tif");
-		File file2 = new File("/home/mcolomb/workspace/mupcity-openMole/result/exOct/N6_Ba_Yag_ahpx_seed_42/N6_Ba_Yag_ahpx_seed_42-eval_anal-20.0.tif");
-		File fileOut = new File("/home/mcolomb/workspace/mupcity-openMole/result/exOct/N6_Ba_Yag_ahpx_seed_42/merged.tiff");
+		// File fileOut = new
+		// File("/media/mcolomb/Data_2/resultExplo/testNov/exOct/raster/remerged.tif");
+		File file1 = new File(
+				"/media/mcolomb/Data_2/resultExplo/testNov/exOct/N6_Ba_Yag_ahpx_seed_42/N6_Ba_Yag_ahpx_seed_42-eval_anal-20.0.tif");
+		File file2 = new File(
+				"/home/mcolomb/workspace/mupcity-openMole/result/exOct/N6_Ba_Yag_ahpx_seed_42/N6_Ba_Yag_ahpx_seed_42-eval_anal-20.0.tif");
+		File fileOut = new File(
+				"/home/mcolomb/workspace/mupcity-openMole/result/exOct/N6_Ba_Yag_ahpx_seed_42/merged.tiff");
 		List<File> lFile = new ArrayList<File>();
 		lFile.add(file2);
 		lFile.add(file1);
@@ -45,16 +43,13 @@ public class RasterMerge {
 	}
 
 	/**
-	 * merge multiple raster to get their replication. Overloaded in the case of a raw mupcity output; /!\ Rasters must be the same size /!\
+	 * merge multiple raster to get their replication. Overloaded in the case of a
+	 * raw mupcity output; /!\ Rasters must be the same size /!\
 	 * 
-	 * @param folderIn
-	 *            : folder containing files containing raster to merge
-	 * @param fileOut
-	 *            : raster out
-	 * @param nameSimul
-	 *            : the code-name of your to-merge rasters
-	 * @param filter
-	 *            : filter the scale that you want to keep
+	 * @param folderIn  : folder containing files containing raster to merge
+	 * @param fileOut   : raster out
+	 * @param nameSimul : the code-name of your to-merge rasters
+	 * @param filter    : filter the scale that you want to keep
 	 * @return the raster file
 	 * @throws Exception
 	 */
@@ -102,9 +97,10 @@ public class RasterMerge {
 	/**
 	 * 
 	 * @param folderIn : list of raster file to merge
-	 * @param fileOut : file where the raster is merged
-	 * @param ech : size of the last decomposed cell
-	 * @param crop : if true, the envelope is croped by the lenght of a cell size
+	 * @param fileOut  : file where the raster is merged
+	 * @param ech      : size of the last decomposed cell
+	 * @param crop     : if true, the envelope is croped by the lenght of a cell
+	 *                 size
 	 * @return the merged file
 	 * @throws Exception
 	 */
@@ -135,11 +131,18 @@ public class RasterMerge {
 		GeoTiffReader readerSet = new GeoTiffReader(folderIn.get(0));
 		GridCoverage2D coverageSet = readerSet.read(params);
 		Envelope2D env = coverageSet.getEnvelope2D();
+		System.out.println("first env : " + env);
+		// if we crop the enveloppe, we need to take as a reference the middle enveloppe
 		if (crop) {
-			env = Rasters.importRaster(middleGridRaster).getEnvelope2D();
+			readerSet = new GeoTiffReader(middleGridRaster);
+			System.out.println(middleGridRaster);
+			coverageSet = readerSet.read(params);
+			env = coverageSet.getEnvelope2D();
+			System.out.println("second env " + env);
 		}
 
-		float[][] imagePixelData = new float[(int) Math.floor(env.getWidth() / ech)][(int) Math.floor(env.getHeight() / ech)];
+		float[][] imagePixelData = new float[(int) Math.floor(env.getWidth() / ech)][(int) Math
+				.floor(env.getHeight() / ech)];
 
 		double xMin = env.getMinX();
 		double yMin = env.getMinY();
@@ -160,7 +163,8 @@ public class RasterMerge {
 			GridCoverage2D coverage = reader.read(params);
 			for (int i = 0; i < longueur; ++i) {
 				for (int j = 0; j < largeur; ++j) {
-					DirectPosition2D pt = new DirectPosition2D(xMin + (2 * i + 1) * ech / 2, yMin + (2 * j + 1) * ech / 2);
+					DirectPosition2D pt = new DirectPosition2D(xMin + (2 * i + 1) * ech / 2,
+							yMin + (2 * j + 1) * ech / 2);
 					float[] val = (float[]) coverage.evaluate(pt);
 					if (val[0] > 0) {
 						imagePixelData[i][j] = imagePixelData[i][j] + 1;
@@ -169,6 +173,8 @@ public class RasterMerge {
 			}
 		}
 
+		// could be simpler.. but translation because the x and y are not stored equally
+		// in the two objects
 		float[][] imgpix2 = new float[imagePixelData[0].length][imagePixelData.length];
 		float[][] imgpix3 = new float[imagePixelData[0].length][imagePixelData.length];
 		for (int i = 0; i < imgpix2.length; ++i) {
@@ -185,7 +191,19 @@ public class RasterMerge {
 		return fileOut;
 	}
 
-	public static void writeGeotiff(Hashtable<DirectPosition2D, Float> table, int ech, File fileOut, File exempleRaster) throws IOException {
+	public static void writeGeotiff(Hashtable<DirectPosition2D, Integer> table, File fileOut, int ech,
+			File exempleRaster) throws IOException {
+		Hashtable<DirectPosition2D, Float> convert = new Hashtable<DirectPosition2D, Float>();
+
+		for (DirectPosition2D pos : table.keySet()) {
+			convert.put(pos, (float) table.get(pos));
+		}
+		writeGeotiff(convert, ech, fileOut, exempleRaster);
+
+	}
+
+	public static void writeGeotiff(Hashtable<DirectPosition2D, Float> table, int ech, File fileOut, File exempleRaster)
+			throws IOException {
 		ParameterValue<OverviewPolicy> policy = AbstractGridFormat.OVERVIEW_POLICY.createValue();
 		policy.setValue(OverviewPolicy.IGNORE);
 		// this will basically read 4 tiles worth of data at once from the
@@ -203,7 +221,8 @@ public class RasterMerge {
 		GridCoverage2D coverageSet = readerSet.read(params);
 		Envelope2D env = coverageSet.getEnvelope2D();
 
-		float[][] imagePixelData = new float[(int) Math.floor(env.getWidth() / ech)][(int) Math.floor(env.getHeight() / ech)];
+		float[][] imagePixelData = new float[(int) Math.floor(env.getWidth() / ech)][(int) Math
+				.floor(env.getHeight() / ech)];
 
 		double xMin = env.getMinX();
 		double yMin = env.getMinY();
@@ -215,13 +234,12 @@ public class RasterMerge {
 			for (int j = 0; j < largeur; ++j) {
 				DirectPosition2D pt = new DirectPosition2D(xMin + (2 * i + 1) * ech / 2, yMin + (2 * j + 1) * ech / 2);
 				try {
-				imagePixelData[i][j] = table.get(pt);
-				}
-				catch (NullPointerException n ) {
-					
+					imagePixelData[i][j] = table.get(pt);
+				} catch (NullPointerException n) {
+
 				}
 			}
-			}
+		}
 		float[][] imgpix2 = new float[imagePixelData[0].length][imagePixelData.length];
 		float[][] imgpix3 = new float[imagePixelData[0].length][imagePixelData.length];
 		for (int i = 0; i < imgpix2.length; ++i) {
@@ -257,7 +275,8 @@ public class RasterMerge {
 		// ParameterValueGroup params = new GeoTiffFormat().getWriteParameters();
 		// params.parameter(AbstractGridFormat.GEOTOOLS_WRITE_PARAMS.getName().toString()).setValue(wp);
 		// GeoTiffWriter writer = new GeoTiffWriter(fileName);
-		// writer.write(coverage, (GeneralParameterValue[]) params.values().toArray(new GeneralParameterValue[1]));
+		// writer.write(coverage, (GeneralParameterValue[]) params.values().toArray(new
+		// GeneralParameterValue[1]));
 		// } catch (Exception e) {
 		//
 		// e.printStackTrace();
