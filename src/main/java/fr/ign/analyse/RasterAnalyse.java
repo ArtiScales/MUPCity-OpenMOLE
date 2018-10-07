@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
@@ -412,11 +414,11 @@ public class RasterAnalyse {
 		double Xmax = env.getMaxX();
 		double Ymin = env.getMinY();
 		double Ymax = env.getMaxY();
-
-		for (double r = Xmin + Double.valueOf(echelle) / 2; r <= Xmax; r = r + Double.valueOf(echelle)) {
+		double ech = Double.valueOf(echelle);
+		for (double r = Xmin + ech / 2; r <= Xmax; r = r + ech) {
 			// those values are the bounds from project (and upped to correspond to a
 			// multiple of 180 to analyse all the cells in the project)
-			for (double t = Ymin + Double.valueOf(echelle) / 2; t <= Ymax; t = t + Double.valueOf(echelle)) {
+			for (double t = Ymin + ech / 2; t <= Ymax; t = t + ech) {
 				DirectPosition2D coordCentre = new DirectPosition2D(r, t);
 				float[] cellMup = (float[]) coverageMup.evaluate(coordCentre);
 				if (cellMup[0] > 0) {
@@ -817,6 +819,7 @@ public class RasterAnalyse {
 
 		GeometryFactory factory = new GeometryFactory();
 		SimpleFeatureIterator iteratorCity = fabricType.features();
+
 		try {
 			// Pour toutes les entitées
 			while (iteratorCity.hasNext()) {
@@ -891,6 +894,98 @@ public class RasterAnalyse {
 		}
 
 		Csv.generateCsvFile(cellByFabric, statFile, ("cellBy" + champ[0]), nameLineFabric);
+		fabricSDS.dispose();
+
+		return statFile;
+	}
+
+	/**
+	 * create the statistics for a discretized study
+	 * 
+	 * @param nameScenar : name given to the study
+	 * @param cellRepet  : Collection of the cell's replication
+	 * @param cellEval   : Collection of the cell's evaluation
+	 * @param champ      : containing [0] the name of the type of entites for the
+	 *                   analyze and [1] its field form the attribute table
+	 * @throws MalformedURLException
+	 * @throws IOException
+	 */
+	public static File createCellPerCities(String nameScenar, List<File> fileRepli, File discreteFile)
+			throws IOException {
+
+		String[] nameLineFabric = new String[fileRepli.size() + 2];
+		nameLineFabric[0] = "Cities - echelle " + echelle + "scenar" + nameScenar;
+		nameLineFabric[1] = "coefficient de variation";
+
+		for (int i = 2; i < fileRepli.size() + 2; i++) {
+			nameLineFabric[i] = i + " replication";
+		}
+		
+
+
+		Hashtable<String, double[]> cellsByCity = new Hashtable<String, double[]>();
+
+		ShapefileDataStore fabricSDS = new ShapefileDataStore(discreteFile.toURI().toURL());
+		SimpleFeatureCollection fabricType = fabricSDS.getFeatureSource().getFeatures();
+
+		GeometryFactory factory = new GeometryFactory();
+		SimpleFeatureIterator iteratorCity = fabricType.features();
+		double ech = Double.valueOf(echelle);
+
+		try {
+			// Pour toutes les entitées
+			while (iteratorCity.hasNext()) {
+				int nbRepli = 0;
+				SimpleFeature city = iteratorCity.next();
+				double[] repetCells = new double[fileRepli.size()];
+				for (File f : fileRepli) {
+					GridCoverage2D repet = Rasters.importRaster(f);
+					Envelope2D env = repet.getEnvelope2D();
+					double Xmin = env.getMinX();
+					double Xmax = env.getMaxX();
+					double Ymin = env.getMinY();
+					double Ymax = env.getMaxY();
+
+					for (double r = Xmin + ech / 2; r <= Xmax; r = r + ech) {
+						for (double t = Ymin + ech / 2; t <= Ymax; t = t + ech) {
+							DirectPosition2D coordCentre = new DirectPosition2D(r, t);
+							float[] cellMup = (float[]) repet.evaluate(coordCentre);
+							if (cellMup[0] > 0) {
+								if (((Geometry) city.getDefaultGeometry()).covers(
+										factory.createPoint(new Coordinate(coordCentre.getX(), coordCentre.getY())))) {
+									repetCells[nbRepli] = repetCells[nbRepli] + 1;
+								}
+							}
+						}
+					}
+					nbRepli = nbRepli + 1;
+				}
+				cellsByCity.put((String) city.getAttribute("NOM_COM"), repetCells);
+			}
+
+		} catch (Exception problem) {
+			problem.printStackTrace();
+		} finally {
+			iteratorCity.close();
+		}
+
+		Hashtable<String, double[]> result = new Hashtable<String, double[]>();
+
+		// calculate the coefficient of variation
+		for (String city : cellsByCity.keySet()) {
+			double[] line = new double[fileRepli.size() + 1];
+			DescriptiveStatistics coeff = new DescriptiveStatistics();
+			int number = 1;
+			for (double val : cellsByCity.get(city)) {
+				coeff.addValue(val);
+				line[number] = val;
+				number++;
+			}
+			line[0] = coeff.getStandardDeviation() / coeff.getMean();
+			result.put(city, line);
+		}
+
+		Csv.generateCsvFile(result, statFile, "cellsForCities", nameLineFabric);
 		fabricSDS.dispose();
 
 		return statFile;
@@ -1055,7 +1150,7 @@ public class RasterAnalyse {
 			}
 		}
 
-		premiereCol[6] = ("moyenne evaluation des cellules instables (inférieures à " + variationThreshold
+		premiereCol[6] = ("moyenne evaluation des cellules instables (strictement inférieures à " + variationThreshold
 				+ " réplications)");
 		premiereCol[7] = ("ecart type des cellules instables");
 		premiereCol[8] = ("coefficient de variation des cellules instables");

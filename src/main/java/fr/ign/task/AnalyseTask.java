@@ -31,13 +31,14 @@ public class AnalyseTask {
 
 	public static void main(String[] args) throws Exception {
 		File file = new File("/home/yo/Documents/these/resultFinal/sens/GridMouv/");
+		File fileDonnee = new File("/home/yo/Documents/these/data/stabilite/dataAutom");
 		RasterAnalyse.rootFile = file;
 		RasterAnalyse.echelle = "20";
 		//
 		// runStab(file, new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/LAEA"),
 		// "LAEA", false);
 
-		runGridExplo(file, "GridMouv", false);
+		runGridExplo(file,fileDonnee,"20", "GridMouv", false);
 
 		// List<File> toCompare = new ArrayList<File>();
 		// toCompare.add(new
@@ -258,7 +259,7 @@ public class AnalyseTask {
 		return projName;
 	}
 
-	public static File runGridExplo(File file, String name, boolean machineReadable) throws Exception {
+	public static File runGridExplo(File file, File fileDonnee, String echelle, String name, boolean machineReadable) throws Exception {
 
 		// folder settings
 
@@ -266,11 +267,13 @@ public class AnalyseTask {
 		if (machineReadable) {
 			resultFile = new File(file.getParentFile(), "result--" + name);
 		}
-
+		File discreteFile = getDiscrete(fileDonnee);
 		resultFile.mkdir();
 		RasterAnalyse.rootFile = file;
 		RasterAnalyse.cutBorder = true;
 		RasterAnalyse.saveEvalTab = true;
+		RasterAnalyse.echelle = echelle;
+		
 		// toutes les listes des projets à tester
 		Analyse anal = new Analyse();
 		if (machineReadable) {
@@ -279,16 +282,13 @@ public class AnalyseTask {
 			anal = new Analyse(file, name);
 		}
 
-		for (String echelle : anal.getEchelleRange(3)) {
 			RasterAnalyse.echelle = echelle;
 			// pour l'analyse des différents seuils
 
 			for (Set<ScenarAnalyse> scenarPerGrid : anal.getProjetByGrid()) {
-// TODO that thing is nicer but it doesn't work.. 
-				// String exProjName = ((ProjetAnalyse)
-				// scenarPerGrid.iterator().next()).getNiceName();
 
 				String exScenarName = scenarPerGrid.iterator().next().getNiceName().split("--")[1];
+if(exScenarName.equals("N5_Ba_Moy_ahpE_seed_42") ||exScenarName.equals("N5_Ba_Moy_ahpE_seed_42N6_St_Moy_ahpE_seed_42")){
 				File eachResultFile = new File(resultFile, exScenarName);
 
 				File statFile = new File(eachResultFile, "stat");
@@ -312,21 +312,21 @@ public class AnalyseTask {
 				RasterMergeResult mergedResult = RasterAnalyse.mergeRasters(fileToTest);
 
 				// get the average evaluation of cells in a .csv
-				if (!mergedResult.getCellEval().isEmpty()) {
-					RasterAnalyse.createStatEvals(mergedResult.getCellEval());
-				}
-
-				RasterAnalyse.createStatsDescriptive("analyse-grid---" + exScenarName, mergedResult, 5);
-				// // discrete statistics
-				// RasterAnalyse.createStatsDiscrete(exProjName, mergedResult, discreteFile);
+//				if (!mergedResult.getCellEval().isEmpty()) {
+//					RasterAnalyse.createStatEvals(mergedResult.getCellEval());
+//				}
+//
+//				RasterAnalyse.createStatsDescriptive("analyse-grid---" + exScenarName, mergedResult, 2);
+				 // discrete statistics on the cities and on the allowed to urbanise zones
+				String[] champ = { "Cities", "NOM_COM" };
+				 RasterAnalyse.createStatsDiscrete(exScenarName, mergedResult, discreteFile,champ);
+				 RasterAnalyse.createCellPerCities(exScenarName, fileToTest, discreteFile);
 				// create a merged raster
-				RasterMerge.writeGeotiff(mergedResult.getCellRepet(),
-						new File(rastFile, exScenarName + "-" + name + "-rasterMerged-" + echelle + ".tif"),
-						Integer.parseInt(echelle), middleGridRaster);
-
+//				RasterMerge.writeGeotiff(mergedResult.getCellRepet(),
+//						new File(rastFile, exScenarName + "-" + name + "-rasterMerged-" + echelle + ".tif"),
+//						Integer.parseInt(echelle), middleGridRaster);
+}
 			}
-		}
-
 		return resultFile;
 	}
 

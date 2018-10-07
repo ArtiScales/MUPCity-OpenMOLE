@@ -105,7 +105,7 @@ public class mouvGrid {
 				}
 			}
 		}
-		AnalyseTask.runGridExplo(folderOut, name, false);
+		AnalyseTask.runGridExplo(folderOut,folderIn, String.valueOf(minSize), name, false);
 	}
 
 	public static void renameFiles() {
