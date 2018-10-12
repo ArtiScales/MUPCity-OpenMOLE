@@ -2,12 +2,9 @@ package fr.ign.analyse;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
@@ -15,7 +12,6 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.math3.stat.correlation.Covariance;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.regexp.recompile;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -31,12 +27,9 @@ import org.geotools.grid.Grids;
 import org.geotools.referencing.CRS;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.geometry.BoundingBox;
-import org.opengis.geometry.DirectPosition;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -47,7 +40,6 @@ import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 
 import au.com.bytecode.opencsv.CSVReader;
-import au.com.bytecode.opencsv.CSVWriter;
 import fr.ign.analyse.obj.Analyse;
 import fr.ign.analyse.obj.ScenarAnalyse;
 import fr.ign.analyse.obj.ScenarAnalyseFile;
@@ -79,8 +71,7 @@ public class RasterAnalyse {
 
 	public static void main(String[] args) throws Exception {
 
-	
-	prepareForCityComparison(new File("/media/mcolomb/Data_2/resultFinal/sens/cellSize/result--cellSize"), "N6_St_Moy_ahpS");
+		prepareForCityComparison(new File("/media/mcolomb/Data_2/resultFinal/sens/cellSize/result--cellSize"), "N6_St_Moy_ahpS");
 		// saveEvalTab = true;
 		//
 		// List<File> listFile = new ArrayList<File>();
@@ -841,14 +832,14 @@ public class RasterAnalyse {
 							}
 						}
 					}
-					//area
-					resultFabric[1]=resultFabric[0]*ech*ech;
+					// area
+					resultFabric[1] = resultFabric[0] * ech * ech;
 					resultFabric[2] = stat.getMean();
 					resultFabric[3] = stat.getStandardDeviation();
-					//put nothing if it's empty
-			//		if (resultFabric[0]>0) {
+					// put nothing if it's empty
+					// if (resultFabric[0]>0) {
 					cellByFabric.put(cityName, resultFabric);
-				//	}
+					// }
 				}
 			}
 		} catch (Exception problem) {
@@ -856,60 +847,53 @@ public class RasterAnalyse {
 		} finally {
 			iteratorGeoFeat.close();
 		}
-		Csv.generateCsvFile(cellByFabric, statFile, ("cellBy" + champ[0]), nameLineFabric,false);
+		Csv.generateCsvFile(cellByFabric, statFile, ("cellBy" + champ[0]), nameLineFabric, false);
 		fabricSDS.dispose();
 
 		return statFile;
 	}
 
 	public static void prepareForCityComparison(File f, String scenarName) throws IOException {
-		String[] firstLine = {"nameCommune"};
+		String[] firstLine = { "nameCommune" };
 		Hashtable<String, double[]> result = new Hashtable<String, double[]>();
 		int nbSim = 1;
 		for (File resultFile : f.listFiles()) {
-			if (resultFile.getName().endsWith(scenarName)){
+			if (resultFile.getName().endsWith(scenarName)) {
 				String echelle = resultFile.getName().split("CM")[1].substring(0, 2);
-				System.out.println("echelle "+echelle);
 				CSVReader csvRead = new CSVReader(new FileReader(new File(resultFile, "stat/cellByCities.csv")));
-				
-			
-				
-				//completet first line
+				// completet first line
 				String[] oldFirstLine = firstLine;
-				
-				firstLine = new String[nbSim+1];
-				for (int i = 0 ; i<oldFirstLine.length;i++) {
-					firstLine[i] = oldFirstLine[i]; 
+
+				firstLine = new String[nbSim + 1];
+				for (int i = 0; i < oldFirstLine.length; i++) {
+					firstLine[i] = oldFirstLine[i];
 				}
 				firstLine[nbSim] = echelle;
 				nbSim++;
 				csvRead.readNext();
 				for (String[] row : csvRead.readAll()) {
-		
+
 					if (result.containsKey(row[0])) {
 						double[] res = result.remove(row[0]);
-						int nbcol = res.length +1;
+						int nbcol = res.length + 1;
 						double[] newVal = new double[nbcol];
-						for (int i = 0; i< res.length; i++) {
+						for (int i = 0; i < res.length; i++) {
 							newVal[i] = res[i];
 						}
-						newVal[nbcol-1] = Double.valueOf(row[2]);
+						newVal[nbcol - 1] = Double.valueOf(row[2]);
 						result.put(row[0], newVal);
-					}
-					else {
-						double[] newTab = {Double.valueOf(row[2])};
+					} else {
+						double[] newTab = { Double.valueOf(row[2]) };
 						result.put(row[0], newTab);
 					}
-					
 				}
-				System.out.println(result.size());
 				csvRead.close();
 			}
 		}
-		Csv.generateCsvFile(result, f, "allCitiesFor-"+scenarName, firstLine);
+		Csv.generateCsvFile(result, f, "allCitiesFor-" + scenarName, firstLine);
 		return;
 	}
-	
+
 	/**
 	 * analyse Mup-city's outputs with different vector geographic objects, all presented in the classic "discret file" with predefined name and fields
 	 * 
