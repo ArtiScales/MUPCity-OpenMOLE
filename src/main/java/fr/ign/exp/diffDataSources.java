@@ -8,6 +8,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.MutablePair;
 
+import fr.ign.analyse.RasterAnalyse;
+import fr.ign.task.AnalyseTask;
 import fr.ign.task.ProjectCreationDecompTask;
 import fr.ign.task.SimulTask;
 import fr.ign.tools.DataSetSelec;
@@ -19,8 +21,10 @@ public class diffDataSources {
 		SimulTask.saveEvalAnal = true;
 		SimulTask.saveWholeProj = true;
 
-		File folderIn = new File("./data/all");
+		File folderIn = new File("./donnee/all");
 		File folderOut = new File("./result/sens/diffDataSource");
+		List<List<File>> compNU = new ArrayList<List<File>>();
+
 		DataSetSelec.predefSet();
 		Map<String, String> dataHT = DataSetSelec.get("Data1");
 		double width = 26590;
@@ -74,10 +78,11 @@ public class diffDataSources {
 		SimulTask.saveEval = true;
 
 		// autom
-
+		List<File> compNUManu = new ArrayList<>();
+		List<File> compNUAutom = new ArrayList<>();
 		MutablePair<String, File> projectFile = ProjectCreationDecompTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT, maxSize, minSize,
 				seuilDensBuild, false);
-
+		compNUManu.add(projectFile.getRight());
 		toUse = ahpS_Moy;
 		for (int j = 0; j <= 3; j++) {
 
@@ -85,15 +90,18 @@ public class diffDataSources {
 			case 1:
 				dataHT = DataSetSelec.get("Data1.1");
 				projectFile = ProjectCreationDecompTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT, maxSize, minSize, seuilDensBuild, false);
+				compNUManu.add(projectFile.getRight());
 				break;
 			//
 			case 2:
 				dataHT = DataSetSelec.get("Data2");
 				projectFile = ProjectCreationDecompTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT, maxSize, minSize, seuilDensBuild, false);
+				compNUAutom.add(projectFile.getRight());
 				break;
 			case 3:
 				dataHT = DataSetSelec.get("Data2.1");
 				projectFile = ProjectCreationDecompTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT, maxSize, minSize, seuilDensBuild, false);
+				compNUAutom.add(projectFile.getRight());
 				break;
 			}
 
@@ -102,6 +110,7 @@ public class diffDataSources {
 				int nMax = 4;
 				boolean strict = true;
 				boolean mean = true;
+				toUse = ahpS_Moy;
 				switch (i) {
 				case 1:
 					nMax = 5;
@@ -121,6 +130,15 @@ public class diffDataSources {
 				String ahpName = ScenarTools.getAHPName(toUse);
 				SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, toUse.get("ahp0"), toUse.get("ahp1"), toUse.get("ahp2"), toUse.get("ahp3"),
 						toUse.get("ahp4"), toUse.get("ahp5"), toUse.get("ahp6"), toUse.get("ahp7"), toUse.get("ahp8"), ahpName, mean, seed, false);
+			}
+		}
+
+		for (List<File> lF : compNU) {
+			File specOut = new File(folderOut, lF.get(0).getName());
+			RasterAnalyse.rootFile = specOut;
+			RasterAnalyse.echelle = "20";
+			for (int ech = 20; ech <= 180; ech = ech * 3) {
+				AnalyseTask.compProjects(lF, "DiffData", specOut, String.valueOf(ech));
 			}
 		}
 	}

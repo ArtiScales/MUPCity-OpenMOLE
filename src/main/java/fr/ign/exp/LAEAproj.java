@@ -21,8 +21,6 @@ public class LAEAproj {
 		String name = "LAEA";
 		File folderIn = new File("./stabilite/LAEA");
 		File folderOut = new File("./result/sens/proj");
-		File discreteFile = new File(folderIn, "admin_typo.shp");
-		File buildFile = new File(folderIn, "batimentPro.shp");
 		double width = 26590;
 		double height = 26590;
 
@@ -71,7 +69,6 @@ public class LAEAproj {
 		for (int i = 0; i <= 3; i++) {
 
 			toUse = ahpE_Moy;
-
 			int nMax = 4;
 			boolean strict = true;
 			boolean mean = true;

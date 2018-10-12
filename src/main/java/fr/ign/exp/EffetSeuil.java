@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.MutablePair;
 
+import fr.ign.task.AnalyseTask;
 import fr.ign.task.ProjectCreationDecompTask;
 import fr.ign.task.SimulTask;
 import fr.ign.tools.DataSetSelec;
@@ -15,14 +16,15 @@ import fr.ign.tools.ScenarTools;
 
 public class EffetSeuil {
 
-	public static void main() throws Exception {
+	public static void main(String[] args) throws Exception {
 
-		String name = "diffSeuils";
+		String name = "EffetSeuils";
 		SimulTask.saveEvalAnal = true;
 		SimulTask.saveWholeProj = true;
 
-		File folderIn = new File("./stabilite/");
-		File folderOut = new File("./result/sens/diffSeuils");
+		File folderIn = new File("./donnee/all");
+		File folderOut = new File("./result/sens/EffetSeuils");
+		DataSetSelec.predefSet();
 		Map<String, String> dataHT = DataSetSelec.get("Data1");
 		double width = 26590;
 		double height = 26590;
@@ -74,7 +76,6 @@ public class EffetSeuil {
 
 		// autom
 
-		toUse = ahpS_Moy;
 		for (double buildDensityThreshold = 0.000001; buildDensityThreshold <= 0.01; buildDensityThreshold = buildDensityThreshold * 10) {
 
 			MutablePair<String, File> projectFile = ProjectCreationDecompTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT, maxSize, minSize,
@@ -85,6 +86,7 @@ public class EffetSeuil {
 				int nMax = 4;
 				boolean strict = true;
 				boolean mean = true;
+				toUse = ahpS_Moy;
 				switch (i) {
 				case 1:
 					nMax = 5;
@@ -106,7 +108,40 @@ public class EffetSeuil {
 						toUse.get("ahp4"), toUse.get("ahp5"), toUse.get("ahp6"), toUse.get("ahp7"), toUse.get("ahp8"), ahpName, mean, seed, false);
 			}
 		}
+		// simulation for a null threshold
+		MutablePair<String, File> projectFile = ProjectCreationDecompTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT, maxSize, minSize, 0,
+				false);
 
+		for (int i = 0; i <= 3; i++) {
+
+			int nMax = 4;
+			boolean strict = true;
+			boolean mean = true;
+			toUse = ahpS_Moy;
+			switch (i) {
+			case 1:
+				nMax = 5;
+				strict = false;
+				break;
+			case 2:
+				nMax = 6;
+				strict = true;
+				break;
+			case 3:
+				nMax = 7;
+				strict = false;
+				mean = false;
+				toUse = ahpS_Yag;
+				break;
+			}
+			String ahpName = ScenarTools.getAHPName(toUse);
+			SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, toUse.get("ahp0"), toUse.get("ahp1"), toUse.get("ahp2"), toUse.get("ahp3"),
+					toUse.get("ahp4"), toUse.get("ahp5"), toUse.get("ahp6"), toUse.get("ahp7"), toUse.get("ahp8"), ahpName, mean, seed, false);
+		}
+
+		for (int ech = 20; ech <= 180; ech = ech * 3) {
+			AnalyseTask.runEffetSeuil(folderOut, folderIn, String.valueOf(ech), name, false);
+		}
 	}
 
 }

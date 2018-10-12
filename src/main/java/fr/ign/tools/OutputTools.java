@@ -35,9 +35,8 @@ public class OutputTools {
 
 	public static void main(String[] args) throws IOException, NoSuchAuthorityCodeException, FactoryException, ParseException {
 		vectorizeMupOutput(Rasters.importRaster(new File(
-				"/media/mcolomb/Data_2/resultFinal/testAHP/2emevague/StabiliteTestAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N4_Ba_MoyahpE_Moy_seed_42/N4_Ba_MoyahpE_Moy_seed_42-evalAnal-20.0.tif")),
-				new File("/media/mcolomb/Data_2/resultFinal/compThema/N4BaEMoy"), 20);
-
+				"/media/mcolomb/Data_2/resultFinal/sens/cellSize/cellSize-Manu-CM15.0-S0.0-GP_915948.0_6677337.0/N6_St_Moy_ahpS_seed_42/N6_St_Moy_ahpS_seed_42-evalAnal-15.0.tif")),
+				new File("/media/mcolomb/Data_2/resultFinal/sens/cellSize/vect/cellSize-Manu-CM15.0-S0.0-GP_915948.0_6677337.0--N6_St_Moy_ahpS_seed_42-evalAnal-15.0.tif"), 15);
 	}
 
 	public static File vectorizeMupOutput(GridCoverage2D coverage, File destFile, double sizeCell)

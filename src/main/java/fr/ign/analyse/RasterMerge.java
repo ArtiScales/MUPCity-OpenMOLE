@@ -131,7 +131,6 @@ public class RasterMerge {
 		GeoTiffReader readerSet = new GeoTiffReader(folderIn.get(0));
 		GridCoverage2D coverageSet = readerSet.read(params);
 		Envelope2D env = coverageSet.getEnvelope2D();
-		System.out.println("first env : " + env);
 		// if we crop the enveloppe, we need to take as a reference the middle enveloppe
 		if (crop) {
 			readerSet = new GeoTiffReader(middleGridRaster);

@@ -74,7 +74,6 @@ public class mouvGrid {
 						ymin, width, height, shiftX, shiftY, dataHT, maxSize, minSize, seuilDensBuild, false);
 
 				toUse = ahpE_Moy;
-
 				int nMax = 4;
 				boolean strict = true;
 				boolean mean = true;
@@ -109,7 +108,7 @@ public class mouvGrid {
 	}
 
 	public static void renameFiles() {
-		File base = new File("/home/yo/Documents/these/resultFinal/sens/GridMouv/");
+		File base = new File("/media/mcolomb/Data_2/resultFinal/sens/GridMouv");
 		for (File f : base.listFiles()) {
 			if (f.getName().startsWith("Grid")) {
 				for (File ff : f.listFiles()) {
@@ -117,7 +116,6 @@ public class mouvGrid {
 						String[] chaine = ff.getName().split("_");
 						String rename = chaine[0] + "_" + chaine[1] + "_" + chaine[3] + "_"
 								+ chaine[2].replace("Yag", "").replace("Moy", "") + "_" + chaine[4] + "_" + chaine[5];
-
 						for (File fff : ff.listFiles()) {
 							if (fff.getName().startsWith("N")) {
 								String[] chaine2 = fff.getName().split("-");
@@ -125,7 +123,6 @@ public class mouvGrid {
 								fff.renameTo(new File(fff.getParentFile(), rename2));
 							}
 						}
-						System.out.println(rename);
 						ff.renameTo(new File(ff.getParent(), rename));
 					}
 

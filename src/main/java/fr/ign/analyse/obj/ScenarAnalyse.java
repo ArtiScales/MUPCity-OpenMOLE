@@ -177,15 +177,13 @@ public class ScenarAnalyse extends ProjetAnalyse {
 		return true;
 	}
 
-	// public File[] getSimuFile() throws FileNotFoundException {
-	// return getSimuFile("evalAnal", sizeCell);
-	// }
-	//
-	// public File getSimuFile(String echelle) throws FileNotFoundException {
-	// return getSimuFile("evalAnal", echelle);
-	// }
-
 	public boolean sameScenario(ScenarAnalyse sA) {
 		return nMax.equals(sA.getnMax()) && ahp.equals(sA.getAhp()) && strict.equals(sA.isStrict()) && yag.equals(sA.isYag()) && seed.equals(sA.getSeed());
+	}
+
+	@Override
+	public String toString() {
+		return "ScenarAnalyse [nMax=" + nMax + ", ahp=" + ahp + ", strict=" + strict + ", yag=" + yag + ", scenarFile=" + scenarFile + ", seed=" + seed + ", projFile=" + projFile
+				+ ", sizeCell=" + sizeCell + ", grid=" + grid + ", seuil=" + seuil + ", data=" + data + "]";
 	}
 }

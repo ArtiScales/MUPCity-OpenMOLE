@@ -8,11 +8,10 @@ import java.util.regex.Pattern;
 
 public class DataSetSelec {
 
-/**
- * This class deals with data issues concerning the run of MUP-City using predefined tasks. 
- * Is is either possible to pre
- * 
- */
+	/**
+	 * This class deals with data issues concerning the run of MUP-City using predefined tasks. Is is either possible to pre
+	 * 
+	 */
 	public static Map<String, Map<String, String>> dataHT = new Hashtable<String, Map<String, String>>();
 	// public static Map<String, String> dataHTtemp = new Hashtable<String, String>();
 

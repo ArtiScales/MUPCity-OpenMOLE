@@ -1,6 +1,8 @@
 target/
-data/
-result/
+donnee
+!*/donnee/*
+result
+!*/result/*
 stabilite/
 
 pom.xml.tag

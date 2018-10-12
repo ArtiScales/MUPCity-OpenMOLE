@@ -269,14 +269,19 @@ public class Analyse {
 	 *            limit : le nombre limite d'échelles renvoyés
 	 * @return ArrayList<String> une liste d'échelles
 	 */
-	public List<String> getEchelleRange(int limit) {
+	public List<String> getEchelleRange(int limit, ProjetAnalyse pA) {
 		List<Integer> echelleCollecLimitedtemp = new ArrayList<Integer>();
+		int multiple = Integer.valueOf(pA.getSizeCell());
 		for (int i = 0; i < echelleCollec.size(); i++) {
-			echelleCollecLimitedtemp.add(Integer.valueOf(echelleCollec.get(i)));
+			// if this cell is a multiple of the siz of the cell that we analyse
+			if ((Integer.valueOf(echelleCollec.get(i)) % multiple) == 0) {
+				echelleCollecLimitedtemp.add(Integer.valueOf(echelleCollec.get(i)));
+			}
 		}
 		Collections.sort(echelleCollecLimitedtemp);
 		List<String> echelleCollecLimited = new ArrayList<String>();
 		for (int i = 0; i < limit; i++) {
+
 			echelleCollecLimited.add(String.valueOf(echelleCollecLimitedtemp.get(i)));
 		}
 
@@ -295,25 +300,21 @@ public class Analyse {
 		return scenarCollec;
 	}
 
-	public List<Set<ScenarAnalyse>> getProjetBySizeCell() throws FileNotFoundException {
-		List<Set<ProjetAnalyse>> listGen = new ArrayList<Set<ProjetAnalyse>>();
-		for (String seuil : seuilCollec) {
-			for (String grid : gridCollec) {
-				for (String data : dataCollec) {
-					Set<ProjetAnalyse> particularList = new HashSet<ProjetAnalyse>();
-					for (ProjetAnalyse pa : projetCollec) {
-						if (pa.getSeuil().equals(seuil) && pa.getData().equals(data) && pa.getGrid().equals(grid)) {
-							particularList.add(pa);
-						}
-					}
-					listGen.add(particularList);
+	public List<Set<ScenarAnalyse>> getScenarBySizeCellOneSeed(String seed) throws FileNotFoundException {
+		List<Set<ScenarAnalyse>> listGen = new ArrayList<Set<ScenarAnalyse>>();
+		for (String cellMin : cellMinCollec) {
+			Set<ScenarAnalyse> particularList = new HashSet<ScenarAnalyse>();
+			for (ScenarAnalyse sA : scenarCollec) {
+				if (sA.getSizeCell().equals(cellMin) && sA.getSeed().equals(seed) ) {
+					particularList.add(sA);
 				}
 			}
+			listGen.add(particularList);
 		}
-		return getScenars(listGen);
+
+		return listGen;
 	}
-	
-	
+
 	public List<Set<ScenarAnalyse>> getProjetBySeuil() throws FileNotFoundException {
 		List<Set<ProjetAnalyse>> listGen = new ArrayList<Set<ProjetAnalyse>>();
 		for (String cellMin : cellMinCollec) {
@@ -462,12 +463,38 @@ public class Analyse {
 			for (String yag : yagCollec) {
 				for (String n : nMaxCollec) {
 					for (String ahp : ahpCollec) {
-
 						for (String str : strictCollec) {
 							List<ScenarAnalyse> sortedList = new ArrayList<ScenarAnalyse>();
 							for (ScenarAnalyse scen : scenProj) {
 								if (scen.getAhp().equals(ahp) && scen.getnMax().equals(n) && scen.isStrict().equals(str) && scen.isYag().equals(yag)) {
 									sortedList.add(scen);
+								}
+							}
+							if (!sortedList.isEmpty()) {
+								result.add(sortedList);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+	
+	public List<List<ScenarAnalyse>> getScenarOneSeed() throws FileNotFoundException {
+		List<List<ScenarAnalyse>> scenPerProj = getScenarPerProject();
+		List<List<ScenarAnalyse>> result = new ArrayList<>();
+		for (List<ScenarAnalyse> scenProj : scenPerProj) {
+			for (String yag : yagCollec) {
+				for (String n : nMaxCollec) {
+					for (String ahp : ahpCollec) {
+						for (String str : strictCollec) {
+							List<ScenarAnalyse> sortedList = new ArrayList<ScenarAnalyse>();
+							for (ScenarAnalyse scen : scenProj) {
+								if (scen.getAhp().equals(ahp) && scen.getnMax().equals(n) && scen.isStrict().equals(str) && scen.isYag().equals(yag)) {
+									sortedList.add(scen);
+									break;
 								}
 							}
 							if (!sortedList.isEmpty()) {
@@ -502,10 +529,10 @@ public class Analyse {
 		return getSimuFile(sA, "20", "evalAnal");
 	}
 
-	public File getSimuFile(ScenarAnalyse sA, String ech, String mean) throws FileNotFoundException {
+	public File getSimuFile(ScenarAnalyse sA, String echelle, String mean) throws FileNotFoundException {
 		for (ScenarAnalyseFile sCf : fileCollec) {
 			if (((ScenarAnalyse) sCf).sameScenario(sA) && ((ProjetAnalyse) sCf).sameProjet(sA)) {
-				if (sCf.getEchelle().equals(ech)) {
+				if (sCf.getEchelle().equals(echelle)) {
 					if (sCf.getMeaning().equals(mean)) {
 						return sCf.getFileFile();
 					}
@@ -552,12 +579,13 @@ public class Analyse {
 
 	/**
 	 * How grid calculation is calculated, there must be one that's in the middle, and knowing which one is this is mandatory for the analysis
+	 * 
 	 * @return the name of the middle grid
 	 */
 	public String getMiddleGrid() {
 		List<Double> lX = new ArrayList<Double>();
 		List<Double> lY = new ArrayList<Double>();
-		
+
 		for (String grid : gridCollec) {
 			Double x = Double.valueOf(grid.split("_")[0]);
 			Double y = Double.valueOf(grid.split("_")[1]);
@@ -569,15 +597,15 @@ public class Analyse {
 			}
 		}
 		double sumX = 0;
-		double sumY=0;
-		for (double x :lX) {
+		double sumY = 0;
+		for (double x : lX) {
 			sumX = sumX + x;
 		}
-		for (double y :lY) {
+		for (double y : lY) {
 			sumY = sumY + y;
 		}
-		
-	return (sumX / lX.size()) + "_" + (sumY / lY.size()) ;
-		
+
+		return (sumX / lX.size()) + "_" + (sumY / lY.size());
+
 	}
 }

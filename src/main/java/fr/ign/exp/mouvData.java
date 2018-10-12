@@ -70,7 +70,6 @@ public class mouvData {
 						minSize, seuilDensBuild, false);
 
 				toUse = ahpE_Moy;
-
 				int nMax = 4;
 				boolean strict = true;
 				boolean mean = true;

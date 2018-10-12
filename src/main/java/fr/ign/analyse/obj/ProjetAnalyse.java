@@ -120,6 +120,10 @@ public class ProjetAnalyse {
 
 		return seuil.equals(sA.getSeuil()) && data.equals(sA.getData()) && sizeCell.equals(sA.getSizeCell()) && grid.equals(sA.getGrid()) ;
 	}
+	@Override
+	public String toString() {
+		return "ProjetAnalyse [projFile=" + projFile + ", sizeCell=" + sizeCell + ", grid=" + grid + ", seuil=" + seuil + ", data=" + data + "]";
+	}
 
 //	public boolean equals(ProjetAnalyse pA) {
 //		return grid.equals(pA.getGrid()) && seuil.equals(pA.getSeuil())
