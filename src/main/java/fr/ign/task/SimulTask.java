@@ -218,7 +218,7 @@ public class SimulTask {
 	public static File run(File projectFile, File scenarOut, String name, int nMax, boolean strict, AHP ahp, String ahpName, boolean mean, long seed, boolean machineReadable)
 			throws Exception {
 		System.out.println("Initialization of " + projectFile);
-		//Initialize.init();
+		Initialize.init();
 		System.out.println("Simulation of " + name);
 		setName(name);
 		Project project = Project.load(new File(projectFile, name + ".xml"));

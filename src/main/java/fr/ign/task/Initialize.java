@@ -28,6 +28,12 @@ import com.google.common.collect.Lists;
 import it.geosolutions.jaiext.ConcurrentOperationRegistry;
 
 public class Initialize {
+	
+	public static void main(String[] args){
+		Initialize.init();
+		System.out.println("Finished");
+	}
+	
 	private static volatile boolean initialized;
 
 	public static synchronized void init() {
@@ -118,7 +124,7 @@ public class Initialize {
 //		System.out.println("scanForPlugins");
 		ImageIO.scanForPlugins();
 		IIORegistry registry = IIORegistry.getDefaultInstance();
-		printRegistry(registry);
+		//printRegistry(registry);
 
 		// in any case, the native png reader is worse than the pure java ones, so
 		// let's disable it (the native png writer is on the other side faster)...
@@ -126,7 +132,7 @@ public class Initialize {
 		ImageIOExt.allowNativeCodec("png", ImageWriterSpi.class, true);
 
 //		System.out.println("allowNativeCodec");
-		printRegistry(registry);
+		//printRegistry(registry);
 
 		// remove the ImageIO JPEG200 readers/writes, they are outdated and not quite
 		// working
@@ -634,7 +640,7 @@ public class Initialize {
 		// registry.registerServiceProvider(new
 		// com.sun.media.jai.imageioimpl.ImageReadWriteSpi());
 		ReferencingFactoryFinder.addAuthorityFactory(new org.geotools.referencing.factory.epsg.ThreadedHsqlEpsgFactory());
-		printRegistry(registry);
+		//printRegistry(registry);
 
 		// new com.sun.media.imageio.stream.RawImageInputStream(arg0, arg1)
 		// com.sun.media.imageioimpl.common.ImageUtil
