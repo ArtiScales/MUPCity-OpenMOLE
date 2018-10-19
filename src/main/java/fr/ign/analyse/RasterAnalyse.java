@@ -46,6 +46,7 @@ import fr.ign.analyse.obj.ScenarAnalyseFile;
 import fr.ign.cogit.GTFunctions.Csv;
 import fr.ign.cogit.GTFunctions.Rasters;
 import fr.ign.tools.ScenarTools;
+import fr.ign.tools.StatTab;
 
 public class RasterAnalyse {
 

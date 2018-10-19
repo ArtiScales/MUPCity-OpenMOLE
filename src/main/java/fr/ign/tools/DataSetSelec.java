@@ -30,7 +30,7 @@ public class DataSetSelec {
 		dataHTtemp.put("ptTrain", "trainPro.shp");
 		dataHTtemp.put("nU", "nonUrbaPro.shp");
 		dataHTtemp.put("name", "Manu");
-		dataHT.put("Data1", dataHTtemp);
+		dataHT.put("Manu", dataHTtemp);
 
 		// Data1.1
 		dataHTtemp = new Hashtable<String, String>();

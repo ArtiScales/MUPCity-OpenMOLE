@@ -31,21 +31,23 @@ public class AnalyseTask {
 
 	public static void main(String[] args) throws Exception {
 
-		// File file = new File("/media/mcolomb/Data_2/resultFinal/sens/diffDataSource");
-		// File fileDonnee = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataAutom");
-		// List<File> aTest = new ArrayList<File>();
-		// aTest.add(new File(file, "DiffData-Manu-CM20.0-S0.0-GP_915948.0_6677337.0"));
-		// aTest.add(new File(file, "DiffData-ManuPhy-CM20.0-S0.0-GP_915948.0_6677337.0"));
-		//
-		// RasterAnalyse.rootFile = file;
-		// RasterAnalyse.echelle = "20";
-		// for (int ech = 20; ech <= 180; ech = ech * 3) {
-		// compProjects(aTest, "DiffData", file, String.valueOf(ech));
-		// }
+		 File file = new File("/media/mcolomb/Data_2/resultFinal/sens/diffDataSource");
+		 List<File> aTest = new ArrayList<File>();
+		 aTest.add(new File(file, "DiffData-Autom-CM20.0-S0.0-GP_915948.0_6677337.0"));
+		 aTest.add(new File(file, "DiffData-AutomPhy-CM20.0-S0.0-GP_915948.0_6677337.0"));
+		
+		 RasterAnalyse.rootFile = file;
+		 RasterAnalyse.echelle = "20";
 
-		File file = new File("/media/mcolomb/Data_2/resultFinal/sens/cellSize");
-		File fileDonnee = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu");
-		runSizeCellExplo(file, fileDonnee, "cellSize", false);
+		 compProjects(aTest, "DiffData", file, RasterAnalyse.echelle);
+		 
+		 
+		 
+//		File file = new File("/media/mcolomb/Data_2/resultFinal/sens/cellSize");
+//		File fileDonnee = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu");
+//		runSizeCellExplo(file, fileDonnee, "cellSize", false);
+		
+		
 		// File file = new File("/media/mcolomb/Data_2/resultFinal/sens/GridMouv");
 		// File fileDonnee = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataAutom");
 		// RasterAnalyse.rootFile = file;
@@ -508,7 +510,6 @@ public class AnalyseTask {
 	}
 
 	public static void compProjects(List<File> projectToTest, String name, File fileOut, String echelle) throws Exception {
-		List<List<File>> fileToTest = new ArrayList<>();
 		Hashtable<String, List<File>> scenarCollec = new Hashtable<String, List<File>>();
 		for (File projet : projectToTest) {
 			if (projet.getName().startsWith(name)) {
@@ -516,7 +517,7 @@ public class AnalyseTask {
 					if (scenar.getName().startsWith("N")) {
 						for (File file : scenar.listFiles()) {
 							if (file.getName().endsWith("evalAnal-" + echelle + ".0.tif")) {
-
+System.out.println(file);
 								if (scenarCollec.containsKey(scenar.getName())) {
 									List<File> tempList = scenarCollec.remove(scenar.getName());
 									tempList.add(file);

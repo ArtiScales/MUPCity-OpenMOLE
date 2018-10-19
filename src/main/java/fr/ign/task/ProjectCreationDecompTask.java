@@ -62,7 +62,7 @@ public class ProjectCreationDecompTask {
 		DataSetSelec.predefSet();
 		Map<String, String> dataHTproj = DataSetSelec.get("Data1.2");
 		*/
-		File folderIn = new File("/home/julien/.openmole/DEL1701P003-Ubuntu/webui/projects/mupcity/dataOpenMole/stabilite/dataAutom");
+		File folderIn = new File("/media/mcolomb/Data_2/dataOpenMole/all");
 		String inputName = folderIn.getName();
 		File folderOut = new File("/tmp/output2");
 		folderOut.mkdirs();
@@ -222,6 +222,11 @@ public class ProjectCreationDecompTask {
 		}
 
 		System.out.println("Decomposition");
+		System.out.println(maxSize);
+		System.out.println(minSize);
+		System.out.println(seuilDensBuild);
+		System.out.println(mon.isCanceled());
+		
 		project.decomp(3, maxSize, minSize, seuilDensBuild, mon, false);
 
 		System.out.println("Saving project in " + folderOut);
