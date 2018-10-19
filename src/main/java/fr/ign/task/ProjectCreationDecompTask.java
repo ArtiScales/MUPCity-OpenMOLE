@@ -109,7 +109,7 @@ public class ProjectCreationDecompTask {
 	public static MutablePair<String, File> run(String name, File folderIn, File folderOut, double xmin, double ymin, double width, double height, double shiftX, double shiftY,
 			Map<String, String> dataHT, double maxSize, double minSize, double seuilDensBuild, boolean machineReadable) throws Exception {
 		System.out.println("Initializing");
-	//	Initialize.init();
+		Initialize.init();
 		TaskMonitor mon = new TaskMonitor.EmptyMonitor();
 		// Dossier intermédiaire avec les fichiers transformées
 		// File folderTemp = new File(folderIn + "/tmp/");

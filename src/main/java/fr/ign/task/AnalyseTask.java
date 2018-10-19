@@ -555,7 +555,7 @@ System.out.println(file);
 
 	public static File runStab(File file, File fileDonnee, String name, boolean machineReadable) throws Exception {
 		// System.out.println("Initialization");
-		// Initialize.init();
+		 Initialize.init();
 
 		// folder settings
 		File discreteFile = getDiscrete(fileDonnee);
