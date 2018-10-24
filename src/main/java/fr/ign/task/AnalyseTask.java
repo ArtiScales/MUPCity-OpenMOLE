@@ -34,7 +34,7 @@ public class AnalyseTask {
 		 File file = new File("/media/mcolomb/Data_2/resultFinal/sens/diffDataSource");
 		 List<File> aTest = new ArrayList<File>();
 		 aTest.add(new File(file, "DiffData-Autom-CM20.0-S0.0-GP_915948.0_6677337.0"));
-		 aTest.add(new File(file, "DiffData-AutomPhy-CM20.0-S0.0-GP_915948.0_6677337.0"));
+		 aTest.add(new File(file, "DiffData-Manu-CM20.0-S0.0-GP_915948.0_6677337.0"));
 		
 		 RasterAnalyse.rootFile = file;
 		 RasterAnalyse.echelle = "20";
@@ -281,7 +281,7 @@ public class AnalyseTask {
 		if (machineReadable) {
 			resultFile = new File(file.getParentFile(), "result--" + name);
 		}
-		File discreteFile = getDiscrete(fileDonnee);
+		
 		resultFile.mkdir();
 		RasterAnalyse.rootFile = file;
 		RasterAnalyse.cutBorder = true;
@@ -514,10 +514,10 @@ public class AnalyseTask {
 		for (File projet : projectToTest) {
 			if (projet.getName().startsWith(name)) {
 				for (File scenar : projet.listFiles()) {
-					if (scenar.getName().startsWith("N")) {
+					if (scenar.getName().startsWith("N")&&scenar.isDirectory()) {
 						for (File file : scenar.listFiles()) {
 							if (file.getName().endsWith("evalAnal-" + echelle + ".0.tif")) {
-System.out.println(file);
+
 								if (scenarCollec.containsKey(scenar.getName())) {
 									List<File> tempList = scenarCollec.remove(scenar.getName());
 									tempList.add(file);

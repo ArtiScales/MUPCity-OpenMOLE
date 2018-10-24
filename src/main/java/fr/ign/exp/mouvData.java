@@ -16,9 +16,9 @@ public class mouvData {
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
 		DataSetSelec.predefSet();
-		Map<String, String> dataHT = DataSetSelec.get("Data1");
+		Map<String, String> dataHT = DataSetSelec.get("Manu");
 		String name = "dataMouv";
-		File folderIn = new File("./data/stabilite/dataManu");
+		File folderIn = new File("./donnee/stabilite/dataManu");
 		File folderOut = new File("./result/sens/dataMouv");
 		double width = 26590;
 		double height = 26590;
@@ -62,11 +62,12 @@ public class mouvData {
 		System.out.println("----------Simulation task----------");
 		SimulTask.saveEval = false;
 		SimulTask.saveWholeProj = true;
-
+		int indice = 0;
 		for (int xSlide = -1; xSlide <= 1; xSlide++) {
 			for (int ySlide = -1; ySlide <= 1; ySlide++) {
-
-				MutablePair<String, File> projectFile = ProjectCreationDecompTask.run(name, folderIn, folderOut, xmin, ymin, width, height, xSlide, ySlide, dataHT, maxSize,
+				//change the name to avoid overwritting (translation is not in the project's name)
+				String newName = name + indice;
+				MutablePair<String, File> projectFile = ProjectCreationDecompTask.run(newName, folderIn, folderOut, xmin, ymin, width, height, xSlide, ySlide, dataHT, maxSize,
 						minSize, seuilDensBuild, false);
 
 				toUse = ahpE_Moy;
@@ -96,6 +97,7 @@ public class mouvData {
 							toUse.get("ahp4"), toUse.get("ahp5"), toUse.get("ahp6"), toUse.get("ahp7"), toUse.get("ahp8"), ahpName, mean, seed, false);
 
 				}
+				indice++;
 			}
 		}
 	}

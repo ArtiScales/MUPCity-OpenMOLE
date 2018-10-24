@@ -222,10 +222,6 @@ public class ProjectCreationDecompTask {
 		}
 
 		System.out.println("Decomposition");
-		System.out.println(maxSize);
-		System.out.println(minSize);
-		System.out.println(seuilDensBuild);
-		System.out.println(mon.isCanceled());
 		
 		project.decomp(3, maxSize, minSize, seuilDensBuild, mon, false);
 

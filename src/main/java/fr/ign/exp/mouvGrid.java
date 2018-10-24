@@ -1,11 +1,17 @@
 package fr.ign.exp;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.MutablePair;
 
+import fr.ign.cogit.GTFunctions.Rasters;
 import fr.ign.task.AnalyseTask;
 import fr.ign.task.ProjectCreationDecompTask;
 import fr.ign.task.SimulTask;
@@ -70,8 +76,8 @@ public class mouvGrid {
 				double xmin = 915948 + xSlide * minSize;
 				double ymin = 6677337 + ySlide * minSize;
 
-				MutablePair<String, File> projectFile = ProjectCreationDecompTask.run(name, folderIn, folderOut, xmin,
-						ymin, width, height, shiftX, shiftY, dataHT, maxSize, minSize, seuilDensBuild, false);
+				MutablePair<String, File> projectFile = ProjectCreationDecompTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT, maxSize,
+						minSize, seuilDensBuild, false);
 
 				toUse = ahpE_Moy;
 				int nMax = 4;
@@ -96,15 +102,13 @@ public class mouvGrid {
 					}
 					String ahpName = ScenarTools.getAHPName(toUse);
 
-					SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, toUse.get("ahp0"),
-							toUse.get("ahp1"), toUse.get("ahp2"), toUse.get("ahp3"), toUse.get("ahp4"),
-							toUse.get("ahp5"), toUse.get("ahp6"), toUse.get("ahp7"), toUse.get("ahp8"), ahpName, mean,
-							seed, false);
+					SimulTask.run(projectFile.getRight(), projectFile.getLeft(), nMax, strict, toUse.get("ahp0"), toUse.get("ahp1"), toUse.get("ahp2"), toUse.get("ahp3"),
+							toUse.get("ahp4"), toUse.get("ahp5"), toUse.get("ahp6"), toUse.get("ahp7"), toUse.get("ahp8"), ahpName, mean, seed, false);
 
 				}
 			}
 		}
-		AnalyseTask.runGridExplo(folderOut,folderIn, String.valueOf(minSize), name, false);
+		AnalyseTask.runGridExplo(folderOut, folderIn, String.valueOf(minSize), name, false);
 	}
 
 	public static void renameFiles() {
@@ -114,8 +118,7 @@ public class mouvGrid {
 				for (File ff : f.listFiles()) {
 					if (ff.getName().startsWith("N")) {
 						String[] chaine = ff.getName().split("_");
-						String rename = chaine[0] + "_" + chaine[1] + "_" + chaine[3] + "_"
-								+ chaine[2].replace("Yag", "").replace("Moy", "") + "_" + chaine[4] + "_" + chaine[5];
+						String rename = chaine[0] + "_" + chaine[1] + "_" + chaine[3] + "_" + chaine[2].replace("Yag", "").replace("Moy", "") + "_" + chaine[4] + "_" + chaine[5];
 						for (File fff : ff.listFiles()) {
 							if (fff.getName().startsWith("N")) {
 								String[] chaine2 = fff.getName().split("-");
@@ -130,7 +133,32 @@ public class mouvGrid {
 			}
 		}
 	}
-	
-	
+
+	public static void getFileEval() throws IOException {
+		File base = new File("/media/mcolomb/Data_2/resultFinal/sens/GridMouv");
+
+		for (int n = 4; n <= 7; n++) {
+			int i = 1;
+			for (File f : base.listFiles()) {
+				if (f.getName().startsWith("Grid")) {
+					for (File ff : f.listFiles()) {
+						if (ff.getName().startsWith("N")) {
+							for (File fff : ff.listFiles()) {
+								if (fff.getName().startsWith("N" + n) && fff.getName().endsWith("evalAnal-20.0.tif")) {
+									OutputStream out = new FileOutputStream(
+											new File("/media/mcolomb/Data_2/resultFinal/sens/GridMouv/result--GridMouv/evalComp", "N" + n + "/" + fff.getName() + "-" + i));
+									// vu que c'est un .getPath sur un truc qui à pas vocation à être exporté, je suis pas sur que ça marche
+									Files.copy(fff.toPath(), out);
+									i++;
+								}
+							}
+						}
+
+					}
+
+				}
+			}
+		}
+	}
 
 }
