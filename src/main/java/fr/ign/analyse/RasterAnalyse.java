@@ -70,50 +70,50 @@ public class RasterAnalyse {
 	public static boolean firstline = true;
 	public static boolean saveEvalTab = false;
 
-	public static void main(String[] args) throws Exception {
+	// public static void main(String[] args) throws Exception {
+	//
+	// prepareForCityComparison(new File("/media/mcolomb/Data_2/resultFinal/sens/dataMouv/result--dataMouv/N5_Ba_Moy_ahpE_seed_42/stat"), "N5_Ba_Moy_ahpE");
+	// saveEvalTab = true;
+	//
+	// List<File> listFile = new ArrayList<File>();
+	// RasterMergeResult rmr = new RasterMergeResult();
+	//
+	// for (File f : rootFile.listFiles()) {
+	// if (f.getName().endsWith("eval-20.0.tif") && f.getName().contains("ahpS")) {
+	// listFile.add(f);
+	// }
+	// }
+	//
+	//
+	// RasterMergeResult resultEval = mergeRasters(listFile.subList(0, 50));
+	//// list.add(resultEval);
+	//// RasterMergeResult resultEval2 = mergeRasters(listFile.subList(34, 67));
+	//// list.add(resultEval2);
+	//// RasterMergeResult resultEval3 = mergeRasters(listFile.subList(68, 100));
+	//// list.add(resultEval3);
+	//// RasterMergeResult.merge(list);
+	// File resultFile = new File(rootFile, "resultYag");
+	// resultFile.mkdir();
+	// HighAndLowEvals(resultEval.getCellEvals(), resultFile, listFile.get(0));
 
-		prepareForCityComparison(new File("/media/mcolomb/Data_2/resultFinal/sens/cellSize/result--cellSize"), "N6_St_Moy_ahpS");
-		// saveEvalTab = true;
-		//
-		// List<File> listFile = new ArrayList<File>();
-		// RasterMergeResult rmr = new RasterMergeResult();
-		//
-		// for (File f : rootFile.listFiles()) {
-		// if (f.getName().endsWith("eval-20.0.tif") && f.getName().contains("ahpS")) {
-		// listFile.add(f);
-		// }
-		// }
-		//
-		//
-		// RasterMergeResult resultEval = mergeRasters(listFile.subList(0, 50));
-		//// list.add(resultEval);
-		//// RasterMergeResult resultEval2 = mergeRasters(listFile.subList(34, 67));
-		//// list.add(resultEval2);
-		//// RasterMergeResult resultEval3 = mergeRasters(listFile.subList(68, 100));
-		//// list.add(resultEval3);
-		//// RasterMergeResult.merge(list);
-		// File resultFile = new File(rootFile, "resultYag");
-		// resultFile.mkdir();
-		// HighAndLowEvals(resultEval.getCellEvals(), resultFile, listFile.get(0));
+	//
+	// Hashtable<String, Hashtable<String, Double>> resultTC = new Hashtable<String,
+	// Hashtable<String, Double>>();
+	//
+	// for (File f : mupFile.listFiles()) {
+	// if (f.getName().startsWith("N") && f.getName().endsWith("_42") &&
+	// f.isDirectory()) {
+	// for (File ff : f.listFiles()) {
+	// if (ff.getName().endsWith(echelle + ".0.tif")) {
+	// resultTC.put(f.getName(), getDistanceFromTC(ff, f.getName().replace("scenario
+	// ", "").replace("seed_50042", "").replace("_",",")));
+	// }
+	// }
+	// }
+	// }
+	// Csv.generateCsvFileMultTab(resultTC, rootFile, "distanceTC");
 
-		//
-		// Hashtable<String, Hashtable<String, Double>> resultTC = new Hashtable<String,
-		// Hashtable<String, Double>>();
-		//
-		// for (File f : mupFile.listFiles()) {
-		// if (f.getName().startsWith("N") && f.getName().endsWith("_42") &&
-		// f.isDirectory()) {
-		// for (File ff : f.listFiles()) {
-		// if (ff.getName().endsWith(echelle + ".0.tif")) {
-		// resultTC.put(f.getName(), getDistanceFromTC(ff, f.getName().replace("scenario
-		// ", "").replace("seed_50042", "").replace("_",",")));
-		// }
-		// }
-		// }
-		// }
-		// Csv.generateCsvFileMultTab(resultTC, rootFile, "distanceTC");
-
-	}
+	// }
 
 	/**
 	 * Select a list of file with the argument "with" in its name from the rootFile
@@ -1021,6 +1021,10 @@ public class RasterAnalyse {
 		return statFile;
 	}
 
+	public static File createCellsPerCities(String nameScenar, List<File> fileRepli, File discreteFile) throws IOException {
+		return createCellsPerCities(nameScenar, fileRepli, discreteFile, false);
+	}
+
 	/**
 	 * create the statistics for a discretized study
 	 * 
@@ -1035,16 +1039,15 @@ public class RasterAnalyse {
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 */
-	public static File createCellsPerCities(String nameScenar, List<File> fileRepli, File discreteFile) throws IOException {
+	public static File createCellsPerCities(String nameScenar, List<File> fileRepli, File discreteFile, boolean surf) throws IOException {
 
-		String[] nameLineFabric = new String[fileRepli.size() + 2];
+		String[] nameLineFabric = new String[fileRepli.size() + 3];
 		nameLineFabric[0] = "Cities - echelle " + echelle + "scenar" + nameScenar;
 		nameLineFabric[1] = "coefficient de variation";
 
 		for (int i = 2; i < fileRepli.size() + 2; i++) {
-			nameLineFabric[i] = i + " replication";
+			nameLineFabric[i] = (i - 1) + " replication";
 		}
-
 		Hashtable<String, double[]> cellsByCity = new Hashtable<String, double[]>();
 
 		ShapefileDataStore fabricSDS = new ShapefileDataStore(discreteFile.toURI().toURL());
@@ -1053,33 +1056,42 @@ public class RasterAnalyse {
 		GeometryFactory factory = new GeometryFactory();
 		SimpleFeatureIterator iteratorCity = fabricType.features();
 		double ech = Double.valueOf(echelle);
-
 		try {
 			// Pour toutes les entitées
 			while (iteratorCity.hasNext()) {
-				int nbRepli = 0;
+
 				SimpleFeature city = iteratorCity.next();
 				double[] repetCells = new double[fileRepli.size()];
+				if (cellsByCity.containsKey((String) city.getAttribute("NOM_COM"))) {
+					repetCells = cellsByCity.remove((String) city.getAttribute("NOM_COM"));
+				}
+				int nbRepli = 0;
 				for (File f : fileRepli) {
-					GridCoverage2D repet = Rasters.importRaster(f);
-					Envelope2D env = repet.getEnvelope2D();
-					double Xmin = env.getMinX();
-					double Xmax = env.getMaxX();
-					double Ymin = env.getMinY();
-					double Ymax = env.getMaxY();
+					GridCoverage2D repet = Rasters.importRaster(f, (Geometry) city.getDefaultGeometry());
+					if (repet != null) {
+						Envelope2D env = repet.getEnvelope2D();
+						double Xmin = env.getMinX();
+						double Xmax = env.getMaxX();
+						double Ymin = env.getMinY();
+						double Ymax = env.getMaxY();
+						for (double r = Xmin + ech / 2; r <= Xmax; r = r + ech) {
+							for (double t = Ymin + ech / 2; t <= Ymax; t = t + ech) {
+								DirectPosition2D coordCentre = new DirectPosition2D(r, t);
+								float[] cellMup = (float[]) repet.evaluate(coordCentre);
+								if (cellMup[0] > 0) {
+									if (((Geometry) city.getDefaultGeometry()).covers(factory.createPoint(new Coordinate(coordCentre.getX(), coordCentre.getY())))) {
+										if (surf) {
+											repetCells[nbRepli] = repetCells[nbRepli] + ech * ech;
+										} else {
+											repetCells[nbRepli] = repetCells[nbRepli] + 1;
+										}
+									}
 
-					for (double r = Xmin + ech / 2; r <= Xmax; r = r + ech) {
-						for (double t = Ymin + ech / 2; t <= Ymax; t = t + ech) {
-							DirectPosition2D coordCentre = new DirectPosition2D(r, t);
-							float[] cellMup = (float[]) repet.evaluate(coordCentre);
-							if (cellMup[0] > 0) {
-								if (((Geometry) city.getDefaultGeometry()).covers(factory.createPoint(new Coordinate(coordCentre.getX(), coordCentre.getY())))) {
-									repetCells[nbRepli] = repetCells[nbRepli] + 1;
 								}
 							}
 						}
+						nbRepli = nbRepli + 1;
 					}
-					nbRepli = nbRepli + 1;
 				}
 				cellsByCity.put((String) city.getAttribute("NOM_COM"), repetCells);
 			}
@@ -1106,7 +1118,7 @@ public class RasterAnalyse {
 			result.put(city, line);
 		}
 
-		Csv.generateCsvFile(result, statFile, "cellsForCities", nameLineFabric);
+		Csv.generateCsvFile(result, statFile, "cellsForCities", nameLineFabric, false);
 		fabricSDS.dispose();
 
 		return statFile;
@@ -1183,7 +1195,7 @@ public class RasterAnalyse {
 	}
 
 	public static File createStatsDescriptive(String nameScenar, RasterMergeResult result) throws IOException {
-		return createStatsDescriptive(nameScenar, result, result.getNbScenar());
+		return createStatsDescriptive(nameScenar, result, result.getNbScenar(), false);
 	}
 
 	/**
@@ -1195,7 +1207,7 @@ public class RasterAnalyse {
 	 * @return
 	 * @throws IOException
 	 */
-	public static File createStatsDescriptive(String nameScenar, RasterMergeResult result, double variationThreshold) throws IOException {
+	public static File createStatsDescriptive(String nameScenar, RasterMergeResult result, double variationThreshold, boolean surface) throws IOException {
 
 		statFile.mkdirs();
 
@@ -1205,6 +1217,11 @@ public class RasterAnalyse {
 
 		double[] tableauFinal = new double[(int) (12 + result.getNbScenar())];
 		String[] premiereCol = new String[(int) (12 + result.getNbScenar())];
+
+		if (surface) {
+			tableauFinal = new double[(int) (13 + result.getNbScenar())];
+			premiereCol = new String[(int) (13 + result.getNbScenar())];
+		}
 
 		DescriptiveStatistics statInstable = new DescriptiveStatistics();
 		DescriptiveStatistics statStable = new DescriptiveStatistics();
@@ -1253,11 +1270,16 @@ public class RasterAnalyse {
 			}
 		}
 
+		int index = 11;
+		if (surface) {
+			index = 12;
+		}
+
 		for (int ii = 1; ii <= result.getNbScenar(); ii++) {
-			premiereCol[ii + 11] = ("repet " + ii);
+			premiereCol[ii + index] = ("repet " + ii);
 			for (DirectPosition2D key : cellRepet.keySet()) {
 				if (cellRepet.get(key) == ii) {
-					tableauFinal[ii + 11]++;
+					tableauFinal[ii + index]++;
 					if (ii < variationThreshold) {
 						statInstable.addValue(cellEval.get(key));
 					} else {
@@ -1273,6 +1295,9 @@ public class RasterAnalyse {
 		premiereCol[9] = ("moyenne evaluation des cellules stables");
 		premiereCol[10] = ("ecart type des cellules stables");
 		premiereCol[11] = ("coefficient de variation des cellules stables");
+		if (surface) {
+			premiereCol[12] = ("surface moyenne occupé par les cellules");
+		}
 
 		tableauFinal[6] = statInstable.getMean();
 		tableauFinal[7] = statInstable.getStandardDeviation();
@@ -1280,11 +1305,17 @@ public class RasterAnalyse {
 		tableauFinal[9] = statStable.getMean();
 		tableauFinal[10] = statStable.getStandardDeviation();
 		tableauFinal[11] = tableauFinal[10] / tableauFinal[9];
-
+		if (surface) {
+			tableauFinal[12] = tableauFinal[1] * tableauFinal[0] * tableauFinal[0];
+		}
 		StatTab tableauStat = new StatTab("descriptive_statistics", nameScenar, tableauFinal, premiereCol);
 		tableauStat.toCsv(statFile, firstline);
 
 		return statFile;
+	}
+
+	public static File createStatsDescriptive(String nameTest, RasterMergeResult mergedResult, boolean surface) throws IOException {
+		return createStatsDescriptive(nameTest, mergedResult, mergedResult.getNbScenar(), surface);
 	}
 
 }

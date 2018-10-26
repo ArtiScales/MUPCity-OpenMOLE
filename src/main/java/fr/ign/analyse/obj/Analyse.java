@@ -305,7 +305,7 @@ public class Analyse {
 		for (String cellMin : cellMinCollec) {
 			Set<ScenarAnalyse> particularList = new HashSet<ScenarAnalyse>();
 			for (ScenarAnalyse sA : scenarCollec) {
-				if (sA.getSizeCell().equals(cellMin) && sA.getSeed().equals(seed) ) {
+				if (sA.getSizeCell().equals(cellMin) && sA.getSeed().equals(seed)) {
 					particularList.add(sA);
 				}
 			}
@@ -481,7 +481,7 @@ public class Analyse {
 
 		return result;
 	}
-	
+
 	public List<List<ScenarAnalyse>> getScenarOneSeed() throws FileNotFoundException {
 		List<List<ScenarAnalyse>> scenPerProj = getScenarPerProject();
 		List<List<ScenarAnalyse>> result = new ArrayList<>();
@@ -506,6 +506,32 @@ public class Analyse {
 			}
 		}
 
+		return result;
+	}
+
+	/**
+	 * other weird stuff - not working for now - whatev
+	 * 
+	 * @param seed
+	 * @return
+	 * @throws FileNotFoundException
+	 */
+	public List<List<File>> getScenarOneSeed(String seed) throws FileNotFoundException {
+		List<List<File>> result = new ArrayList<>();
+		for (ScenarAnalyse singleScen : scenarCollec) {
+			List<File> scenarFile = new ArrayList<File>();
+
+			for (ScenarAnalyseFile file : fileCollec) {
+
+				if (singleScen.getSeed().equals(seed) && singleScen.getSizeCell().equals(file.getEchelle()) && singleScen.getnMax().equals(file.getnMax())
+						&& singleScen.getAhp().equals(file.getAhp()) && singleScen.isStrict().equals(file.isStrict()) && singleScen.isYag().equals(file.isYag())
+						&& file.getMeaning().equals("evalAnal")) {
+					scenarFile.add(file.getFileFile());
+				}
+
+				result.add(scenarFile);
+			}
+		}
 		return result;
 	}
 

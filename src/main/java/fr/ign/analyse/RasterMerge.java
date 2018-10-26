@@ -124,8 +124,6 @@ public class RasterMerge {
 		useJaiRead.setValue(false);
 		GeneralParameterValue[] params = new GeneralParameterValue[] { policy, gridsize, useJaiRead };
 
-		double xMinIni = 0, yMinIni = 0, xMaxIni = 0, yMaxIni = 0;
-
 		// set matrice
 
 		GeoTiffReader readerSet = new GeoTiffReader(folderIn.get(0));
@@ -255,7 +253,13 @@ public class RasterMerge {
 		writeGeotiff(fileOut, imgpix3, env);
 	}
 
-	// TODO to delete coz it'll be in Artiscales.tools.Rasters
+	/**
+	 * export raster
+	 * @see i don't know why it's done with thema libs (another method is available within the Artiscale-tools.Raster class)
+	 * @param fileName
+	 * @param imagePixelData
+	 * @param env
+	 */
 	public static void writeGeotiff(File fileName, float[][] imagePixelData, Envelope2D env) {
 		GridCoverage2D coverage = new GridCoverageFactory().create("OTPAnalyst", imagePixelData, env);
 		writeGeotiff(fileName, coverage);
@@ -267,20 +271,6 @@ public class RasterMerge {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		// try {
-		// GeoTiffWriteParams wp = new GeoTiffWriteParams();
-		// wp.setCompressionMode(GeoTiffWriteParams.MODE_EXPLICIT);
-		// wp.setCompressionType("LZW");
-		// ParameterValueGroup params = new GeoTiffFormat().getWriteParameters();
-		// params.parameter(AbstractGridFormat.GEOTOOLS_WRITE_PARAMS.getName().toString()).setValue(wp);
-		// GeoTiffWriter writer = new GeoTiffWriter(fileName);
-		// writer.write(coverage, (GeneralParameterValue[]) params.values().toArray(new
-		// GeneralParameterValue[1]));
-		// } catch (Exception e) {
-		//
-		// e.printStackTrace();
-		// }
-
 	}
 
 }
