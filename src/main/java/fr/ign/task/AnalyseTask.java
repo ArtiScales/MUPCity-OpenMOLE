@@ -16,9 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.MutablePair;
-import org.ejml.ops.ReadCsv;
 import org.geotools.geometry.DirectPosition2D;
-import org.math.plot.utils.Array;
 
 import au.com.bytecode.opencsv.CSVReader;
 import fr.ign.analyse.FractalDimention;
