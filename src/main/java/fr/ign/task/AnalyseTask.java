@@ -27,7 +27,6 @@ import fr.ign.analyse.obj.Analyse;
 import fr.ign.analyse.obj.ProjetAnalyse;
 import fr.ign.analyse.obj.ScenarAnalyse;
 import fr.ign.cogit.GTFunctions.Csv;
-import fr.ign.exp.minCellSize;
 
 public class AnalyseTask {
 
@@ -36,7 +35,7 @@ public class AnalyseTask {
 	public static void main(String[] args) throws Exception {
 
 		runGridExplo(new File("/home/yo/Documents/these/resultFinal/sens/GridMouv2"),
-				new File("/home/yo/Documents/these/data/stabilite/dataManu/"), "180", "GridMouv", false);
+				new File("/home/yo/Documents/these/data/stabilite/dataManu/"), "20", "GridMouv", false);
 
 		// makezoningDiagram(new
 		// File("/media/mcolomb/Data_2/resultFinal/sens/cellSize/cuted/result--cellSize"));
@@ -382,7 +381,6 @@ public class AnalyseTask {
 		// pour l'analyse des différents seuils
 
 		for (Set<ScenarAnalyse> scenarPerGrid : anal.getProjetByGrid()) {
-			System.out.println(scenarPerGrid.toArray());
 			String exScenarName = scenarPerGrid.iterator().next().getNiceName().split("--")[1];
 			File eachResultFile = new File(resultFile, exScenarName);
 
@@ -413,6 +411,8 @@ public class AnalyseTask {
 			}
 
 			RasterAnalyse.createStatsDescriptive("analyse-grid---" + exScenarName, mergedResult, 2, false);
+			RasterAnalyse.createStatsDescriptive("analyse-grid---" + exScenarName, mergedResult, 5, false);
+			RasterAnalyse.createStatsDescriptive("analyse-grid---" + exScenarName, mergedResult, 9, false);
 			// discrete statistics on the cities and on the allowed to urbanise zones
 			String[] champ = { "Cities", "NOM_COM" };
 			RasterAnalyse.createStatsStabDiscrete(exScenarName, mergedResult, discreteFile, champ);
@@ -514,72 +514,70 @@ public class AnalyseTask {
 			anal = new Analyse(file, name);
 		}
 
-		// for (List<ScenarAnalyse> arL : anal.getScenarDiffSeed()) {
-		// for (String echelle : anal.getEchelleRange(1, arL.get(0))) {
-		// System.out.println("echelle : " + echelle);
-		// System.out.println(arL.get(0).getNiceName());
-		// String nameTest = new String(arL.get(0).getNiceNameWthSeed());
-		//
-		// File eachResultFile = new File(resultFile, nameTest);
-		// eachResultFile.mkdirs();
-		//
-		// File statFile = new File(eachResultFile, "stat");
-		// RasterAnalyse.statFile = statFile;
-		// File rastFile = new File(eachResultFile, "raster");
-		// rastFile.mkdir();
-		//
-		// RasterAnalyse.echelle = echelle;
-		// List<File> fileToTest = new ArrayList<File>();
-		// // get the set of files to test
-		// for (ScenarAnalyse sC : arL) {
-		// fileToTest.add(anal.getSimuFile(sC, echelle, "evalAnal"));
-		// }
-		//
-		// // merge the different input rasters
-		// RasterMergeResult mergedResult = RasterAnalyse.mergeRasters(fileToTest);
-		//
-		// // statistics for the simple task with those objects
-		// RasterAnalyse.createStatsDescriptive(nameTest, mergedResult, true);
-		//
-		// RasterAnalyse.createStatsStabDiscrete(arL.get(0).getNiceNameWthSeed() + "-" +
-		// arL.get(0).getSizeCell(), mergedResult, discreteFile);
-		// String[] differentObjects3 = { "zoning", "TYPEZONE" };
-		// RasterAnalyse.createStatsStabDiscrete(arL.get(0).getNiceNameWthSeed() + "-" +
-		// arL.get(0).getSizeCell(), mergedResult, zoningFile, differentObjects3);
-		//
-		// }
-		// }
-		// for (List<ScenarAnalyse> arL : anal.getScenarOneSeed()) {
-		// for (String echelle : anal.getEchelleRange(1, arL.get(0))) {
-		// System.out.println("echelle : " + echelle);
-		// System.out.println(arL.get(0).getNiceName());
-		// String nameTest = new String(arL.get(0).getNiceNameWthSeed());
-		//
-		// File eachResultFile = new File(resultFile, nameTest);
-		// eachResultFile.mkdirs();
-		//
-		// File statFile = new File(eachResultFile, "stat");
-		// RasterAnalyse.statFile = statFile;
-		//
-		// RasterAnalyse.echelle = echelle;
-		//
-		// // discrete stat (for the number and not the area)
-		// RasterAnalyse.createStatDiscreteSingleSimu(arL.get(0).getNiceNameWthSeed() +
-		// "-" + arL.get(0).getSizeCell(), anal.getSimuFile(arL.get(0), echelle,
-		// "evalAnal"),
-		// discreteFile );
-		// String[] differentObjects3 = { "zoning", "TYPEZONE" };
-		//
-		// RasterAnalyse.createStatDiscreteSingleSimu(arL.get(0).getNiceNameWthSeed() +
-		// "-" + arL.get(0).getSizeCell(), anal.getSimuFile(arL.get(0), echelle,
-		// "evalAnal"),
-		// new File("/media/mcolomb/Data_2/donnee/ZC-simple.shp"), differentObjects3);
-		//
-		//
-		// RasterAnalyse.createCellsPerCities(nameScenar, fileRepli, discreteFile);
-		//
-		// }
-		// }
+		for (List<ScenarAnalyse> arL : anal.getScenarDiffSeed()) {
+			for (String echelle : anal.getEchelleRange(1, arL.get(0))) {
+				System.out.println("echelle : " + echelle);
+				System.out.println(arL.get(0).getNiceName());
+				String nameTest = new String(arL.get(0).getNiceNameWthSeed());
+
+				File eachResultFile = new File(resultFile, nameTest);
+				eachResultFile.mkdirs();
+
+				File statFile = new File(eachResultFile, "stat");
+				RasterAnalyse.statFile = statFile;
+				File rastFile = new File(eachResultFile, "raster");
+				rastFile.mkdir();
+
+				RasterAnalyse.echelle = echelle;
+				List<File> fileToTest = new ArrayList<File>();
+				// get the set of files to test
+				for (ScenarAnalyse sC : arL) {
+					fileToTest.add(anal.getSimuFile(sC, echelle, "evalAnal"));
+				}
+
+				// merge the different input rasters
+				RasterMergeResult mergedResult = RasterAnalyse.mergeRasters(fileToTest);
+
+				// statistics for the simple task with those objects
+				RasterAnalyse.createStatsDescriptive(nameTest, mergedResult, true);
+
+				RasterAnalyse.createStatsStabDiscrete(arL.get(0).getNiceNameWthSeed() + "-" + arL.get(0).getSizeCell(),
+						mergedResult, discreteFile);
+				String[] differentObjects3 = { "zoning", "TYPEZONE" };
+				RasterAnalyse.createStatsStabDiscrete(arL.get(0).getNiceNameWthSeed() + "-" + arL.get(0).getSizeCell(),
+						mergedResult, zoningFile, differentObjects3);
+
+			}
+		}
+		for (List<ScenarAnalyse> arL : anal.getScenarOneSeed()) {
+			for (String echelle : anal.getEchelleRange(1, arL.get(0))) {
+				System.out.println("echelle : " + echelle);
+				System.out.println(arL.get(0).getNiceName());
+				String nameTest = new String(arL.get(0).getNiceNameWthSeed());
+
+				File eachResultFile = new File(resultFile, nameTest);
+				eachResultFile.mkdirs();
+
+				File statFile = new File(eachResultFile, "stat");
+				RasterAnalyse.statFile = statFile;
+
+				RasterAnalyse.echelle = echelle;
+
+				// discrete stat (for the number and not the area)
+				RasterAnalyse.createStatDiscreteSingleSimu(
+						arL.get(0).getNiceNameWthSeed() + "-" + arL.get(0).getSizeCell(),
+						anal.getSimuFile(arL.get(0), echelle, "evalAnal"), discreteFile);
+				String[] differentObjects3 = { "zoning", "TYPEZONE" };
+
+				RasterAnalyse.createStatDiscreteSingleSimu(
+						arL.get(0).getNiceNameWthSeed() + "-" + arL.get(0).getSizeCell(),
+						anal.getSimuFile(arL.get(0), echelle, "evalAnal"),
+						new File("/media/mcolomb/Data_2/donnee/ZC-simple.shp"), differentObjects3);
+
+			//	RasterAnalyse.createCellsPerCities(nameScenar, fileRepli, discreteFile);
+
+			}
+		}
 
 		for (List<File> salut : anal.getScenarOneSeed("42")) {
 			for (File f : salut) {
