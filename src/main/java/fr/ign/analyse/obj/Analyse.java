@@ -187,6 +187,10 @@ public class Analyse {
 	public Analyse() {
 	}
 
+	public String toString() {
+		return "Analyse object for "+nameExplo+"\nprojects loaded : " + projetCollec+"\nscenarios loaded : " + scenarCollec+"\nfiles loaded : " + fileCollec;
+	}
+	
 	public void makeProjCollection(String nameProj) {
 		Pattern tiret = Pattern.compile("-");
 		String[] decompNameProj = tiret.split(nameProj);
