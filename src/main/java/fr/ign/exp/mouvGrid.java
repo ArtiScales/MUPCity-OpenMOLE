@@ -1,7 +1,6 @@
 package fr.ign.exp;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -11,7 +10,6 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.MutablePair;
 
-import fr.ign.cogit.GTFunctions.Rasters;
 import fr.ign.task.AnalyseTask;
 import fr.ign.task.ProjectCreationDecompTask;
 import fr.ign.task.SimulTask;
@@ -23,10 +21,10 @@ public class mouvGrid {
 	public static void main(String[] args) throws Exception {
 
 		DataSetSelec.predefSet();
-		Map<String, String> dataHT = DataSetSelec.get("Data1");
+		Map<String, String> dataHT = DataSetSelec.get("Manu");
 		String name = "GridMouv";
-		File folderIn = new File("./stabilite/dataManu");
-		File folderOut = new File("./result/sens/GridMouv");
+		File folderIn = new File("./donnee/stabilite/dataManu");
+		File folderOut = new File("./result/sens/GridMouv2");
 		double width = 26590;
 		double height = 26590;
 
@@ -35,7 +33,6 @@ public class mouvGrid {
 
 		double minSize = 20;
 		double maxSize = 14580;
-		// double maxSize = 200;
 		double seuilDensBuild = 0;
 
 		// setting on our six ahp objects
@@ -83,7 +80,8 @@ public class mouvGrid {
 				int nMax = 4;
 				boolean strict = true;
 				boolean mean = true;
-				for (int i = 0; i <= 3; i++) {
+				// for (int i = 0; i <= 3; i++) {
+				for (int i = 3; i <= 3; i++) {
 					switch (i) {
 					case 1:
 						nMax = 5;
@@ -153,9 +151,7 @@ public class mouvGrid {
 								}
 							}
 						}
-
 					}
-
 				}
 			}
 		}

@@ -33,9 +33,49 @@ public class AnalyseTask {
 	// public static String echelle;
 
 	public static void main(String[] args) throws Exception {
-
-		runGridExplo(new File("/home/yo/Documents/these/resultFinal/sens/GridMouv2"),
-				new File("/home/yo/Documents/these/data/stabilite/dataManu/"), "20", "GridMouv", false);
+		File rootFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/comparaison/compAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0");
+		List<File> aTest = new ArrayList<File>();
+		List<File> bTest = new ArrayList<File>();
+		List<File> cTest = new ArrayList<File>();
+		List<File> dTest = new ArrayList<File>();
+		
+			for (File ff : rootFile.listFiles()) {
+				if (ff.getName().startsWith("N4_St") && ff.getName().contains("Moy")) {
+					for (File fff : ff.listFiles()) {
+						if (fff.getName().endsWith("evalAnal-20.0.tif")) {
+							aTest.add(fff);
+						}
+					}
+				}
+				if (ff.getName().startsWith("N5_Ba") && ff.getName().contains("Moy")) {
+					for (File fff : ff.listFiles()) {
+						if (fff.getName().endsWith("evalAnal-20.0.tif")) {
+							bTest.add(fff);
+						}
+					}
+				}
+				if (ff.getName().startsWith("N6_St") && ff.getName().contains("Moy")) {
+					for (File fff : ff.listFiles()) {
+						if (fff.getName().endsWith("evalAnal-20.0.tif")) {
+							cTest.add(fff);
+						}
+					}
+				}
+				if (ff.getName().startsWith("N7_Ba") && ff.getName().contains("Yag")) {
+					for (File fff : ff.listFiles()) {
+						if (fff.getName().endsWith("evalAnal-20.0.tif")) {
+							dTest.add(fff);
+						}
+					}
+				}
+			}
+			compTwoSimus(aTest, new File(rootFile, "stat/compRepli/A"  + ""), "20");
+			compTwoSimus(bTest, new File(rootFile, "stat/compRepli/B"  + ""), "20");
+			compTwoSimus(cTest, new File(rootFile, "stat/compRepli/C"  + ""), "20");
+			compTwoSimus(dTest, new File(rootFile, "stat/compRepli/D"  + ""), "20");
+		
+		// runGridExplo(new File("/home/yo/Documents/these/resultFinal/sens/GridMouv2"),
+		// new File("/home/yo/Documents/these/data/stabilite/dataManu/"), "20", "GridMouv", false);
 
 		// makezoningDiagram(new
 		// File("/media/mcolomb/Data_2/resultFinal/sens/cellSize/cuted/result--cellSize"));
@@ -145,16 +185,18 @@ public class AnalyseTask {
 	// }
 
 	/**
-	 * Analyse automatique des explorations faites avec le script
-	 * MupCityGridExplo.oms
+	 * Analyse automatique des explorations faites avec le script MupCityGridExplo.oms
 	 * 
-	 * @param file         : le dossier ou sont contenus les résultats
-	 * @param minCell      : taille minimale des cellules
-	 * @param discreteFile : le shapefile contenant les entitées permettant une
-	 *                     discrétisation (dans la pluspart des cas, les communes)
-	 * @param batiFile     : le shapefile contenant les batiments
-	 * @param name         : le nom de la simulation (doit être le même que pour le
-	 *                     projet)
+	 * @param file
+	 *            : le dossier ou sont contenus les résultats
+	 * @param minCell
+	 *            : taille minimale des cellules
+	 * @param discreteFile
+	 *            : le shapefile contenant les entitées permettant une discrétisation (dans la pluspart des cas, les communes)
+	 * @param batiFile
+	 *            : le shapefile contenant les batiments
+	 * @param name
+	 *            : le nom de la simulation (doit être le même que pour le projet)
 	 * @return le dossier où sont contenus les fichiers produits
 	 * @throws Exception
 	 */
@@ -253,8 +295,7 @@ public class AnalyseTask {
 	// }
 
 	/**
-	 * overlaoding to use aggregation transition from openMole. It copies all the
-	 * files into a mainFile folder calles 'ScenarVrac'
+	 * overlaoding to use aggregation transition from openMole. It copies all the files into a mainFile folder calles 'ScenarVrac'
 	 * 
 	 * @param file
 	 * @param fileDonnee
@@ -263,8 +304,7 @@ public class AnalyseTask {
 	 * @return
 	 * @throws Exception
 	 */
-	public static File runGridExplo(File[] file, File[] fileDonnee, File mainFile, String[] name,
-			boolean machineReadable) throws Exception {
+	public static File runGridExplo(File[] file, File[] fileDonnee, File mainFile, String[] name, boolean machineReadable) throws Exception {
 		return runStab(copyToScenVrac(file, mainFile), fileDonnee[0], name[0], machineReadable);
 	}
 
@@ -278,8 +318,7 @@ public class AnalyseTask {
 		return projName;
 	}
 
-	public static File runGridMouvData(File file, File fileDonnee, String echelle, String name, boolean machineReadable)
-			throws Exception {
+	public static File runGridMouvData(File file, File fileDonnee, String echelle, String name, boolean machineReadable) throws Exception {
 
 		// folder settings
 		File discreteFile = getDiscrete(fileDonnee);
@@ -353,8 +392,7 @@ public class AnalyseTask {
 		return resultFile;
 	}
 
-	public static File runGridExplo(File file, File fileDonnee, String echelle, String name, boolean machineReadable)
-			throws Exception {
+	public static File runGridExplo(File file, File fileDonnee, String echelle, String name, boolean machineReadable) throws Exception {
 
 		// folder settings
 		File discreteFile = getDiscrete(fileDonnee);
@@ -418,15 +456,13 @@ public class AnalyseTask {
 			RasterAnalyse.createStatsStabDiscrete(exScenarName, mergedResult, discreteFile, champ);
 			RasterAnalyse.createCellsPerCities(exScenarName, fileToTest, discreteFile);
 			// create a merged raster
-			RasterMerge.writeGeotiff(mergedResult.getCellRepet(),
-					new File(rastFile, exScenarName + "-" + name + "-rasterMerged-" + echelle + ".tif"),
-					Integer.parseInt(echelle), middleGridRaster);
+			RasterMerge.writeGeotiff(mergedResult.getCellRepet(), new File(rastFile, exScenarName + "-" + name + "-rasterMerged-" + echelle + ".tif"), Integer.parseInt(echelle),
+					middleGridRaster);
 		}
 		return resultFile;
 	}
 
-	public static File runEffetSeuil(File file, File fileDonnee, String echelle, String name, boolean machineReadable)
-			throws Exception {
+	public static File runEffetSeuil(File file, File fileDonnee, String echelle, String name, boolean machineReadable) throws Exception {
 
 		// folder settings
 
@@ -478,20 +514,17 @@ public class AnalyseTask {
 			// single simulation to analyse
 			ScenarAnalyse singleSim = scenarPerGrid.iterator().next();
 			// discrete statistics on the cities and on the allowed to urbanise zones
-			RasterAnalyse.createStatDiscreteSingleSimu(fileToTest.get(0).getName() + "-" + singleSim.getSeuil(),
-					anal.getSimuFile(singleSim), discreteFile);
+			RasterAnalyse.createStatDiscreteSingleSimu(fileToTest.get(0).getName() + "-" + singleSim.getSeuil(), anal.getSimuFile(singleSim), discreteFile);
 			// RasterAnalyse.createCellPerCities(exScenarName, fileToTest, discreteFile);
 			// create a merged raster
-			RasterMerge.writeGeotiff(mergedResult.getCellRepet(),
-					new File(rastFile, exScenarName + "-" + name + "-rasterMerged-" + echelle + ".tif"),
-					Integer.parseInt(echelle), fileToTest.get(0));
+			RasterMerge.writeGeotiff(mergedResult.getCellRepet(), new File(rastFile, exScenarName + "-" + name + "-rasterMerged-" + echelle + ".tif"), Integer.parseInt(echelle),
+					fileToTest.get(0));
 		}
 
 		return resultFile;
 	}
 
-	public static File runSizeCellExplo(File file, File fileDonnee, File empriseFile, String name,
-			boolean machineReadable) throws Exception {
+	public static File runSizeCellExplo(File file, File fileDonnee, File empriseFile, String name, boolean machineReadable) throws Exception {
 		// folder settings
 		File discreteFile = getDiscrete(fileDonnee);
 		File zoningFile = getZoningFile(fileDonnee);
@@ -541,11 +574,9 @@ public class AnalyseTask {
 				// statistics for the simple task with those objects
 				RasterAnalyse.createStatsDescriptive(nameTest, mergedResult, true);
 
-				RasterAnalyse.createStatsStabDiscrete(arL.get(0).getNiceNameWthSeed() + "-" + arL.get(0).getSizeCell(),
-						mergedResult, discreteFile);
+				RasterAnalyse.createStatsStabDiscrete(arL.get(0).getNiceNameWthSeed() + "-" + arL.get(0).getSizeCell(), mergedResult, discreteFile);
 				String[] differentObjects3 = { "zoning", "TYPEZONE" };
-				RasterAnalyse.createStatsStabDiscrete(arL.get(0).getNiceNameWthSeed() + "-" + arL.get(0).getSizeCell(),
-						mergedResult, zoningFile, differentObjects3);
+				RasterAnalyse.createStatsStabDiscrete(arL.get(0).getNiceNameWthSeed() + "-" + arL.get(0).getSizeCell(), mergedResult, zoningFile, differentObjects3);
 
 			}
 		}
@@ -564,17 +595,14 @@ public class AnalyseTask {
 				RasterAnalyse.echelle = echelle;
 
 				// discrete stat (for the number and not the area)
-				RasterAnalyse.createStatDiscreteSingleSimu(
-						arL.get(0).getNiceNameWthSeed() + "-" + arL.get(0).getSizeCell(),
-						anal.getSimuFile(arL.get(0), echelle, "evalAnal"), discreteFile);
+				RasterAnalyse.createStatDiscreteSingleSimu(arL.get(0).getNiceNameWthSeed() + "-" + arL.get(0).getSizeCell(), anal.getSimuFile(arL.get(0), echelle, "evalAnal"),
+						discreteFile);
 				String[] differentObjects3 = { "zoning", "TYPEZONE" };
 
-				RasterAnalyse.createStatDiscreteSingleSimu(
-						arL.get(0).getNiceNameWthSeed() + "-" + arL.get(0).getSizeCell(),
-						anal.getSimuFile(arL.get(0), echelle, "evalAnal"),
+				RasterAnalyse.createStatDiscreteSingleSimu(arL.get(0).getNiceNameWthSeed() + "-" + arL.get(0).getSizeCell(), anal.getSimuFile(arL.get(0), echelle, "evalAnal"),
 						new File("/media/mcolomb/Data_2/donnee/ZC-simple.shp"), differentObjects3);
 
-			//	RasterAnalyse.createCellsPerCities(nameScenar, fileRepli, discreteFile);
+				// RasterAnalyse.createCellsPerCities(nameScenar, fileRepli, discreteFile);
 
 			}
 		}
@@ -596,8 +624,7 @@ public class AnalyseTask {
 		for (int n = 4; n <= 7; n++) {
 			Hashtable<String, double[]> result = new Hashtable<String, double[]>();
 			for (File f : base.listFiles()) {
-				if (f.isDirectory() && f.getName().startsWith("Manu")
-						&& f.getName().split("--")[1].startsWith("N" + n)) {
+				if (f.isDirectory() && f.getName().startsWith("Manu") && f.getName().split("--")[1].startsWith("N" + n)) {
 					System.out.println(f.getName());
 					String sizeCell = f.getName().split("CM")[1].split("-")[0];
 					CSVReader csv = new CSVReader(new FileReader((new File(f, "stat/descriptive_statistics.csv"))));
@@ -617,15 +644,14 @@ public class AnalyseTask {
 		}
 	}
 
-//TODO make that work
+	// TODO make that work
 	public static void makezoningDiagram(File base) throws IOException {
 		String[] fLine = { "sizeCell", "surfaceAU", "surfaceA", "surfaceNC", "surfaceZC", "surfaceU", "surfaceN" };
 		for (int n = 4; n <= 7; n++) {
 			Hashtable<String, double[]> result = new Hashtable<String, double[]>();
 			// pour les 10 simus
 			for (File f : base.listFiles()) {
-				if (f.isDirectory() && f.getName().startsWith("Manu")
-						&& f.getName().split("--")[1].startsWith("N" + n)) {
+				if (f.isDirectory() && f.getName().startsWith("Manu") && f.getName().split("--")[1].startsWith("N" + n)) {
 
 					System.out.println(f.getName());
 					String sizeCell = f.getName().split("CM")[1].split("-")[0];
@@ -647,10 +673,8 @@ public class AnalyseTask {
 						int count = 0;
 						for (String[] line : csv2.readAll()) {
 							if (count == i) {
-								put[i] = Double.valueOf(line[surfIndice]) * Math.pow(Double.valueOf(sizeCell), 2)
-										/ 1000000;
-								System.out.println("line[surfIndice]   : " + Double.valueOf(line[surfIndice])
-										* Math.pow(Double.valueOf(sizeCell), 2) / 1000000);
+								put[i] = Double.valueOf(line[surfIndice]) * Math.pow(Double.valueOf(sizeCell), 2) / 1000000;
+								System.out.println("line[surfIndice]   : " + Double.valueOf(line[surfIndice]) * Math.pow(Double.valueOf(sizeCell), 2) / 1000000);
 
 							}
 							count++;
@@ -688,7 +712,6 @@ public class AnalyseTask {
 	public static void compTwoSimus(List<File> fileToTest, File fileOut, String echelle) throws Exception {
 
 		String nameTest = fileToTest.get(0).getName();
-		File mainFile = fileOut;
 
 		for (File f : fileToTest) {
 			if (!f.equals(fileToTest.get(0))) {
@@ -698,16 +721,15 @@ public class AnalyseTask {
 
 		RasterAnalyse.echelle = echelle;
 		RasterAnalyse.statFile = new File(fileOut, "stat");
+		RasterAnalyse.statFile.mkdirs();
 		RasterMergeResult mergedResult = RasterAnalyse.mergeRasters(fileToTest);
 		RasterAnalyse.createStatsDescriptive(nameTest, mergedResult);
-		RasterMerge.merge(fileToTest, new File(mainFile, nameTest + "-rasterMerged-" + echelle + ".tif"),
-				Integer.parseInt(echelle));
+		RasterMerge.merge(fileToTest, new File(fileOut, nameTest + "-rasterMerged-" + echelle + ".tif"), Integer.parseInt(echelle));
 
-		System.out.println("Ça se trouve dans " + mainFile);
+		System.out.println("Ça se trouve dans " + fileOut);
 	}
 
-	public static void compProjects(List<File> projectToTest, String name, File fileOut, String echelle)
-			throws Exception {
+	public static void compProjects(List<File> projectToTest, String name, File fileOut, String echelle) throws Exception {
 		Hashtable<String, List<File>> scenarCollec = new Hashtable<String, List<File>>();
 		for (File projet : projectToTest) {
 			if (projet.getName().startsWith(name)) {
@@ -738,8 +760,7 @@ public class AnalyseTask {
 	}
 
 	/**
-	 * overlaoding to use aggregation transition from openMole. It copies all the
-	 * files into a mainFile folder calles 'ScenarVrac'
+	 * overlaoding to use aggregation transition from openMole. It copies all the files into a mainFile folder calles 'ScenarVrac'
 	 * 
 	 * @param file
 	 * @param fileDonnee
@@ -748,8 +769,7 @@ public class AnalyseTask {
 	 * @return
 	 * @throws Exception
 	 */
-	public static File runStab(File[] file, File[] fileDonnee, File mainFile, String[] name, boolean machineReadable)
-			throws Exception {
+	public static File runStab(File[] file, File[] fileDonnee, File mainFile, String[] name, boolean machineReadable) throws Exception {
 		return runStab(copyToScenVrac(file, mainFile), fileDonnee[0], name[0], machineReadable);
 	}
 
@@ -784,14 +804,13 @@ public class AnalyseTask {
 
 			// pour les trois premières échelles
 			for (String echelle : anal.getEchelleRange(3, arL.get(0))) {
-				System.out.println(
-						"!! Pour les scénarios " + arL.get(0).getProjFile().getName() + "_" + arL.get(0).getnMax() + "_"
-								+ arL.get(0).isStrict() + "_" + arL.get(0).isYag() + "_" + arL.get(0).getAhp());
+				System.out.println("!! Pour les scénarios " + arL.get(0).getProjFile().getName() + "_" + arL.get(0).getnMax() + "_" + arL.get(0).isStrict() + "_"
+						+ arL.get(0).isYag() + "_" + arL.get(0).getAhp());
 				int ech = Integer.valueOf(echelle);
 
 				// convert Scenar to File
-				String nameTest = arL.get(0).getProjFile().getName() + "_" + arL.get(0).getnMax() + "_"
-						+ arL.get(0).isStrict() + "_" + arL.get(0).isYag() + "_" + arL.get(0).getAhp();
+				String nameTest = arL.get(0).getProjFile().getName() + "_" + arL.get(0).getnMax() + "_" + arL.get(0).isStrict() + "_" + arL.get(0).isYag() + "_"
+						+ arL.get(0).getAhp();
 
 				if (machineReadable) {
 					nameTest = new String(arL.get(0).getNiceNameWthSeed());
@@ -835,8 +854,7 @@ public class AnalyseTask {
 				RasterAnalyse.createStatsStabDiscrete(nameTest, mergedResult, discreteFile);
 
 				// create a merged raster
-				RasterMerge.merge(fileToTest, new File(rastFile, nameTest + "-rasterMerged-" + echelle + ".tif"),
-						Integer.parseInt(echelle));
+				RasterMerge.merge(fileToTest, new File(rastFile, nameTest + "-rasterMerged-" + echelle + ".tif"), Integer.parseInt(echelle));
 
 				Integer minSizeCell = Integer.valueOf(arL.get(0).getSizeCell());
 				// cells contained in superior scaled cells
@@ -849,19 +867,13 @@ public class AnalyseTask {
 					SvgCellEval20 = RasterAnalyse.mergeRasters(concernedFile).getCellEval();
 					SvgCellRepet20 = RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
 				} else if (ech == minSizeCell * 3) {
-					Hashtable<DirectPosition2D, Float> cellEval60 = (Hashtable<DirectPosition2D, Float>) RasterAnalyse
-							.mergeRasters(concernedFile).getCellEval();
-					Hashtable<DirectPosition2D, Integer> cellRepet60 = (Hashtable<DirectPosition2D, Integer>) RasterAnalyse
-							.mergeRasters(concernedFile).getCellRepet();
-					RasterAnalyse.compareInclusionSizeCell(SvgCellRepet20, SvgCellEval20, cellRepet60, cellEval60,
-							nameTest, ech);
+					Hashtable<DirectPosition2D, Float> cellEval60 = (Hashtable<DirectPosition2D, Float>) RasterAnalyse.mergeRasters(concernedFile).getCellEval();
+					Hashtable<DirectPosition2D, Integer> cellRepet60 = (Hashtable<DirectPosition2D, Integer>) RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
+					RasterAnalyse.compareInclusionSizeCell(SvgCellRepet20, SvgCellEval20, cellRepet60, cellEval60, nameTest, ech);
 				} else if (ech == minSizeCell * 9) {
-					Hashtable<DirectPosition2D, Float> cellEval180 = (Hashtable<DirectPosition2D, Float>) RasterAnalyse
-							.mergeRasters(concernedFile).getCellEval();
-					Hashtable<DirectPosition2D, Integer> cellRepet180 = (Hashtable<DirectPosition2D, Integer>) RasterAnalyse
-							.mergeRasters(concernedFile).getCellRepet();
-					RasterAnalyse.compareInclusionSizeCell(SvgCellRepet20, SvgCellEval20, cellRepet180, cellEval180,
-							nameTest, ech);
+					Hashtable<DirectPosition2D, Float> cellEval180 = (Hashtable<DirectPosition2D, Float>) RasterAnalyse.mergeRasters(concernedFile).getCellEval();
+					Hashtable<DirectPosition2D, Integer> cellRepet180 = (Hashtable<DirectPosition2D, Integer>) RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
+					RasterAnalyse.compareInclusionSizeCell(SvgCellRepet20, SvgCellEval20, cellRepet180, cellEval180, nameTest, ech);
 				}
 				// fractal dimention calculation
 				int resolution = 10;
@@ -898,8 +910,8 @@ public class AnalyseTask {
 				System.out.println("!! Pour les scénarios " + arL.get(0).getNiceNameWthSeed());
 
 				// convert Scenar to File
-				String nameTest = arL.get(0).getProjFile().getName() + "_" + arL.get(0).getnMax() + "_"
-						+ arL.get(0).isStrict() + "_" + arL.get(0).isYag() + "_" + arL.get(0).getAhp();
+				String nameTest = arL.get(0).getProjFile().getName() + "_" + arL.get(0).getnMax() + "_" + arL.get(0).isStrict() + "_" + arL.get(0).isYag() + "_"
+						+ arL.get(0).getAhp();
 
 				if (machineReadable) {
 					nameTest = new String(arL.get(0).getNiceNameWthSeed());
@@ -936,8 +948,7 @@ public class AnalyseTask {
 				}
 
 				// create a merged raster
-				RasterMerge.merge(fileToTest, new File(rastFile, nameTest + "-rasterMerged-" + echelle + ".tif"),
-						Integer.parseInt(echelle));
+				RasterMerge.merge(fileToTest, new File(rastFile, nameTest + "-rasterMerged-" + echelle + ".tif"), Integer.parseInt(echelle));
 				// fractal dimention calculation
 				int resolution = 10;
 				// pour seulement 20 valeures
@@ -950,25 +961,26 @@ public class AnalyseTask {
 	}
 
 	/**
-	 * Overlaoding to use aggregation transition from openMole Creates a new
-	 * directory <i>mainFile</i> with the use of <i>copyToScenVrac</i> and puts all
-	 * of the incoming <i>file[]</i> in it
+	 * Overlaoding to use aggregation transition from openMole Creates a new directory <i>mainFile</i> with the use of <i>copyToScenVrac</i> and puts all of the incoming
+	 * <i>file[]</i> in it
 	 * 
-	 * @param file            : the array file contaning the different scenarios
-	 * @param fileDonnee      : file containing the root data
-	 * @param name            : name of the explo
-	 * @param machineReadable : if it's set to be launch by the machine (openmole)
+	 * @param file
+	 *            : the array file contaning the different scenarios
+	 * @param fileDonnee
+	 *            : file containing the root data
+	 * @param name
+	 *            : name of the explo
+	 * @param machineReadable
+	 *            : if it's set to be launch by the machine (openmole)
 	 * @return File : the result file
 	 * @throws Exception
 	 */
-	public static File runCompData(File[] file, File[] fileDonnee, File mainFile, String[] name,
-			boolean machineReadable) throws Exception {
+	public static File runCompData(File[] file, File[] fileDonnee, File mainFile, String[] name, boolean machineReadable) throws Exception {
 		return runCompData(copyToScenVrac(file, mainFile), fileDonnee[0], name[0], machineReadable);
 	}
 
 	/**
-	 * Fonction permettant de comparer les différents sets de données décris dans la
-	 * partie 2.6.1 de ma thèse
+	 * Fonction permettant de comparer les différents sets de données décris dans la partie 2.6.1 de ma thèse
 	 * 
 	 * @param file
 	 * @param buildFile
@@ -1031,8 +1043,7 @@ public class AnalyseTask {
 					for (ScenarAnalyse sSc : secSc) {
 						if (fSc.getShortScenarName().equals(sSc.getShortScenarName())) {
 							for (String echelle : compDonnee.getEchelleRange(3, fSc)) {
-								System.out.println("comparaison des données " + fSc.getData() + " et " + sSc.getData()
-										+ " pour l'échelle " + echelle);
+								System.out.println("comparaison des données " + fSc.getData() + " et " + sSc.getData() + " pour l'échelle " + echelle);
 								List<File> fileToTest = new ArrayList<>();
 								// get the file from the first scenar selected with the right echelle and
 								// meaning
@@ -1051,17 +1062,10 @@ public class AnalyseTask {
 								// statistics
 								File statFile = new File(resultFile, "stat-" + nameComp);
 								RasterAnalyse.statFile = statFile;
-								RasterAnalyse.createStatsDescriptive(name + "-" + echelle + sSc.getShortScenarName(),
-										result);
-								RasterMerge
-										.merge(fileToTest,
-												new File(resultFile,
-														nameComp + "-Scenar" + sSc.getShortScenarName()
-																+ "-rasterMerged-" + echelle + ".0.tif"),
-												Integer.valueOf(echelle));
-								RasterAnalyse.createStatsStabDiscrete(
-										name + "-" + echelle + "-Scenar" + sSc.getShortScenarName(), result,
-										discreteFile);
+								RasterAnalyse.createStatsDescriptive(name + "-" + echelle + sSc.getShortScenarName(), result);
+								RasterMerge.merge(fileToTest, new File(resultFile, nameComp + "-Scenar" + sSc.getShortScenarName() + "-rasterMerged-" + echelle + ".0.tif"),
+										Integer.valueOf(echelle));
+								RasterAnalyse.createStatsStabDiscrete(name + "-" + echelle + "-Scenar" + sSc.getShortScenarName(), result, discreteFile);
 							}
 						}
 					}
@@ -1104,8 +1108,10 @@ public class AnalyseTask {
 	/**
 	 * select a scaled sample of an eval-anal type output
 	 * 
-	 * @param exampleFolder : where to get the sample
-	 * @param ech           : scale
+	 * @param exampleFolder
+	 *            : where to get the sample
+	 * @param ech
+	 *            : scale
 	 * @return the sample
 	 * @throws IOException
 	 */
@@ -1164,8 +1170,10 @@ public class AnalyseTask {
 	/**
 	 * copy an example of scenar output folder
 	 * 
-	 * @param resultFile   : the file where the example will be copied
-	 * @param folderToCopy : the folder to copy
+	 * @param resultFile
+	 *            : the file where the example will be copied
+	 * @param folderToCopy
+	 *            : the folder to copy
 	 * @return the copied file
 	 * @throws IOException
 	 */

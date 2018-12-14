@@ -4,8 +4,10 @@ import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
 
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
@@ -31,25 +33,56 @@ import org.thema.process.Rasterizer;
 import com.vividsolutions.jts.geom.Geometry;
 
 import fr.ign.cogit.GTFunctions.Csv;
+import fr.ign.tools.OutputTools;
 
 public class FractalDimention {
 	public static void main(String[] args) throws Exception {
-//		int resolution = 5;
-//		File fileOut = new File("/home/mcolomb/tmp/fractDimS.tif");
-//		fileOut.mkdirs();
-//		File batiFile = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu/batimentPro.shp");
-//		// File rootFile = new File("/media/mcolomb/Data_2/resultExplo/Stability/N5MoySt");
-//		// getCorrFracDimfromSimu(batiFile, rootFile, fileOut, resolution);
-//		File testFile = new File("");
-//		getCorrFracDim(batiFile, testFile, fileOut, resolution, "seed_8600511651180259677");
-//		fileOut = new File("/home/mcolomb/tmp/fractDimT.tif");
-//		testFile = new File(
-//				"/media/mcolomb/Data_2/resultFinal/testAHP/Stabilite-testAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N5_Ba_MoyahpT_Moy_seed_42/N5_Ba_MoyahpT_Moy_seed_42-evalAnal-20.0.tif");
-//		getCorrFracDim(batiFile, testFile, fileOut, resolution, "seed_8600511651180259677");
+		// int resolution = 5;
+		// File fileOut = new File("/home/mcolomb/tmp/fractDimS.tif");
+		// fileOut.mkdirs();
+		// File batiFile = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu/batimentPro.shp");
+		// // File rootFile = new File("/media/mcolomb/Data_2/resultExplo/Stability/N5MoySt");
+		// // getCorrFracDimfromSimu(batiFile, rootFile, fileOut, resolution);
+		// File testFile = new File("");
+		// getCorrFracDim(batiFile, testFile, fileOut, resolution, "seed_8600511651180259677");
+		// fileOut = new File("/home/mcolomb/tmp/fractDimT.tif");
+		// testFile = new File(
+		// "/media/mcolomb/Data_2/resultFinal/testAHP/Stabilite-testAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N5_Ba_MoyahpT_Moy_seed_42/N5_Ba_MoyahpT_Moy_seed_42-evalAnal-20.0.tif");
+		// getCorrFracDim(batiFile, testFile, fileOut, resolution, "seed_8600511651180259677");
+		File base = new File("/media/mcolomb/Data_2/resultFinal/testAHP/Stabilite/StabiliteTestAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0");
+		List<File> toStudy = new ArrayList<File>();
+		toStudy.add(new File(base, "N4_St_MoyahpE_Moy_seed_96081"));
+		toStudy.add(new File(base, "N4_St_MoyahpS_Moy_seed_5882"));
+		toStudy.add(new File(base, "N4_St_MoyahpT_Moy_seed_15711"));
+
+		toStudy.add(new File(base, "N5_Ba_MoyahpE_Moy_seed_42"));
+		toStudy.add(new File(base, "N5_Ba_MoyahpS_Moy_seed_42"));
+		toStudy.add(new File(base, "N5_Ba_MoyahpT_Moy_seed_42"));
+
+		toStudy.add(new File(base, "N6_St_MoyahpE_Moy_seed_51558"));
+		toStudy.add(new File(base, "N6_St_MoyahpS_Moy_seed_42736"));
+		toStudy.add(new File(base, "N6_St_MoyahpT_Moy_seed_16683"));
+
+		toStudy.add(new File(base, "N7_Ba_YagahpE_Yag_seed_48726"));
+		toStudy.add(new File(base, "N7_Ba_YagahpS_Yag_seed_77034"));
+		toStudy.add(new File(base, "N7_Ba_YagahpT_Yag_seed_26483"));
+		getCorrFracDim(new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu/batimentPro.shp"), base.getParentFile(), 20, "situ init");
 		
-		getCorrFracDim(new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu/batimentPro.shp"),new File("/home/mcolomb/tmp/cra.tif"),new File("//home/mcolomb/tmp/"),20,"lol");
+		for (File f : toStudy) {
+			getCorrFracDim(new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu/batimentPro.shp"), f,base.getParentFile(), 20, f.getName());
+		}
 	}
-		/**
+
+	public static Hashtable<String, Hashtable<String, Double>> getCorrFracDim(File batiFile, File fileOut, int resolution, String name) throws IOException {
+		Hashtable<String, Hashtable<String, Double>> results = new Hashtable<String, Hashtable<String, Double>>();
+			results.put(name, calculFracCor(importRaster(rasterize(batiFile, new File(fileOut.getParentFile(), "temprast.tif"))), fileOut));
+		Csv.generateCsvFileMultTab(results, fileOut, "dimensionFractale");
+		File dF = new File(fileOut.getParentFile(), "temprast.tif");
+		dF.delete();
+		return results;
+	}
+	
+	/**
 	 * get the fractal dimension (calculated with the correlation method) of a MUP-City output by mergini it with a build file
 	 * 
 	 * @param batiFile
@@ -67,7 +100,13 @@ public class FractalDimention {
 	 */
 	public static Hashtable<String, Hashtable<String, Double>> getCorrFracDim(File batiFile, File mupFile, File fileOut, int resolution, String name) throws IOException {
 		Hashtable<String, Hashtable<String, Double>> results = new Hashtable<String, Hashtable<String, Double>>();
+			if (mupFile.isDirectory()) {
+				mupFile = OutputTools.getMupFileFromFolder(mupFile, String.valueOf(resolution));
+			}
 		results.put(name, calculFracCor(mergeBuildMUPResultRast(batiFile, mupFile, fileOut, resolution), fileOut));
+		
+
+		
 		Csv.generateCsvFileMultTab(results, fileOut, "dimensionFractale");
 		File dF = new File(fileOut.getParentFile(), "temprast.tif");
 		dF.delete();
@@ -134,7 +173,7 @@ public class FractalDimention {
 		// System.out.println("toTestRaster");
 		GridCoverage2D toTestRaster = new GridCoverageFactory().create("bati", imgpix3, gridBounds);
 
-	//	RasterMerge.writeGeotiff(new File("/home/mcolomb/rastermergedtmp.tif"), toTestRaster);
+		// RasterMerge.writeGeotiff(new File("/home/mcolomb/rastermergedtmp.tif"), toTestRaster);
 		return toTestRaster;
 	}
 
@@ -214,15 +253,15 @@ public class FractalDimention {
 	}
 
 	public static GridCoverage2D importRaster(File rasterIn) throws IOException {
-//		 ParameterValue<OverviewPolicy> policy = AbstractGridFormat.OVERVIEW_POLICY.createValue();
-//		 policy.setValue(OverviewPolicy.IGNORE);
-//		 ParameterValue<String> gridsize = AbstractGridFormat.SUGGESTED_TILE_SIZE.createValue();
-//		 ParameterValue<Boolean> useJaiRead = AbstractGridFormat.USE_JAI_IMAGEREAD.createValue();
-//		 useJaiRead.setValue(true);
-//		 GeneralParameterValue[] params = new GeneralParameterValue[] { policy, gridsize, useJaiRead };
-//		 GridCoverage2DReader reader = new GeoTiffReader(rasterIn);
-//		 GridCoverage2D coverage = reader.read(params);
-//		 return coverage;
+		// ParameterValue<OverviewPolicy> policy = AbstractGridFormat.OVERVIEW_POLICY.createValue();
+		// policy.setValue(OverviewPolicy.IGNORE);
+		// ParameterValue<String> gridsize = AbstractGridFormat.SUGGESTED_TILE_SIZE.createValue();
+		// ParameterValue<Boolean> useJaiRead = AbstractGridFormat.USE_JAI_IMAGEREAD.createValue();
+		// useJaiRead.setValue(true);
+		// GeneralParameterValue[] params = new GeneralParameterValue[] { policy, gridsize, useJaiRead };
+		// GridCoverage2DReader reader = new GeoTiffReader(rasterIn);
+		// GridCoverage2D coverage = reader.read(params);
+		// return coverage;
 		return IOImage.loadTiff(rasterIn);
 	}
 }

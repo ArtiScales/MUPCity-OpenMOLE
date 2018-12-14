@@ -70,50 +70,125 @@ public class RasterAnalyse {
 	public static boolean firstline = true;
 	public static boolean saveEvalTab = false;
 
-	// public static void main(String[] args) throws Exception {
-	//
-	// prepareForCityComparison(new File("/media/mcolomb/Data_2/resultFinal/sens/dataMouv/result--dataMouv/N5_Ba_Moy_ahpE_seed_42/stat"), "N5_Ba_Moy_ahpE");
-	// saveEvalTab = true;
-	//
-	// List<File> listFile = new ArrayList<File>();
-	// RasterMergeResult rmr = new RasterMergeResult();
-	//
-	// for (File f : rootFile.listFiles()) {
-	// if (f.getName().endsWith("eval-20.0.tif") && f.getName().contains("ahpS")) {
-	// listFile.add(f);
-	// }
-	// }
-	//
-	//
-	// RasterMergeResult resultEval = mergeRasters(listFile.subList(0, 50));
-	//// list.add(resultEval);
-	//// RasterMergeResult resultEval2 = mergeRasters(listFile.subList(34, 67));
-	//// list.add(resultEval2);
-	//// RasterMergeResult resultEval3 = mergeRasters(listFile.subList(68, 100));
-	//// list.add(resultEval3);
-	//// RasterMergeResult.merge(list);
-	// File resultFile = new File(rootFile, "resultYag");
-	// resultFile.mkdir();
-	// HighAndLowEvals(resultEval.getCellEvals(), resultFile, listFile.get(0));
+	public static void main(String[] args) throws Exception {
+		rootFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/comparaison/compAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0");
+		echelle = "20";
 
-	//
-	// Hashtable<String, Hashtable<String, Double>> resultTC = new Hashtable<String,
-	// Hashtable<String, Double>>();
-	//
-	// for (File f : mupFile.listFiles()) {
-	// if (f.getName().startsWith("N") && f.getName().endsWith("_42") &&
-	// f.isDirectory()) {
-	// for (File ff : f.listFiles()) {
-	// if (ff.getName().endsWith(echelle + ".0.tif")) {
-	// resultTC.put(f.getName(), getDistanceFromTC(ff, f.getName().replace("scenario
-	// ", "").replace("seed_50042", "").replace("_",",")));
-	// }
-	// }
-	// }
-	// }
-	// Csv.generateCsvFileMultTab(resultTC, rootFile, "distanceTC");
 
-	// }
+		// makeComparaisonDecFract(new File("/media/mcolomb/Data_2/resultFinal/scenarios/decompFract"), new File("/media/mcolomb/Data_2/dataOpenMole/all/discreteFile.shp"), "20");
+	}
+
+	public static void makeComparaisonDecFract(File mainFile, File discreteFile, String echellee) throws IOException {
+
+		Hashtable<String, double[]> resultTable = new Hashtable<String, double[]>();
+		String[] fLine = { "Paramètres", "Nombre de cellule totale", "Nombre de cellules dans la typologie rurale", "Nombre de cellules dans la typologie péri-urbaine",
+				"Nombre de cellules dans la typologie banlieue", "Nombre de cellules dans la typologie centre-ville", "zone urbanisée", "zone à urbaniser" };
+		echelle = echellee;
+		String typoObjects = "typo";
+		String[] diffObject = { "allIn", "rural", "peri-urbain", "banlieue", "hypercentre", "peri-centre" };
+
+		File zoneFile = new File("/media/mcolomb/Data_2/dataOpenMole/all/zonage.shp");
+		String zoneObjects = "TYPEZONE";
+		String[] zoneObject = { "AU", "U", "ZC" };
+
+		for (File f : mainFile.listFiles()) {
+			if (f.isDirectory() && f.getName().startsWith("N")) {
+				for (File ff : f.listFiles()) {
+					if (ff.getName().endsWith("evalAnal-" + echelle + ".0.tif")) {
+						double[] line = new double[fLine.length - 1];
+						Hashtable<String, Integer> typo = getDiscreteCharacteristic(ff, discreteFile, typoObjects, diffObject);
+						line[0] = typo.get("allIn");
+						line[1] = typo.get("rural");
+						line[2] = typo.get("peri-urbain");
+						line[3] = typo.get("banlieue");
+						line[4] = typo.get("hypercentre") + typo.get("peri-centre");
+
+						Hashtable<String, Integer> zone = getDiscreteCharacteristic(ff, zoneFile, zoneObjects, zoneObject);
+						line[5] = zone.get("U") + zone.get("ZC");
+						line[6] = zone.get("AU");
+
+						resultTable.put(f.getName().split("_")[0] + f.getName().split("_")[1], line);
+					}
+				}
+			}
+		}
+
+		Csv.generateCsvFile(resultTable, mainFile, "comparaisonTypo", fLine);
+	}
+
+	/**
+	 * get discrete characteristic from a single MUP-City's outupt
+	 * 
+	 * @param nameScenar
+	 *            : name of the output file
+	 * @param rasterFile
+	 *            : MUP-City's output
+	 * @param discreteFile
+	 *            : shapeFile containing the discretization
+	 * @param field
+	 *            : filed to discretize with
+	 * @return a list containing the number of the wanted filed
+	 * @throws IOException
+	 */
+	public static Hashtable<String, Integer> getDiscreteCharacteristic(File rasterFile, File discreteFile, String field, String[] wantedFeat) throws IOException {
+		Hashtable<String, Integer> result = new Hashtable<String, Integer>();
+		for (String w : wantedFeat) {
+			result.put(w, 0);
+		}
+		ShapefileDataStore fabricSDS = new ShapefileDataStore(discreteFile.toURI().toURL());
+		SimpleFeatureCollection fabricType = fabricSDS.getFeatureSource().getFeatures();
+
+		SimpleFeatureIterator iteratorGeoFeat = fabricType.features();
+
+		try {
+			// Pour toutes les entitées
+			while (iteratorGeoFeat.hasNext()) {
+				SimpleFeature city = iteratorGeoFeat.next();
+				String fabricName = (String) city.getAttribute(field);
+				// does tab contained the selected feature?
+				boolean concerned = false;
+				for (String s : wantedFeat) {
+					if (s.equals(fabricName)) {
+						concerned = true;
+						break;
+					}
+				}
+				if (concerned) {
+					// pour toutes les cellules
+					GridCoverage2D coverageMup = Rasters.importRaster(rasterFile, (Geometry) city.getDefaultGeometry());
+					if (coverageMup != null) {
+						Envelope2D env = coverageMup.getEnvelope2D();
+						double Xmin = env.getMinX();
+						double Xmax = env.getMaxX();
+						double Ymin = env.getMinY();
+						double Ymax = env.getMaxY();
+						double ech = Double.valueOf(echelle);
+						for (double r = Xmin + ech / 2; r <= Xmax; r = r + ech) {
+							// those values are the bounds from project (and upped to correspond to a
+							// multiple of 180 to analyse all the cells in the project)
+							for (double t = Ymin + ech / 2; t <= Ymax; t = t + ech) {
+								DirectPosition2D coordCentre = new DirectPosition2D(r, t);
+								float[] cellMup = (float[]) coverageMup.evaluate(coordCentre);
+								if (cellMup[0] > 0) {
+									result.put(fabricName, result.get(fabricName) + 1);
+									if (result.containsKey("allIn")) {
+										result.put("allIn", result.get("allIn") + 1);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		} catch (Exception problem) {
+			problem.printStackTrace();
+		} finally {
+			iteratorGeoFeat.close();
+		}
+
+		fabricSDS.dispose();
+		return result;
+	}
 
 	/**
 	 * Select a list of file with the argument "with" in its name from the rootFile
@@ -282,21 +357,22 @@ public class RasterAnalyse {
 				}
 			}
 		} else {
-			for (File f : rootFile.listFiles()) {
-				if (f.isDirectory() && f.getName().startsWith(nameExplo)) {
-					for (File ff : f.listFiles()) {
-						if (ff.getName().startsWith("N")) {
-							for (File fff : ff.listFiles()) {
-								if (fff.getName().endsWith("evalAnal-" + echelle + ".0.tif")) {
-									String nameScenar = fff.getName().replace("evalAnal-" + echelle + ".0.tif", "");
-									distServices.put(nameScenar, getDistanceFromServices(fff, nameScenar));
-									distLeisure.put(nameScenar, getDistanceFromLeisure(fff, nameScenar));
-									distTC.put(nameScenar, getDistanceFromTC(fff, nameScenar));
-								}
-							}
+			// for (File f : rootFile.listFiles()) {
+			// if (f.isDirectory() && f.getName().startsWith(nameExplo)) {
+			for (File ff : rootFile.listFiles()) {
+				System.out.println(ff);
+				if (ff.getName().startsWith("N")&& !ff.getName().contains("Yag")) {
+					for (File fff : ff.listFiles()) {
+						if (fff.getName().endsWith("evalAnal-" + echelle + ".0.tif")) {
+							String nameScenar = fff.getName().replace("evalAnal-" + echelle + ".0.tif", "");
+							distServices.put(nameScenar, getDistanceFromServices(fff, nameScenar));
+							distLeisure.put(nameScenar, getDistanceFromLeisure(fff, nameScenar));
+							distTC.put(nameScenar, getDistanceFromTC(fff, nameScenar));
 						}
 					}
 				}
+				// }
+				// }
 
 			}
 		}
@@ -1057,9 +1133,8 @@ public class RasterAnalyse {
 		SimpleFeatureIterator iteratorCity = fabricType.features();
 		double ech = Double.valueOf(echelle);
 		try {
-			// Pour toutes les entitées
+			// for all entities
 			while (iteratorCity.hasNext()) {
-
 				SimpleFeature city = iteratorCity.next();
 				double[] repetCells = new double[fileRepli.size()];
 				if (cellsByCity.containsKey((String) city.getAttribute("NOM_COM"))) {
@@ -1198,6 +1273,10 @@ public class RasterAnalyse {
 		return createStatsDescriptive(nameScenar, result, result.getNbScenar(), false);
 	}
 
+	public static File createStatsDescriptive(String nameTest, RasterMergeResult mergedResult, boolean surface) throws IOException {
+		return createStatsDescriptive(nameTest, mergedResult, mergedResult.getNbScenar(), surface);
+	}
+
 	/**
 	 * 
 	 * @param nameScenar
@@ -1211,6 +1290,23 @@ public class RasterAnalyse {
 
 		statFile.mkdirs();
 
+		StatTab tableauStat = statDescriptive(nameScenar, result, variationThreshold, surface);
+
+		tableauStat.toCsv(statFile, firstline);
+
+		return statFile;
+	}
+
+	/**
+	 * get a spectial characeristic from a set of mupCity's output
+	 * 
+	 * @param statab
+	 *            :
+	 * @param simuCode
+	 * @return
+	 */
+
+	public static StatTab statDescriptive(String nameScenar, RasterMergeResult result, double variationThreshold, boolean surface) {
 		Hashtable<DirectPosition2D, Integer> cellRepet = result.getCellRepet();
 		Hashtable<DirectPosition2D, Float> cellEval = result.getCellEval();
 		DescriptiveStatistics statNb = result.getHistoDS();
@@ -1308,14 +1404,7 @@ public class RasterAnalyse {
 		if (surface) {
 			tableauFinal[12] = tableauFinal[1] * tableauFinal[0] * tableauFinal[0];
 		}
-		StatTab tableauStat = new StatTab("descriptive_statistics", nameScenar, tableauFinal, premiereCol);
-		tableauStat.toCsv(statFile, firstline);
-
-		return statFile;
-	}
-
-	public static File createStatsDescriptive(String nameTest, RasterMergeResult mergedResult, boolean surface) throws IOException {
-		return createStatsDescriptive(nameTest, mergedResult, mergedResult.getNbScenar(), surface);
+		return new StatTab("descriptive_statistics", nameScenar, tableauFinal, premiereCol);
 	}
 
 }

@@ -1,15 +1,14 @@
 package fr.ign.tools;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
@@ -35,8 +34,17 @@ public class OutputTools {
 
 	public static void main(String[] args) throws IOException, NoSuchAuthorityCodeException, FactoryException, ParseException {
 		vectorizeMupOutput(Rasters.importRaster(new File(
-				"/media/mcolomb/Data_2/resultFinal/sens/diffDataSource/DiffData-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N7_Ba_Yag_ahpS_seed_42/N7_Ba_Yag_ahpS_seed_42-evalAnal-20.0.tif")),
-				new File("/media/mcolomb/Data_2/resultFinal/sens/diffDataSource/DiffData-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N7_Ba_Yag_ahpS_seed_42/"), 20);
+				"/media/mcolomb/Data_2/resultFinal/testAHP/comparaison/compAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N5_St_MoyahpS_Moy_seed_42/N5_St_MoyahpS_Moy_seed_42-evalAnal-20.0.tif")),
+				new File("/media/mcolomb/Data_2/resultFinal/testAHP/comparaison/traitements/N5St/N5_StS-lgt.shp"), 20);
+	}
+	
+	public static File getMupFileFromFolder(File mupFolder, String echelle) throws FileNotFoundException {
+		for (File f : mupFolder.listFiles()) {
+			if (f.getName().endsWith("evalAnal-"+echelle+".0.tif")) {
+				return f;
+			}
+		}
+		throw new FileNotFoundException();
 	}
 
 	public static File vectorizeMupOutput(GridCoverage2D coverage, File destFile, double sizeCell)
