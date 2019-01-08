@@ -56,30 +56,30 @@ public class FractalDimention {
 		// "seed_8600511651180259677");
 		File base =	new File("/home/yo/Documents/these/lastDimFract/out");
 		List<File> toStudy = new ArrayList<File>();
-		toStudy.add(new File(base, "Stability-dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N4_St_Moy_ahpx_seed_5621105064239176722-evalAnal-20.0"));
-		toStudy.add(new File(base, "N4_St_Moy_ahpS_seed_42-evalAnal-20.0"));
+		toStudy.add(new File(base, "Stability-dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N4_St_Moy_ahpx_seed_5621105064239176722-evalAnal-20.0.tif"));
+		toStudy.add(new File(base, "N4_St_Moy_ahpS_seed_42-evalAnal-20.0.tif"));
 //		toStudy.add(new File(base, "N4_St_MoyahpT_Moy_seed_15711"));
 
-		toStudy.add(new File(base, "Stability-dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N5_Ba_Moy_ahpx_seed_6274526350136348928-evalAnal-20.0"));
-		toStudy.add(new File(base, "N5_Ba_Moy_ahpS_seed_42-evalAnal-20.0"));
+		toStudy.add(new File(base, "Stability-dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N5_Ba_Moy_ahpx_seed_6274526350136348928-evalAnal-20.0.tif"));
+		toStudy.add(new File(base, "N5_Ba_Moy_ahpS_seed_42-evalAnal-20.0.tif"));
 //		toStudy.add(new File(base, "N5_Ba_MoyahpT_Moy_seed_42"));
 
-		toStudy.add(new File(base, "Stability-dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N6_St_Moy_ahpx_seed_6395953612790931483-evalAnal-20.0"));
-		toStudy.add(new File(base, "N6_St_Moy_ahpS_seed_42-evalAnal-20.0"));
+		toStudy.add(new File(base, "Stability-dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N6_St_Moy_ahpx_seed_6395953612790931483-evalAnal-20.0.tif"));
+		toStudy.add(new File(base, "N6_St_Moy_ahpS_seed_42-evalAnal-20.0.tif"));
 //		toStudy.add(new File(base, "N6_St_MoyahpT_Moy_seed_16683"));
 
-		toStudy.add(new File(base, "Stability-dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N7_Ba_Yag_ahpx_seed_7452225133228106350-evalAnal-20.0"));
-		toStudy.add(new File(base, "N7_Ba_Yag_ahpS_seed_42-evalAnal-20.0"));
+		toStudy.add(new File(base, "Stability-dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N7_Ba_Yag_ahpx_seed_7452225133228106350-evalAnal-20.0.tif"));
+		toStudy.add(new File(base, "N7_Ba_Yag_ahpS_seed_42-evalAnal-20.0.tif"));
 //		toStudy.add(new File(base, "N7_Ba_YagahpT_Yag_seed_26483"));
 		
 		File outFile = new File("/home/yo/Documents/these/lastDimFract");
 
-		toStudy.add(new File(
-				"/home/yo/Documents/these/resultFinal/dataManu/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N4_St_Moy_ahpx/SortieExemple/Stability-dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N4_St_Moy_ahpx_seed_5621105064239176722-eval-20.0.tif"));
-
-		File empty = new File("/home/yo/Documents/these/resultFinal/emptyOutputreal.tif");
-		getCorrFracDim(new File("/home/yo/Documents/these/data/stabilite/dataManu/batimentPro.shp"), empty, outFile, 4,
-				"situ init");
+//		toStudy.add(new File(
+//				"/home/yo/Documents/these/resultFinal/dataManu/dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N4_St_Moy_ahpx/SortieExemple/Stability-dataManu-CM20.0-S0.0-GP_915948.0_6677337.0--N4_St_Moy_ahpx_seed_5621105064239176722-eval-20.0.tif"));
+//
+//		File empty = new File("/home/yo/Documents/these/resultFinal/emptyOutputreal.tif");
+//		getCorrFracDim(new File("/home/yo/Documents/these/data/stabilite/dataManu/batimentPro.shp"), empty, outFile, 4,
+//				"situ init");
 
 		for (File f : toStudy) {
 			getCorrFracDim(new File("/home/yo/Documents/these/data/stabilite/dataManu/batimentPro.shp"), f, outFile, 4,
@@ -199,18 +199,13 @@ public class FractalDimention {
 
 	public static Hashtable<String, Double> calculFracCor(GridCoverage2D toTestRaster, File fileOut)
 			throws IOException {
-		// System.out.println("\tstart calculFracCor");
-		System.out.println("fileOut : " + fileOut);
 		Rasters.writeGeotiff(new File(fileOut, "tmp"), toTestRaster);
 		DefaultSampling dS = new DefaultSampling(22, 3000, 1.5, Sequence.GEOM);
-		// System.out.println("\tcorrelation");
 		CorrelationRasterMethod correlation = new CorrelationRasterMethod("test", dS, toTestRaster.getRenderedImage(),
 				JTS.rectToEnv(toTestRaster.getEnvelope2D()));
 
-		// System.out.println("\tcorrelation execute");
 		correlation.execute(new TaskMonitor.EmptyMonitor(), true);
 
-		// System.out.println("\testimation");
 		Estimation estim = new EstimationFactory(correlation).getDefaultEstimation();
 
 		Hashtable<String, Double> values = new Hashtable<String, Double>();
@@ -260,6 +255,9 @@ public class FractalDimention {
 		GridCoverage2D rasterBati = new GridCoverageFactory().create("bati", wRaster, envBati);
 		writeGeotiff(fileOut, rasterBati);
 		batiDS.dispose();
+		}
+		else {
+			System.out.println("rasterized build already exists");
 		}
 		return fileOut;
 	}
