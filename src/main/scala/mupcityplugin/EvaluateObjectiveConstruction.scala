@@ -5,6 +5,6 @@ import java.io.File
 
 object EvalusimulFile, folderInion {
   def apply(simulFile : File, folderIn : File ): File = {
-    fr.ign.task.
+    fr.ign.exp.EvaluateObjectiveConstructionWithCells(simulFile, folderIn)
   }
 }
