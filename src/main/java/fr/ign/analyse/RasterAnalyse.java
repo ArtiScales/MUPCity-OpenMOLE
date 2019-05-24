@@ -1227,6 +1227,7 @@ public class RasterAnalyse {
 			cpt++;
 		}
 		deuForme.put("Évaluations du scénario", distrib);
+		statFile.mkdirs();
 		Csv.generateCsvFileCol(deuForme, statFile, "evaluation_moyenne-" + echelle);
 	}
 

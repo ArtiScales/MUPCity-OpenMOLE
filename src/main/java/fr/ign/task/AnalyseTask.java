@@ -33,47 +33,53 @@ public class AnalyseTask {
 	// public static String echelle;
 
 	public static void main(String[] args) throws Exception {
-		File rootFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/comparaison/compAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0");
-		List<File> aTest = new ArrayList<File>();
-		List<File> bTest = new ArrayList<File>();
-		List<File> cTest = new ArrayList<File>();
-		List<File> dTest = new ArrayList<File>();
+
 		
-			for (File ff : rootFile.listFiles()) {
-				if (ff.getName().startsWith("N4_St") && ff.getName().contains("Moy")) {
-					for (File fff : ff.listFiles()) {
-						if (fff.getName().endsWith("evalAnal-20.0.tif")) {
-							aTest.add(fff);
-						}
-					}
-				}
-				if (ff.getName().startsWith("N5_Ba") && ff.getName().contains("Moy")) {
-					for (File fff : ff.listFiles()) {
-						if (fff.getName().endsWith("evalAnal-20.0.tif")) {
-							bTest.add(fff);
-						}
-					}
-				}
-				if (ff.getName().startsWith("N6_St") && ff.getName().contains("Moy")) {
-					for (File fff : ff.listFiles()) {
-						if (fff.getName().endsWith("evalAnal-20.0.tif")) {
-							cTest.add(fff);
-						}
-					}
-				}
-				if (ff.getName().startsWith("N7_Ba") && ff.getName().contains("Yag")) {
-					for (File fff : ff.listFiles()) {
-						if (fff.getName().endsWith("evalAnal-20.0.tif")) {
-							dTest.add(fff);
-						}
-					}
-				}
-			}
-			compTwoSimus(aTest, new File(rootFile, "stat/compRepli/A"  + ""), "20");
-			compTwoSimus(bTest, new File(rootFile, "stat/compRepli/B"  + ""), "20");
-			compTwoSimus(cTest, new File(rootFile, "stat/compRepli/C"  + ""), "20");
-			compTwoSimus(dTest, new File(rootFile, "stat/compRepli/D"  + ""), "20");
-		
+		runGridExplo(new File("/media/ubuntu/bkk/resultFinal/sens/GridMouv2/"),
+				new File("/media/ubuntu/bkk/dataManu/") , "20", "GridMouv", false) ;
+
+	//	File rootFile = new File("/media/mcolomb/Data_2/resultFinal/testAHP/comparaison/compAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0");
+
+		//		List<File> aTest = new ArrayList<File>();
+//		List<File> bTest = new ArrayList<File>();
+//		List<File> cTest = new ArrayList<File>();
+//		List<File> dTest = new ArrayList<File>();
+//		
+//			for (File ff : rootFile.listFiles()) {
+//				if (ff.getName().startsWith("N4_St") && ff.getName().contains("Moy")) {
+//					for (File fff : ff.listFiles()) {
+//						if (fff.getName().endsWith("evalAnal-20.0.tif")) {
+//							aTest.add(fff);
+//						}
+//					}
+//				}
+//				if (ff.getName().startsWith("N5_Ba") && ff.getName().contains("Moy")) {
+//					for (File fff : ff.listFiles()) {
+//						if (fff.getName().endsWith("evalAnal-20.0.tif")) {
+//							bTest.add(fff);
+//						}
+//					}
+//				}
+//				if (ff.getName().startsWith("N6_St") && ff.getName().contains("Moy")) {
+//					for (File fff : ff.listFiles()) {
+//						if (fff.getName().endsWith("evalAnal-20.0.tif")) {
+//							cTest.add(fff);
+//						}
+//					}
+//				}
+//				if (ff.getName().startsWith("N7_Ba") && ff.getName().contains("Yag")) {
+//					for (File fff : ff.listFiles()) {
+//						if (fff.getName().endsWith("evalAnal-20.0.tif")) {
+//							dTest.add(fff);
+//						}
+//					}
+//				}
+//			}
+//			compTwoSimus(aTest, new File(rootFile, "stat/compRepli/A"  + ""), "20");
+//			compTwoSimus(bTest, new File(rootFile, "stat/compRepli/B"  + ""), "20");
+//			compTwoSimus(cTest, new File(rootFile, "stat/compRepli/C"  + ""), "20");
+//			compTwoSimus(dTest, new File(rootFile, "stat/compRepli/D"  + ""), "20");
+//		
 		// runGridExplo(new File("/home/yo/Documents/these/resultFinal/sens/GridMouv2"),
 		// new File("/home/yo/Documents/these/data/stabilite/dataManu/"), "20", "GridMouv", false);
 
