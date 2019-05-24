@@ -1,0 +1,98 @@
+//names
+val name = Val[String]
+val zipToAvoid = Val[String]
+val nameProject = Val[String]
+val nameTotal = Val[String]
+val simulName = Val[String]
+val inputName = Val[String]
+val arraySimulFile = Val[Array[File]]
+val arrayFolderIn = Val[Array[File]]
+val arrayName = Val[Array[String]]
+
+//files & folders
+val folderIn = Val[File]
+val folderOut = Val[File]
+val projectFile = Val[File]
+val simulFile = Val[File]
+val resultFile = Val[File]
+val mainFolder = Val[File]
+val resultFolder = workDirectory / "results_min_local"
+
+val machineReadable = Val[Boolean]
+
+//project param
+val xmin = Val[Double]
+val ymin = Val[Double]
+val width = Val[Double]
+val height = Val[Double]
+val xshift = Val[Double]
+val yshift = Val[Double]
+
+//decomp param
+val seuilDensBuild=Val[Double]
+val minSize = Val[Double]
+val maxSize = Val[Double]
+
+//scenar param
+val seed = Val[Long]
+val ahp0 = Val[Double]
+val ahp1 = Val[Double]
+val ahp2 = Val[Double]
+val ahp3 = Val[Double]
+val ahp4 = Val[Double]
+val ahp5 = Val[Double]
+val ahp6 = Val[Double]
+val ahp7 = Val[Double]
+val ahp8 = Val[Double]
+val mean = Val[Boolean]
+val strict = Val[Boolean]
+val nMax = Val[Int]
+
+System.setProperty("java.awt.headless", "true")
+System.setProperty("java.awt.toolkit", "sun.awt.HToolkit")
+
+val SimuTask = ScalaTask("""
+|import fr.ign.task._
+|val simulFile = withThreadClassLoader(classLoader(mupcityplugin.SimulTask))(mupcityplugin.SimulTask.apply(projectFile, nameProject, nMax, strict, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, mean, seed))""".stripMargin
+) set (
+  plugins += pluginsOf(mupcityplugin.SimulTask),
+  machineReadable := true,
+	seed := 42,  
+	nMax := 6, 	
+	mean := true,
+	strict := true,
+	folderIn := workDirectory / "dataOpenMole",
+	projectFile := workDirectory / "proj",
+  inputs += (projectFile, name, nameProject, nMax, strict, mean, ahp0, ahp1, ahp2, ahp3, ahp4, ahp5, ahp6, ahp7, ahp8, seed, folderIn),
+  outputs += (simulFile, folderIn, name)
+)
+
+NSGA2Evolution(
+  evaluation = SimuTask,
+  parallelism = 10,
+  termination = 100,
+  genome = Seq(
+	ahp0 in (0.0,1.0),
+    ahp1 in (0.0,1.0),
+    ahp2 in (0.0,1.0),
+    ahp3 in (0.0,1.0),
+    ahp4 in (0.0,1.0),
+    ahp5 in (0.0,1.0),
+    ahp6 in (0.0,1.0),
+    ahp7 in (0.0,1.0),
+    ahp8 in (0.0,1.0)
+),
+  objectives = mupcityplugin.EvaluateObjectiveConstruction(simulFile, folderIn)
+)hook (workDirectory / "evolution") on LocalEnvironment(2)
+
+//val h = ToStringHook(nameProject)
+//val copyProjectHook =  CopyFileHook(projectFile, resultFolder / "${name}-${inputName}-CM${minSize}-S${seuilDensBuild}-GP_${xmin}_${ymin}")
+//val copySimProjectHook =  CopyFileHook(simulFile, resultFolder / "${name}-${inputName}-CM${minSize}-S${seuilDensBuild}-GP_${xmin}_${ymin}" / "${simulName}")
+//val copyVracHook =  CopyFileHook(simulFile, resultFolder / "ScenarVrac")
+//val copySimProjectHookSimplified =  CopyFileHook(simulFile, resultFolder / "${name}-${inputName}-CM${minSize}-S${seuilDensBuild}-GP_${xmin}_${ymin}" / "${simulName}")
+//val copyHook =  CopyFileHook(resultFile, resultFolder / "analyse_${name}")
+
+// val egiEnv = EGIEnvironment("vo.complex-systems.eu", openMOLEMemory = 2500 megabytes)
+//val localEnv = LocalEnvironment(4)
+
+//(ProjectCreationTask on localEnv hook ToStringHook(inputName)) -- ((exploScenario) -< (SimuTask on egiEnv by 10) >- )

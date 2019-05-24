@@ -47,7 +47,7 @@ public class OutputTools {
 		throw new FileNotFoundException();
 	}
 
-	public static File vectorizeMupOutput(GridCoverage2D coverage, File destFile, double sizeCell)
+	public static File vectorizeMupOutput(GridCoverage2D coverage, File outFile, double sizeCell)
 			throws IOException, NoSuchAuthorityCodeException, FactoryException, ParseException {
 
 		CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:2154");
@@ -97,8 +97,8 @@ public class OutputTools {
 		} finally {
 			featIt.close();
 		}
-		Vectors.exportSFC(output.collection(), destFile);
-		return destFile;
+		Vectors.exportSFC(output.collection(), outFile);
+		return outFile;
 	}
 
 	/**

@@ -27,9 +27,12 @@ import org.geotools.grid.Grids;
 import org.geotools.referencing.CRS;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.parameter.InvalidParameterValueException;
+import org.opengis.parameter.ParameterNotFoundException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -116,6 +119,34 @@ public class RasterAnalyse {
 		Csv.generateCsvFile(resultTable, mainFile, "comparaisonTypo", fLine);
 	}
 
+	
+	public static int getCellsInCity(File rasterFile, SimpleFeature comm)
+			throws IOException, InvalidParameterValueException, ParameterNotFoundException, TransformException {
+		int result = 0;
+		GridCoverage2D coverageMup = Rasters.importRaster(rasterFile, (Geometry) comm.getDefaultGeometry());
+		if (coverageMup != null) {
+			Envelope2D env = coverageMup.getEnvelope2D();
+			double Xmin = env.getMinX();
+			double Xmax = env.getMaxX();
+			double Ymin = env.getMinY();
+			double Ymax = env.getMaxY();
+			double ech = Double.valueOf(echelle);
+			for (double r = Xmin + ech / 2; r <= Xmax; r = r + ech) {
+				// those values are the bounds from project (and upped to correspond to a
+				// multiple of 180 to analyse all the cells in the project)
+				for (double t = Ymin + ech / 2; t <= Ymax; t = t + ech) {
+					DirectPosition2D coordCentre = new DirectPosition2D(r, t);
+					float[] cellMup = (float[]) coverageMup.evaluate(coordCentre);
+					if (cellMup[0] > 0) {
+						result++;
+					}
+				}
+			}
+		}	
+		return result; 
+
+	}
+	
 	/**
 	 * get discrete characteristic from a single MUP-City's outupt
 	 * 
@@ -127,14 +158,14 @@ public class RasterAnalyse {
 	 *            : shapeFile containing the discretization
 	 * @param field
 	 *            : filed to discretize with
+	 * @param wantedFeat
 	 * @return a list containing the number of the wanted filed
 	 * @throws IOException
 	 */
 	public static Hashtable<String, Integer> getDiscreteCharacteristic(File rasterFile, File discreteFile, String field, String[] wantedFeat) throws IOException {
 		Hashtable<String, Integer> result = new Hashtable<String, Integer>();
-		for (String w : wantedFeat) {
-			result.put(w, 0);
-		}
+		
+		// 
 		ShapefileDataStore fabricSDS = new ShapefileDataStore(discreteFile.toURI().toURL());
 		SimpleFeatureCollection fabricType = fabricSDS.getFeatureSource().getFeatures();
 
@@ -203,7 +234,7 @@ public class RasterAnalyse {
 	 * 
 	 */
 	public static ArrayList<File> selectWith(String with, ArrayList<File> in) throws IOException {
-		ArrayList<File> listFile = new ArrayList<File>();
+		ArrayList<File> listFile = new ArrayList<File>();	
 		if (in == null) {
 			for (File fil : rootFile.listFiles()) {
 				Pattern ech = Pattern.compile("evalAnal-");
