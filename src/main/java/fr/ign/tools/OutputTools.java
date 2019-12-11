@@ -34,8 +34,8 @@ public class OutputTools {
 
 	public static void main(String[] args) throws IOException, NoSuchAuthorityCodeException, FactoryException, ParseException {
 		vectorizeMupOutput(Rasters.importRaster(new File(
-				"/media/mcolomb/Data_2/resultFinal/testAHP/comparaison/compAHP-Autom-CM20.0-S0.0-GP_915948.0_6677337.0/N5_St_MoyahpS_Moy_seed_42/N5_St_MoyahpS_Moy_seed_42-evalAnal-20.0.tif")),
-				new File("/media/mcolomb/Data_2/resultFinal/testAHP/comparaison/traitements/N5St/N5_StS-lgt.shp"), 20);
+				"/media/mcolomb/Data_2/simu/MupCityDepot/CDense/variantMvGrid1/CDense--MouvGrid3--N6_St_Moy_ahpE_seed_42-evalAnal-20.0.tif")),
+				new File("/media/mcolomb/Data_2/simu/MupCityDepot/CDense/variantMvGrid1/CDense--MouvGrid3--N6_St_Moy_ahpE_seed_42-evalAnal-20.0.shp"), 20);
 	}
 	
 	public static File getMupFileFromFolder(File mupFolder, String echelle) throws FileNotFoundException {

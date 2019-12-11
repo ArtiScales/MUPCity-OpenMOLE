@@ -6,14 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.NavigableSet;
 
-import org.apache.commons.lang3.tuple.MutablePair;
-
-//import javax.media.jai.JAI;
-//import javax.media.jai.OperationRegistry;
-
 import org.thema.mupcity.AHP;
-import org.thema.mupcity.Project;
 import org.thema.mupcity.scenario.ScenarioAuto;
+import org.thema.mupcity.Project;
+
 
 import fr.ign.tools.OutputTools;
 import fr.ign.tools.ScenarTools;

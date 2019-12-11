@@ -9,8 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.plaf.synth.SynthScrollBarUI;
-
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.geotools.data.DefaultTransaction;
 import org.geotools.data.FeatureWriter;
@@ -24,15 +22,13 @@ import org.geotools.data.store.ContentFeatureCollection;
 import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
+import org.locationtech.jts.geom.Geometry;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.thema.common.swing.TaskMonitor;
-import org.thema.mupcity.Project;
 import org.thema.mupcity.rule.OriginDistance;
+import org.thema.mupcity.Project;
 
-import com.vividsolutions.jts.geom.Geometry;
-
-import fr.ign.cogit.GTFunctions.Vectors;
 import fr.ign.tools.DataSetSelec;
 
 public class ProjectCreationDecompTask {

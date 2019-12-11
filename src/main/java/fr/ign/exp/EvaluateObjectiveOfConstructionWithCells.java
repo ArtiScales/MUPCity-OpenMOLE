@@ -2,8 +2,6 @@ package fr.ign.exp;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.simple.SimpleFeatureIterator;
@@ -55,14 +53,18 @@ public class EvaluateObjectiveOfConstructionWithCells {
 				SimpleFeature feat = comIt.next();
 				int objectif = (int) feat.getAttribute("objLgt");
 				String insee = (String) feat.getAttribute("DEPCOM");
-				// if we want to avoid a city, we continue (for example, if the city is too big
-				// and crash the stats
+				int ponderation = 1;
+				if (feat.getAttributes().contains("pond")) {
+					ponderation = (int) feat.getAttribute("pond");
+				}
+						
+				// if we want to avoid a city, we continue (for example, if the city is too big and corrupt the stats
 				if (insee.equals(zipToAvoid)) {
 					continue;
 				}
 				// get the number of simulated cells in that city
 				int nbCell = RasterAnalyse.getCellsInCity(mupOutputFile, feat);
-				weight = weight + Math.abs(objectif - nbCell);
+				weight = weight + ponderation * Math.abs(objectif - nbCell);
 			}
 		} catch (Exception problem) {
 			problem.printStackTrace();

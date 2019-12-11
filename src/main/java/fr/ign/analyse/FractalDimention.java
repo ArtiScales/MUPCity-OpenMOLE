@@ -30,7 +30,7 @@ import org.thema.fracgis.sampling.DefaultSampling;
 import org.thema.fracgis.sampling.Sampling.Sequence;
 import org.thema.process.Rasterizer;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 import fr.ign.cogit.GTFunctions.Csv;
 import fr.ign.cogit.GTFunctions.Rasters;
