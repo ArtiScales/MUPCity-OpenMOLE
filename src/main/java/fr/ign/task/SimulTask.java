@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.NavigableSet;
 
-//import javax.media.jai.OperationRegistry;
-
 import org.thema.mupcity.AHP;
 import org.thema.mupcity.Project;
 import org.thema.mupcity.scenario.ScenarioAuto;

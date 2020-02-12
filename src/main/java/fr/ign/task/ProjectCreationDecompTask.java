@@ -26,8 +26,8 @@ import org.locationtech.jts.geom.Geometry;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.thema.common.swing.TaskMonitor;
-import org.thema.mupcity.Project;
 import org.thema.mupcity.rule.OriginDistance;
+import org.thema.mupcity.Project;
 
 import fr.ign.tools.DataSetSelec;
 

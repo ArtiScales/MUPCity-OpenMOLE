@@ -10,7 +10,6 @@ import fr.ign.task.AnalyseTask;
 import fr.ign.task.ProjectCreationDecompTask;
 import fr.ign.task.SimulTask;
 import fr.ign.tools.DataSetSelec;
-import fr.ign.tools.OutputTools;
 import fr.ign.tools.ScenarTools;
 
 public class LAEAproj {

@@ -24,6 +24,8 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.operation.TransformException;
 
+import org.locationtech.jts.geom.Geometry;
+
 public class BougeData {
 
 	//TODO cette classe ne marche pas - réparer si l'on veut lancer des tests automatiques et ne pas tout faire à la main

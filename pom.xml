@@ -3,14 +3,14 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>fr.ign</groupId>
 	<artifactId>mupcity-openMole</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.0.3-SNAPSHOT</version>
 	<description>Projet maven type pour produire un jar qui peut être lancé sur OpenMole</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<mupcity.version>1.2.3-ORIGINAL</mupcity.version>
 		<geotools.version>21.0</geotools.version>
-    		<geoxygene.version>1.10-SNAPSHOT</geoxygene.version>
-	<!--	<fracgis.version>0.7-ORIGINAL</fracgis.version>-->
+             	<geoxygene.version>1.10-SNAPSHOT</geoxygene.version>
+		<fracgis.version>0.7.1-ORIGINAL</fracgis.version> 
 		<artiscales.tools.version>0.2-SNAPSHOT</artiscales.tools.version>
 	</properties>
 	<build>
