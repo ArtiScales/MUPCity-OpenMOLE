@@ -16,21 +16,13 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.locationtech.jts.geom.Geometry;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.thema.common.JTS;
-import org.thema.common.swing.TaskMonitor;
 import org.thema.data.IOImage;
 import org.thema.data.feature.DefaultFeature;
 import org.thema.data.feature.DefaultFeatureCoverage;
 import org.thema.data.feature.Feature;
-import org.thema.fracgis.estimation.Estimation;
-import org.thema.fracgis.estimation.EstimationFactory;
-import org.thema.fracgis.method.raster.mono.CorrelationRasterMethod;
-import org.thema.fracgis.sampling.DefaultSampling;
-import org.thema.fracgis.sampling.Sampling.Sequence;
 import org.thema.process.Rasterizer;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 import fr.ign.cogit.GTFunctions.Csv;
 import fr.ign.cogit.GTFunctions.Rasters;
@@ -199,25 +191,27 @@ public class FractalDimention {
 
 	public static Hashtable<String, Double> calculFracCor(GridCoverage2D toTestRaster, File fileOut)
 			throws IOException {
-		Rasters.writeGeotiff(new File(fileOut, "tmp"), toTestRaster);
-		DefaultSampling dS = new DefaultSampling(22, 3000, 1.5, Sequence.GEOM);
-		CorrelationRasterMethod correlation = new CorrelationRasterMethod("test", dS, toTestRaster.getRenderedImage(),
-				JTS.rectToEnv(toTestRaster.getEnvelope2D()));
-
-		correlation.execute(new TaskMonitor.EmptyMonitor(), true);
-
-		Estimation estim = new EstimationFactory(correlation).getDefaultEstimation();
-
-		Hashtable<String, Double> values = new Hashtable<String, Double>();
-		values.put("dimension de corrélation", estim.getDimension());
-		values.put("R2", estim.getR2());
-		values.put("BootStrap Confidence Interval Low", estim.getBootStrapConfidenceInterval()[0]);
-		values.put("BootStrap Confidence Interval High", estim.getBootStrapConfidenceInterval()[1]);
-		System.out.println("dimension de corrélation " + values.get("dimension de corrélation"));
-		System.out.println("R2 " + values.get("R2"));
-		System.out.println("BootStrap Confidence Interval Low : " + values.get("BootStrap Confidence Interval Low"));
-		System.out.println("BootStrap Confidence Interval High : " + values.get("BootStrap Confidence Interval High"));
-		return values;
+//		Rasters.writeGeotiff(new File(fileOut, "tmp"), toTestRaster);
+//		DefaultSampling dS = new DefaultSampling(22, 3000, 1.5, Sequence.GEOM);
+//		CorrelationRasterMethod correlation = new CorrelationRasterMethod("test", dS, toTestRaster.getRenderedImage(),
+//				JTS.rectToEnv(toTestRaster.getEnvelope2D()));
+//
+//		correlation.execute(new TaskMonitor.EmptyMonitor(), true);
+//
+//		Estimation estim = new EstimationFactory(correlation).getDefaultEstimation();
+//
+//		Hashtable<String, Double> values = new Hashtable<String, Double>();
+//		values.put("dimension de corrélation", estim.getDimension());
+//		values.put("R2", estim.getR2());
+//		values.put("BootStrap Confidence Interval Low", estim.getBootStrapConfidenceInterval()[0]);
+//		values.put("BootStrap Confidence Interval High", estim.getBootStrapConfidenceInterval()[1]);
+//		System.out.println("dimension de corrélation " + values.get("dimension de corrélation"));
+//		System.out.println("R2 " + values.get("R2"));
+//		System.out.println("BootStrap Confidence Interval Low : " + values.get("BootStrap Confidence Interval Low"));
+//		System.out.println("BootStrap Confidence Interval High : " + values.get("BootStrap Confidence Interval High"));
+//		return values;
+		System.out.println("fractal calculation desactivated");
+		return null;
 	}
 
 	public static File rasterize(File batiFile, File fileOut, int resolution)

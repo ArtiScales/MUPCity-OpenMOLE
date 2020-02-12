@@ -8,7 +8,6 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.geotools.data.DataUtilities;
 import org.geotools.data.DefaultTransaction;
 import org.geotools.data.Transaction;
 import org.geotools.data.shapefile.ShapefileDataStore;
@@ -16,24 +15,14 @@ import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.data.simple.SimpleFeatureStore;
-import org.geotools.data.store.ContentDataStore;
 import org.geotools.data.store.ContentFeatureCollection;
-import org.geotools.factory.CommonFactoryFinder;
-import org.geotools.factory.GeoTools;
 import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
+import org.locationtech.jts.geom.Geometry;
 import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.filter.Filter;
-import org.opengis.filter.FilterFactory;
-import org.opengis.filter.FilterFactory2;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.operation.TransformException;
-
-import com.vividsolutions.jts.geom.Geometry;
-
-import fr.ign.task.AnalyseTask;
 
 public class BougeData {
 

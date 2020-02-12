@@ -8,9 +8,10 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<mupcity.version>1.2.3-ORIGINAL</mupcity.version>
-		<geotools.version>18.4</geotools.version>
-		<fracgis.version>0.7-ORIGINAL</fracgis.version>
-		<artiscales.tools.version>0.1-SNAPSHOT</artiscales.tools.version>
+		<geotools.version>21.0</geotools.version>
+    		<geoxygene.version>1.10-SNAPSHOT</geoxygene.version>
+	<!--	<fracgis.version>0.7-ORIGINAL</fracgis.version>-->
+		<artiscales.tools.version>0.2-SNAPSHOT</artiscales.tools.version>
 	</properties>
 	<build>
 		<plugins>
@@ -128,29 +129,6 @@
                 </exclusion>
             </exclusions>
 		</dependency>
-        <dependency>
-			<groupId>org.thema</groupId>
-			<artifactId>fracgis</artifactId>
-			<version>${fracgis.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.geotools</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-				<exclusion>
-					<groupId>org.geotools</groupId>
-					<artifactId>gt-shapefile</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.geotools</groupId>
-					<artifactId>gt-data</artifactId>
-				</exclusion>
-                <exclusion>
-                    <groupId>com.vividsolutions</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-		</dependency>
 		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-grid</artifactId>
@@ -212,76 +190,27 @@
 		<artifactId>gt-geotiff</artifactId>
 		<version>${geotools.version}</version>
 	      </dependency>-->
-		<dependency>
-			<groupId>org.jdom</groupId>
-			<artifactId>jdom</artifactId>
-			<version>1.1.3</version>
-		</dependency>
+
 		<dependency>
 			<groupId>fr.ign.cogit</groupId>
-			<artifactId>simplu3d-rules</artifactId>
-			<version>1.2-SNAPSHOT</version>
-			<exclusions>
-				<!-- <exclusion> <groupId>fr.ign.cogit</groupId> <artifactId>geoxygene-util</artifactId> 
-					</exclusion> -->
-				<exclusion>
-					<groupId>jama</groupId>
-					<artifactId>jama</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.sun.xml.bind</groupId>
-					<artifactId>jaxb-xjc</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.xml.bind</groupId>
-					<artifactId>jaxb-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.geotools</groupId>
-					<artifactId>gt-jdbc</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.geotools.jdbc</groupId>
-					<artifactId>gt-jdbc-postgis</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.geotools</groupId>
-					<artifactId>gt-cql</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.geotools.xsd</groupId>
-					<artifactId>gt-xsd-filter</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.geotools.xsd</groupId>
-					<artifactId>gt-xsd-core</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.geotools.xsd</groupId>
-					<artifactId>gt-xsd-gml3</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.geotools</groupId>
-					<artifactId>gt-xml</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.geotools.xsd</groupId>
-					<artifactId>gt-xsd-gml2</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.geotools.xsd</groupId>
-					<artifactId>gt-xsd-wfs</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.geotools.xsd</groupId>
-					<artifactId>gt-xsd-fes</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.geotools.xsd</groupId>
-					<artifactId>gt-xsd-ows</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+			<artifactId>geoxygene-contrib</artifactId>
+			<version>${geoxygene.version}</version>
+	    	</dependency>
+		<dependency>
+			<groupId>fr.ign.cogit</groupId>
+			<artifactId>geoxygene-api</artifactId>
+			<version>${geoxygene.version}</version>
+	    	</dependency>
+		<dependency>
+			<groupId>fr.ign.cogit</groupId>
+			<artifactId>geoxygene-feature</artifactId>
+			<version>${geoxygene.version}</version>
+	    	</dependency>
+		<dependency>
+			<groupId>fr.ign.cogit</groupId>
+			<artifactId>geoxygene-util</artifactId>
+			<version>${geoxygene.version}</version>
+	    	</dependency>
 	</dependencies>
 	<repositories>
 	<!-- 

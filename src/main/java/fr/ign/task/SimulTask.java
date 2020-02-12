@@ -6,9 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.NavigableSet;
 
-import org.apache.commons.lang3.tuple.MutablePair;
-
-//import javax.media.jai.JAI;
 //import javax.media.jai.OperationRegistry;
 
 import org.thema.mupcity.AHP;
