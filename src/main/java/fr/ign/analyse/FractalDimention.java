@@ -24,11 +24,10 @@ import org.thema.data.feature.DefaultFeatureCoverage;
 import org.thema.data.feature.Feature;
 import org.thema.process.Rasterizer;
 
-import org.locationtech.jts.geom.Geometry;
-
 import fr.ign.cogit.GTFunctions.Csv;
 import fr.ign.cogit.GTFunctions.Rasters;
 import fr.ign.tools.OutputTools;
+
 
 public class FractalDimention {
 	public static void main(String[] args) throws Exception {
