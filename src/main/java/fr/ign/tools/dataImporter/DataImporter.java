@@ -1,6 +1,12 @@
 package fr.ign.tools.dataImporter;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+
+import org.locationtech.jts.io.ParseException;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.NoSuchAuthorityCodeException;
 
 public class DataImporter {
 
@@ -24,8 +30,6 @@ public class DataImporter {
 	public static void main(String[] args) throws Exception {
 
 		File rootFolder = new File("/home/thema/donnees/rootFileType/");
-		// emprise File
-//		empriseFile = createEmpriseFile(rootFolder, new File(rootFolder, "dataIn/admin.csv"));
 
 		Integer[] listDept = { 25, 70, 39 };
 
@@ -33,8 +37,10 @@ public class DataImporter {
 			multipleDepartment = true;
 		}
 		setUsualFolders(rootFolder);
-
-		Prepare.sortAmenities();
+		mainSetData();;
+		
+		
+//		Prepare.sortAmenities();
 
 //		String[] dbInfo = { "jdbc:postgresql://localhost:5432/sirene", "postgres", "postgres" };
 //		
@@ -44,13 +50,14 @@ public class DataImporter {
 
 	}
 
-	private static void setUsualFolders(File rootFolder) {
+	private static void setUsualFolders(File rootFolder) throws MalformedURLException, NoSuchAuthorityCodeException, IOException, ParseException, FactoryException {
 		File folderIn = new File(rootFolder, "dataIn");
 		File folderOut = new File(rootFolder, "dataOut");
 		Prepare.setFolderIn(folderIn);
 		Prepare.setFolderOut(folderOut);
+		new File(folderOut, "NU").mkdirs();
 		Prepare.setTmpFolder(new File(rootFolder, "tmp"));
-		new File(rootFolder, "tmp").mkdir();
+		new File(rootFolder, "tmp").mkdirs();
 		Prepare.setBuildingFolder(new File(folderIn, "build"));
 		Prepare.setRoadFolder(new File(folderIn, "road"));
 		Prepare.setAmenityFolder(new File(folderIn, "amenity"));
@@ -61,13 +68,12 @@ public class DataImporter {
 		Prepare.setHydroFolder(new File(folderIn, "hydro"));
 		Prepare.setEmpriseFile(new File(folderIn,"emprise.shp"));
 		Prepare.setMultipleDepartment(multipleDepartment);
-		
 	}
 
-	public static void mainSetData(Integer[] listDep, String[] dbInfo) throws Exception {
+	public static void mainSetData() throws Exception {
 
 		// Bati
-		Prepare.prepareBuildBDTopo12();
+//		Prepare.prepareBuild();
 
 		// Road
 		Prepare.prepareRoad();
@@ -86,7 +92,7 @@ public class DataImporter {
 
 		// IN CASE OF GEOCODED SIRENE POINTS (you can find french ones here :
 		// http://data.cquest.org/geo_sirene/v2019/last/dep/)
-		Prepare.sortAmenities();
+//		Prepare.sortAmenities();
 		// Train
 		Prepare.prepareTrain();
 		// Zones Non Urbanisables

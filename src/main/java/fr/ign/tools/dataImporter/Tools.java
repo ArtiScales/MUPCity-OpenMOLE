@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -87,7 +88,7 @@ public class Tools {
 			if (folderDeptIn.isDirectory()) {
 				for (File shapeFile : folderDeptIn.listFiles()) {
 					if (shapeFile.toString().toLowerCase().endsWith(".shp")) {
-						String name = shapeFile.getName().toLowerCase().replace(".shp", "");
+						String name = shapeFile.getName().replace(".shp", "").replace(".SHP", "");
 						List<File> tmpList = lists.containsKey(name) ? lists.get(name) : new ArrayList<File>();
 						tmpList.add(shapeFile);
 						lists.put(name, tmpList);
@@ -161,10 +162,12 @@ public class Tools {
 	 */
 	public static File createLeisureAccess(File vegetFile, File routeFile, File cheminFile) throws Exception {
 		// Minimal area for a vegetation feature to be considered as an loisir resort is a half of an hectare
-		int minArea = 10000;
+		int minArea = 10000;	
 		ShapefileDataStore vegetSDS = new ShapefileDataStore(vegetFile.toURI().toURL());
-		//TODO set charset (must be something like that?)
-//		vegetSDS.setCharset();
+		//TODO set charset (verify if it's ok?)
+		System.out.println("createLeisureAccess charset tests"+vegetSDS.getCharset());
+		
+		vegetSDS.setCharset(Charset.forName("UTF-8"));
 		SimpleFeatureCollection veget = vegetSDS.getFeatureSource().getFeatures();
 		ShapefileDataStore routeSDS = new ShapefileDataStore(routeFile.toURI().toURL());
 		SimpleFeatureCollection route = routeSDS.getFeatureSource().getFeatures();
@@ -288,53 +291,45 @@ public class Tools {
 	
 	public static File setSpeed(File fileIn, File fileOut) throws Exception {
 		ShapefileDataStore routesSDS = new ShapefileDataStore(fileIn.toURI().toURL());
-		SimpleFeatureCollection routes = routesSDS.getFeatureSource().getFeatures();
+		routesSDS.setCharset(Charset.forName("UTF-8"));
+		SimpleFeatureIterator routeIt = routesSDS.getFeatureSource().getFeatures().features();
 		SimpleFeatureBuilder sfBuilder = Schemas.getMUPRoadSchema();
 		DefaultFeatureCollection roadDFC = new DefaultFeatureCollection();
-		int i = 0;
-		SimpleFeatureIterator routeIt = routes.features();
 		try {
 			while (routeIt.hasNext()) {
 				SimpleFeature feat = routeIt.next();
-				Object[] attr = { 0, 0 };
-				// TODO fix encodage
-				String nature = ((String) feat.getAttribute("NATURE")).replaceAll("Ã©", "e");
-
+				String nature = (String) feat.getAttribute("NATURE");
 				switch (nature) {
 				case "Autoroute":
-					attr[0] = 130;
-					attr[1] = "Autoroute";
+					sfBuilder.set("SPEED", 130); 
 					break;
 				case "Quasi-autoroute":
-					attr[0] = 110;
-					attr[1] = "Quasi-autoroute";
+					sfBuilder.set("SPEED", 110);
 					break;
 				case "Bretelle":
-					attr[0] = 50;
-					attr[1] = "Bretelle";
+					sfBuilder.set("SPEED", 50);
 					break;
-				default:
+				case "Route à 1 chaussée":
+				case "Route à 2 chaussées":
+				case "Rond-point":
 					String classement = (String) feat.getAttribute("CL_ADMIN");
 					if (classement == null || classement.isEmpty()) {
-						classement = ((String) feat.getAttribute("CLASSEMENT")).replaceAll("Ã©", "e");
+						classement = "";
 					}
 					switch (classement) {
 					case "Autre":
-						attr[0] = 40;
-						attr[1] = "Autre";
+					case "":
+						sfBuilder.set("SPEED", 40);
 						break;
 					default:
-						attr[0] = 80;
-						attr[1] = feat.getAttribute("CL_ADMIN");
+						sfBuilder.set("SPEED",  80);
 					}
+				default:
+					continue;
 				}
-				// la ligne ci dessous devrait logiquement être dans la méthode prepareRaod, mais la flemme de recharger l'obj gt pour trier les attributs ; c'est bien ici aussi.
-				if (!(nature.equals("Route empierrÃ©e"))) {
-					sfBuilder.add((Geometry) feat.getDefaultGeometry());
-					SimpleFeature feature = sfBuilder.buildFeature(String.valueOf(i), attr);
-					roadDFC.add(feature);
-					i = i + 1;
-				}
+				sfBuilder.add((Geometry) feat.getDefaultGeometry());
+				sfBuilder.set("NATURE", nature);
+				roadDFC.add(sfBuilder.buildFeature(null));
 			}
 		} catch (Exception problem) {
 			problem.printStackTrace();
