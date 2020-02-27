@@ -26,7 +26,7 @@ import fr.ign.analyse.RasterMergeResult;
 import fr.ign.analyse.obj.Analyse;
 import fr.ign.analyse.obj.ProjetAnalyse;
 import fr.ign.analyse.obj.ScenarAnalyse;
-import fr.ign.cogit.GTFunctions.Csv;
+import fr.ign.cogit.geoToolsFunctions.Csv;
 
 public class AnalyseTask {
 

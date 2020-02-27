@@ -29,17 +29,13 @@ public class DataImporter {
 	 */
 	public static void main(String[] args) throws Exception {
 
-		File rootFolder = new File("/home/thema/donnees/rootFileType/");
-
+		File rootFolder = new File("/home/ubuntu/donnees/rootFileType/");
 		Integer[] listDept = { 25, 70, 39 };
-
 		if (listDept.length > 1) {
 			multipleDepartment = true;
 		}
 		setUsualFolders(rootFolder);
 		mainSetData();;
-		
-		
 //		Prepare.sortAmenities();
 
 //		String[] dbInfo = { "jdbc:postgresql://localhost:5432/sirene", "postgres", "postgres" };

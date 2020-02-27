@@ -24,8 +24,8 @@ import org.thema.data.feature.DefaultFeatureCoverage;
 import org.thema.data.feature.Feature;
 import org.thema.process.Rasterizer;
 
-import fr.ign.cogit.GTFunctions.Csv;
-import fr.ign.cogit.GTFunctions.Rasters;
+import fr.ign.cogit.geoToolsFunctions.Csv;
+import fr.ign.cogit.geoToolsFunctions.Rasters;
 import fr.ign.tools.OutputTools;
 
 

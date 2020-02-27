@@ -29,10 +29,11 @@ import org.opengis.referencing.operation.TransformException;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
-import fr.ign.cogit.GTFunctions.Attribute;
-import fr.ign.cogit.GTFunctions.Csv;
-import fr.ign.cogit.GTFunctions.Schemas;
-import fr.ign.cogit.GTFunctions.Vectors;
+import fr.ign.cogit.geoToolsFunctions.Attribute;
+import fr.ign.cogit.geoToolsFunctions.Csv;
+import fr.ign.cogit.geoToolsFunctions.Schemas;
+import fr.ign.cogit.geoToolsFunctions.vectors.Collec;
+import fr.ign.cogit.geoToolsFunctions.vectors.Shp;
 
 public class Prepare {
 
@@ -144,12 +145,12 @@ public class Prepare {
 		for (String shp : getShpNamesFromBDTopo("building", bdTopoVersion)) {
 			listShpFinal.add(new File (buildingFolder, shp));
 		}
-		Vectors.mergeVectFiles(listShpFinal, new File(folderOut, "building.shp"), empriseFile, true);
+		Shp.mergeVectFiles(listShpFinal, new File(folderOut, "building.shp"), empriseFile, true);
 		// create the Non-urbanizable shapefile
 		for (String shp : getShpNamesFromBDTopo("buildingNU", bdTopoVersion)) {
 			listShpFinal.add(new File (buildingFolder, shp));
 		}
-		Vectors.mergeVectFiles(listShpFinal, new File(folderOut, "NU/artificial.shp"), new File(""), false);
+		Shp.mergeVectFiles(listShpFinal, new File(folderOut, "NU/artificial.shp"), new File(""), false);
 	}
 
 	public static void prepareHydrography() throws Exception {
@@ -160,7 +161,7 @@ public class Prepare {
 		for (String shp : getShpNamesFromBDTopo("hydro", bdTopoVersion)) {
 			listShpNu.add(new File(hydroFolder, shp));
 		}
-		Vectors.mergeVectFiles(listShpNu, new File(folderOut, "NU/hydro.shp"), new File(""), false);
+		Shp.mergeVectFiles(listShpNu, new File(folderOut, "NU/hydro.shp"), new File(""), false);
 	}
 
 	public static void prepareVege() throws Exception {
@@ -208,7 +209,7 @@ public class Prepare {
 			});
 		trainTriSDS.dispose();
 		}
-		Vectors.exportSFC(bufferTrain.collection(), new File(folderOut, "NU/bufferTrain.shp"));
+		Collec.exportSFC(bufferTrain.collection(), new File(folderOut, "NU/bufferTrain.shp"));
 	}
 
 	public static void prepareRoad() throws Exception {
@@ -220,8 +221,8 @@ public class Prepare {
 		for (String shp : getShpNamesFromBDTopo("road", bdTopoVersion)) {
 			listShp.add(new File(roadFolder, shp));
 		}
-	
-		File roadMerged = Vectors.mergeVectFiles(listShp, new File(tmpFolder, "road.shp"), empriseFile, true);
+
+		File roadMerged = Shp.mergeVectFiles(listShp, new File(tmpFolder, "road.shp"), empriseFile, true);
 		File tmpTmpRoadFile = new File(tmpFolder, "roadSpeed.shp");
 		File finalRoadFile = new File(folderOut, "road.shp");
 		Tools.setSpeed(roadMerged, tmpTmpRoadFile);
@@ -236,40 +237,34 @@ public class Prepare {
 		DefaultFeatureCollection bufferRouteExtra = new DefaultFeatureCollection();
 
 		SimpleFeatureBuilder sfBuilder = Schemas.getBasicSchema("routeBuffer");
-//		Arrays.stream(routesSFC.toArray(new SimpleFeature[0])).forEach(feat -> {
 		SimpleFeatureIterator featIt = routesSFC.features();
 		try {
 			while (featIt.hasNext()) {
 				SimpleFeature feat = featIt.next();
-				String largeur = (String) feat.getAttribute("LARGEUR");
-				if (largeur == null || largeur.equals("0")) {
+				String largeur = String.valueOf(feat.getAttribute("LARGEUR"));
+				if (largeur == null || largeur.equals("0") || largeur.equals("") || largeur.equals("null")) {
 					continue;
 				}
-			System.out.println(feat);
-
-			Geometry newFeat = ((Geometry) feat.getDefaultGeometry()).buffer((Double.parseDouble(largeur)));
-			String nature = ((String) feat.getAttribute("NATURE")).toLowerCase();
-			System.out.println(newFeat);
-			System.out.println(nature);
-			if (nature.equals("autoroute")) {
-				newFeat = ((Geometry) feat.getDefaultGeometry()).buffer(100);
+				Geometry newFeat = ((Geometry) feat.getDefaultGeometry()).buffer((Double.parseDouble(largeur)));
+				String nature = ((String) feat.getAttribute("NATURE")).toLowerCase();
+				sfBuilder.add(newFeat);
+				bufferRoute.add(sfBuilder.buildFeature(null));
+				if (nature.equals("autoroute")) {
+					newFeat = ((Geometry) feat.getDefaultGeometry()).buffer(100);
+				}
+				if (nature.equals("bretelle") || nature.equals("route à 2 chaussées") || nature.equals("quasi-autoroute")) {
+					newFeat = ((Geometry) feat.getDefaultGeometry()).buffer(75);
+				}
+				sfBuilder.set("the_geom", newFeat);
+				bufferRouteExtra.add(sfBuilder.buildFeature(null));
 			}
-			if (nature.equals("bretelle") || nature.equals("route à 2 chaussées")
-					|| nature.equals("quasi-autoroute")) {
-				newFeat = ((Geometry) feat.getDefaultGeometry()).buffer(75);
-			}
-			sfBuilder.add(newFeat);
-			bufferRoute.add(sfBuilder.buildFeature(null));
-			}
-			} catch (Exception problem) {
-				problem.printStackTrace();
-			} finally {
-				featIt.close();
-			}
-
-//		});
-		Vectors.exportSFC(bufferRoute.collection(), new File(folderOut, "NU/bufferRoad.shp"));
-		Vectors.exportSFC(bufferRouteExtra.collection(), new File(folderOut, "NU/bufferExtraRoad.shp"));
+		} catch (Exception problem) {
+			problem.printStackTrace();
+		} finally {
+			featIt.close();
+		}
+		Collec.exportSFC(bufferRoute.collection(), new File(folderOut, "NU/bufferRoad.shp"));
+		Collec.exportSFC(bufferRouteExtra.collection(), new File(folderOut, "NU/bufferExtraRoad.shp"));
 		routesSDS.dispose();
 	}
 
@@ -294,8 +289,8 @@ public class Prepare {
 			}
 		}
 		File nUUnKut = new File(rootFileNU.getParentFile(), "nonUrbaUncut.shp");
-		Vectors.mergeVectFiles(listFullNU, nUUnKut, null, false);
-		Vectors.discretizeShp(nUUnKut, new File(rootFileNU.getParentFile(), "nonUrba.shp"), "nonUrba");
+		Shp.mergeVectFiles(listFullNU, nUUnKut, null, false);
+		Shp.discretizeShp(nUUnKut, new File(rootFileNU.getParentFile(), "nonUrba.shp"), "nonUrba",500);
 	}
 
 	public static void makePhysicNU() throws Exception {
@@ -306,8 +301,8 @@ public class Prepare {
 		listFullNU.add(new File(rootFileNU, "artificial.shp"));
 		listFullNU.add(new File(rootFileNU, "bufferTrain.shp"));
 		File nUUnKut = new File(rootFileNU.getParentFile(), "nonUrbaPhyUncut.shp");
-		Vectors.mergeVectFiles(listFullNU, nUUnKut, null, false);
-		Vectors.discretizeShp(nUUnKut, new File(rootFileNU.getParentFile(), "nonUrbaPhy.shp"), "nonUrbaPhy");
+		Shp.mergeVectFiles(listFullNU, nUUnKut, null, false);
+		Shp.discretizeShp(nUUnKut, new File(rootFileNU.getParentFile(), "nonUrbaPhy.shp"), "nonUrbaPhy",500);
 	}
 
 	public static void setMultipleDepartment(boolean multipleDepartment) {
@@ -631,7 +626,7 @@ public class Prepare {
 		}
 		listServices.add(new File(rootFolder, "tmp/BPE-Services.shp"));
 
-		Vectors.mergeVectFiles(listServices, pointServices, empriseFile, true);
+		Shp.mergeVectFiles(listServices, pointServices, empriseFile, true);
 
 		// merge multiple loisirs sources
 		System.out.println("merge leisure");
@@ -647,7 +642,7 @@ public class Prepare {
 		}
 		listLoisirs.add(Tools.createLeisureAccess(new File(rootFolder, "dataIn/vege/ZONE_VEGETATION.SHP"),
 				new File(rootFolder, "dataIn/route/CHEMIN.SHP"), new File(rootFolder, "dataOut/routeAutom.shp")));
-		Vectors.mergeVectFiles(listLoisirs, pointLoisirs, empriseFile, true);
+		Shp.mergeVectFiles(listLoisirs, pointLoisirs, empriseFile, true);
 	}
 
 }

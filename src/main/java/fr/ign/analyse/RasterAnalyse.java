@@ -41,20 +41,12 @@ import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Envelope;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.io.ParseException;
-import org.locationtech.jts.io.WKTReader;
-
 import au.com.bytecode.opencsv.CSVReader;
 import fr.ign.analyse.obj.Analyse;
 import fr.ign.analyse.obj.ScenarAnalyse;
 import fr.ign.analyse.obj.ScenarAnalyseFile;
-import fr.ign.cogit.GTFunctions.Csv;
-import fr.ign.cogit.GTFunctions.Rasters;
+import fr.ign.cogit.geoToolsFunctions.Csv;
+import fr.ign.cogit.geoToolsFunctions.Rasters;
 import fr.ign.tools.ScenarTools;
 import fr.ign.tools.StatTab;
 
@@ -288,6 +280,7 @@ public class RasterAnalyse {
 		ArrayList<Float> cellInEval = new ArrayList<Float>();
 		ArrayList<Float> cellOutEval = new ArrayList<Float>();
 		// TODO it's a weird line
+		@SuppressWarnings("unchecked")
 		Hashtable<DirectPosition2D, Float> doubleSvgCellEval20 = (Hashtable<DirectPosition2D, Float>) SvgCellEval20.clone();
 
 		for (DirectPosition2D coord : cellRepetParent.keySet()) {
@@ -308,8 +301,6 @@ public class RasterAnalyse {
 			cellOut = cellOut + 1;
 			cellOutEval.add(doubleSvgCellEval20.get(cell));
 		}
-
-		int cellOutTheorie = cellTotal - cellIn;
 
 		// eval moyenne des cellules contenues
 		float sumInVal = 0;

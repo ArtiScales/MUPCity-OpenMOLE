@@ -683,7 +683,7 @@ public class Initialize {
 //		}
 //	}
 
-	private static void printRegistry(IIORegistry registry) {
+	public static void printRegistry(IIORegistry registry) {
 		Iterator<Class<?>> it = registry.getCategories();
 		while (it.hasNext()) {
 			Class<?> category = it.next();

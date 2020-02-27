@@ -34,10 +34,8 @@ public class RasterMergeResult {
 	public static RasterMergeResult merge(List<RasterMergeResult> list) {
 		RasterMergeResult finale = new RasterMergeResult();
 
-		Hashtable<DirectPosition2D, Integer> cellRepetFinal = new Hashtable<DirectPosition2D, Integer>();
 		Hashtable<DirectPosition2D, Float> cellEvalFinal = new Hashtable<DirectPosition2D, Float>();
 		Hashtable<DirectPosition2D, ArrayList<Float>> cellEvalsFinal = new Hashtable<DirectPosition2D, ArrayList<Float>>();
-		DescriptiveStatistics histoDSFinal = new DescriptiveStatistics();
 
 		for (RasterMergeResult single : list) {
 			Hashtable<DirectPosition2D, ArrayList<Float>> cellevalsSingle = single.getCellEvals();

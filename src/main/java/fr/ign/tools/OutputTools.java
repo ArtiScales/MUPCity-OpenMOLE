@@ -17,18 +17,17 @@ import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.grid.Grids;
 import org.geotools.referencing.CRS;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.io.ParseException;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.io.ParseException;
-
 import au.com.bytecode.opencsv.CSVReader;
-import fr.ign.cogit.GTFunctions.Csv;
-import fr.ign.cogit.GTFunctions.Rasters;
-import fr.ign.cogit.GTFunctions.Vectors;
+import fr.ign.cogit.geoToolsFunctions.Csv;
+import fr.ign.cogit.geoToolsFunctions.Rasters;
+import fr.ign.cogit.geoToolsFunctions.vectors.Collec;
 
 public class OutputTools {
 
@@ -97,7 +96,7 @@ public class OutputTools {
 		} finally {
 			featIt.close();
 		}
-		Vectors.exportSFC(output.collection(), outFile);
+		Collec.exportSFC(output.collection(), outFile);
 		return outFile;
 	}
 

@@ -12,7 +12,7 @@ import org.opengis.parameter.InvalidParameterValueException;
 import org.opengis.parameter.ParameterNotFoundException;
 import org.opengis.referencing.operation.TransformException;
 
-import fr.ign.cogit.GTFunctions.Rasters;
+import fr.ign.cogit.geoToolsFunctions.Rasters;
 import fr.ign.task.AnalyseTask;
 import fr.ign.task.ProjectCreationDecompTask;
 import fr.ign.task.SimulTask;
@@ -85,7 +85,7 @@ public class minCellSize {
 
 			MutablePair<String, File> projectFile = ProjectCreationDecompTask.run(name, folderIn, folderOut, xmin, ymin, width, height, shiftX, shiftY, dataHT, maxSize, minSize,
 					buildDensityThreshold, false);
-			File fIn = new File("/media/mcolomb/Data_2/resultFinal/sens/cellSize");
+//			File fIn = new File("/media/mcolomb/Data_2/resultFinal/sens/cellSize");
 			for (int i = 0; i <= 3; i++) {
 				int nMax = 4;
 				boolean strict = true;

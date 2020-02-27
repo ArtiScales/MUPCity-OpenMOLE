@@ -17,8 +17,8 @@ public class CompositeTask {
 		String name = "newDimFract";
 		File folderIn = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu");
 		File folderOut = new File("/home/mcolomb/lastDimFract/out/");
-		File discreteFile = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu/discreteFile.shp");
-		File buildFile = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu/batimentPro.shp");
+//		File discreteFile = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu/discreteFile.shp");
+//		File buildFile = new File("/media/mcolomb/Data_2/dataOpenMole/stabilite/dataManu/batimentPro.shp");
 		double width = 26590;
 		double height = 26590;
 		// double width = 200;
@@ -33,7 +33,7 @@ public class CompositeTask {
 		double minSize = 20;
 		double maxSize = 14580;
 		// double maxSize = 200;
-		double seuilDensBuild = 0;
+//		double seuilDensBuild = 0;
 
 		HashMap<String, Double> ahpT_Yag = new HashMap<String, Double>();
 		HashMap<String, Double> ahpT_Moy = new HashMap<String, Double>();

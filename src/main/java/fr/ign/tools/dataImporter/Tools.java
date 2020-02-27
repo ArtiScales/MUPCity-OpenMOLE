@@ -35,9 +35,11 @@ import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
 import au.com.bytecode.opencsv.CSVReader;
-import fr.ign.cogit.GTFunctions.Attribute;
-import fr.ign.cogit.GTFunctions.Schemas;
-import fr.ign.cogit.GTFunctions.Vectors;
+import fr.ign.cogit.geoToolsFunctions.Attribute;
+import fr.ign.cogit.geoToolsFunctions.Schemas;
+import fr.ign.cogit.geoToolsFunctions.vectors.Collec;
+import fr.ign.cogit.geoToolsFunctions.vectors.Geom;
+import fr.ign.cogit.geoToolsFunctions.vectors.Shp;
 import fr.ign.cogit.geoxygene.api.feature.IFeature;
 import fr.ign.cogit.geoxygene.api.feature.IFeatureCollection;
 import fr.ign.cogit.geoxygene.contrib.cartetopo.Arc;
@@ -101,7 +103,7 @@ public class Tools {
 			if (listFile.isEmpty()) {
 				continue;
 			}
-			Vectors.mergeVectFiles(listFile, new File(folderIn, key), empriseFile, true);
+			Shp.mergeVectFiles(listFile, new File(folderIn, key), empriseFile, true);
 		}
 	}
 	/**
@@ -135,13 +137,13 @@ public class Tools {
 					villeColl.add(feat);
 		}});}
 		SimpleFeatureBuilder sfBuilder = Schemas.getBasicSchema("emprise");
-		sfBuilder.add(Vectors.unionSFC(villeColl).buffer(3000));
+		sfBuilder.add(Geom.unionSFC(villeColl).buffer(3000));
 		emprise.add(sfBuilder.buildFeature(null));
 
 		listVilleReader.close();
 		geoFlaSDS.dispose();
 
-		return Vectors.exportSFC(emprise.collection(), new File(inFolder, "emprise.shp"));
+		return Collec.exportSFC(emprise.collection(), new File(inFolder, "emprise.shp"));
 	}
 	
 	/**
@@ -223,8 +225,8 @@ public class Tools {
 				cpt = cpt + 1;
 				SimpleFeature featForet = vegetIt.next();
 				// snap of the wanted data
-				SimpleFeatureCollection snapRoute = Vectors.snapDatas(route, ((Geometry) featForet.getDefaultGeometry()).buffer(15));
-				SimpleFeatureCollection snapChemin = Vectors.snapDatas(chemin, ((Geometry) featForet.getDefaultGeometry()).buffer(15));
+				SimpleFeatureCollection snapRoute = Collec.snapDatas(route, ((Geometry) featForet.getDefaultGeometry()).buffer(15));
+				SimpleFeatureCollection snapChemin = Collec.snapDatas(chemin, ((Geometry) featForet.getDefaultGeometry()).buffer(15));
 				SimpleFeatureIterator routeIt = snapRoute.features();
 				try {
 					while (routeIt.hasNext()) {
@@ -266,7 +268,7 @@ public class Tools {
 		cheminSDS.dispose();
 		vegetSDS.dispose();
 
-		return Vectors.exportSFC(loisirColl.collection(), new File(vegetFile.getParentFile().getParentFile().getParentFile(), "tmp/loisir2.shp"));
+		return Collec.exportSFC(loisirColl.collection(), new File(vegetFile.getParentFile().getParentFile().getParentFile(), "tmp/loisir2.shp"));
 	}
 	
 	public static Double[] getCoordFromCSV(String coordType, String row, String row2) {
@@ -337,7 +339,7 @@ public class Tools {
 			routeIt.close();
 		}
 		routesSDS.dispose();
-		return Vectors.exportSFC(roadDFC.collection(), fileOut);
+		return Collec.exportSFC(roadDFC.collection(), fileOut);
 	}
 	
 	public static File createPointFromCsv(File fileIn, File FileOut, File empriseFile, String name)
@@ -437,7 +439,7 @@ public class Tools {
 			i = i + 1;
 		}
 		ptCsv.close();
-		Vectors.exportSFC(coll.collection(), new File("/home/mcolomb/tmp/tmp.shp"));
-		return Vectors.exportSFC(Vectors.cropSFC(coll.collection(), empriseFile), FileOut);
+		Collec.exportSFC(coll.collection(), new File("/home/mcolomb/tmp/tmp.shp"));
+		return Collec.exportSFC(Collec.cropSFC(coll.collection(), empriseFile), FileOut);
 	}
 }

@@ -54,17 +54,11 @@ public class RasterSynth {
 		return nbCell;
 	}
 
-	private static void selectRasterStable(ArrayList<File> listRepliFile) throws IOException {
+	public static void selectRasterStable(ArrayList<File> listRepliFile) throws IOException {
 
 		Hashtable<GridCoordinates2D, Integer> cellRepet = new Hashtable<GridCoordinates2D, Integer>();
 
 		int nbDeScenar = 0;
-
-		double[] histo = new double[listRepliFile.size()];
-		int iter = 0;
-
-		// Object salut = Project.originalBounds;
-		// variables for merged raster
 
 		float[][] imagePixelData = null;
 		float[][] imagePD = null;
