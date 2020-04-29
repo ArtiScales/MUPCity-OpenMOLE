@@ -6,7 +6,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -18,13 +17,16 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.CRS;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
+import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -38,13 +40,20 @@ import fr.ign.cogit.geoToolsFunctions.vectors.Shp;
 public class Prepare {
 
 	static boolean multipleDepartment;
-	static File rootFolder, folderIn, folderOut, tmpFolder, buildingFolder, roadFolder, amenityFolder, adminFile,
-			vegeFolder, trainFolder, NUFolder, hydroFolder, empriseFile;
+	static File rootFolder, folderIn, folderOut, tmpFolder, buildingFolder, transportFolder, amenityFolder, adminFile,
+			vegeFolder, NUFolder, hydroFolder, empriseFile;
 	static String bdTopoVersion = "";
 	
+	/**
+	 * Get the usual names of the shapefiles depending of the BDTopo version
+	 * @param theme Which BDTopo theme is wanted. Must be one of these <ul> <li><i>'building'</i></li>,<li><i>'buildingNU'</i>
+	 * 
+	 * ,<li><i>'hydro'</i><li>,<li><i>''</i><li>,<li><i>''</i><li> </ul>
+	 * @param version
+	 * @return
+	 */
 	public static List<String> getShpNamesFromBDTopo(String theme, String version) {
 		List<String> result = new ArrayList<String>();
-
 		switch (theme) {
 		case "building":
 			switch (version) {
@@ -133,10 +142,10 @@ public class Prepare {
 
 	/**
 	 * Former formalization of bdtopo
+	 * @throws IOException 
 	 * 
-	 * @throws Exception
 	 */
-	public static void prepareBuild() throws Exception {
+	public static void prepareBuild() throws IOException  {
 		if (multipleDepartment) {
 			Tools.mergeMultipleBdTopo(buildingFolder, empriseFile);
 		}
@@ -153,7 +162,7 @@ public class Prepare {
 		Shp.mergeVectFiles(listShpFinal, new File(folderOut, "NU/artificial.shp"), new File(""), false);
 	}
 
-	public static void prepareHydrography() throws Exception {
+	public static void prepareHydrography() throws IOException {
 		if (multipleDepartment) {
 			Tools.mergeMultipleBdTopo(hydroFolder, empriseFile);
 		}
@@ -164,35 +173,33 @@ public class Prepare {
 		Shp.mergeVectFiles(listShpNu, new File(folderOut, "NU/hydro.shp"), new File(""), false);
 	}
 
-	public static void prepareVege() throws Exception {
+	public static void prepareVege() throws IOException  {
 		if (multipleDepartment) {
 			Tools.mergeMultipleBdTopo(vegeFolder, empriseFile);
 		}
 	}
 
-	public static void prepareTrain() throws Exception {
+	public static void prepareTrain() throws NoSuchAuthorityCodeException, FactoryException, IOException {
 		if (multipleDepartment) {
-			Tools.mergeMultipleBdTopo(trainFolder, empriseFile);
+			Tools.mergeMultipleBdTopo(transportFolder, empriseFile);
 		}
 		// create the Non-urbanizable shapefile
 		SimpleFeatureBuilder sfBuilder = Schemas.getBasicSchema("trainBuffer");
 		DefaultFeatureCollection bufferTrain = new DefaultFeatureCollection();
-			
 		for (String shp : getShpNamesFromBDTopo("train", bdTopoVersion)) {
-			ShapefileDataStore trainSDS = new ShapefileDataStore((new File(trainFolder, shp)).toURI().toURL());
+			ShapefileDataStore trainSDS = new ShapefileDataStore((new File(transportFolder, shp)).toURI().toURL());
 			SimpleFeatureCollection trainSFC = trainSDS.getFeatureSource().getFeatures();
 			Arrays.stream(trainSFC.toArray(new SimpleFeature[0])).forEach(feat -> {
 				Geometry featGeom = ((Geometry) feat.getDefaultGeometry()).buffer(7.5);
-				if (((String) feat.getAttribute("NATURE")).contains("LGV")) {
+				if (((String) feat.getAttribute("NATURE")).contains("LGV"))
 					featGeom = ((Geometry) feat.getDefaultGeometry()).buffer(10);
-				}
 				sfBuilder.add(featGeom);
 				bufferTrain.add(sfBuilder.buildFeature(null));
 			});
 			trainSDS.dispose();
 		}
 		for (String shp : getShpNamesFromBDTopo("trainNU", bdTopoVersion)) {
-		ShapefileDataStore trainTriSDS = new ShapefileDataStore((new File(trainFolder, shp)).toURI().toURL());
+		ShapefileDataStore trainTriSDS = new ShapefileDataStore((new File(transportFolder, shp)).toURI().toURL());
 			trainTriSDS.setCharset(Charset.forName("UTF-8"));
 			SimpleFeatureCollection trainAT_SFC = trainTriSDS.getFeatureSource().getFeatures();
 			Arrays.stream(trainAT_SFC.toArray(new SimpleFeature[0])).forEach(feat -> {
@@ -212,14 +219,14 @@ public class Prepare {
 		Collec.exportSFC(bufferTrain.collection(), new File(folderOut, "NU/bufferTrain.shp"));
 	}
 
-	public static void prepareRoad() throws Exception {
+	public static void prepareRoad() throws IOException, NoSuchAuthorityCodeException, FactoryException {
 		if (multipleDepartment) {
-			Tools.mergeMultipleBdTopo(roadFolder, empriseFile);
+			Tools.mergeMultipleBdTopo(transportFolder, empriseFile);
 		}
 
 		List<File> listShp = new ArrayList<>();
 		for (String shp : getShpNamesFromBDTopo("road", bdTopoVersion)) {
-			listShp.add(new File(roadFolder, shp));
+			listShp.add(new File(transportFolder, shp));
 		}
 
 		File roadMerged = Shp.mergeVectFiles(listShp, new File(tmpFolder, "road.shp"), empriseFile, true);
@@ -227,7 +234,6 @@ public class Prepare {
 		File finalRoadFile = new File(folderOut, "road.shp");
 		Tools.setSpeed(roadMerged, tmpTmpRoadFile);
 		Tools.deleteIsolatedRoadSections(tmpTmpRoadFile, finalRoadFile);
-
 		// create the Non-urbanizable shapefile
 
 		ShapefileDataStore routesSDS = new ShapefileDataStore(roadMerged.toURI().toURL());
@@ -249,7 +255,7 @@ public class Prepare {
 				String nature = ((String) feat.getAttribute("NATURE")).toLowerCase();
 				sfBuilder.add(newFeat);
 				bufferRoute.add(sfBuilder.buildFeature(null));
-				if (nature.equals("autoroute")) {
+				if (nature.equals("autoroute") || nature.equals("type autoroutier")) {
 					newFeat = ((Geometry) feat.getDefaultGeometry()).buffer(100);
 				}
 				if (nature.equals("bretelle") || nature.equals("route à 2 chaussées") || nature.equals("quasi-autoroute")) {
@@ -271,10 +277,13 @@ public class Prepare {
 	/**
 	 * TODO when i get there, regarder si et comment se sont créées beaucoup de géométries
 	 * vides.
+	 * @throws FactoryException 
+	 * @throws IOException 
+	 * @throws NoSuchAuthorityCodeException 
 	 * 
 	 * @throws Exception
 	 */
-	public static void makeFullZoneNU() throws Exception {
+	public static void makeFullZoneNU() throws NoSuchAuthorityCodeException, IOException, FactoryException  {
 		File rootFileNU = new File(folderOut, "NU");
 		List<File> listFullNU = new ArrayList<File>();
 		listFullNU.add(new File(rootFileNU, "bufferRoad.shp"));
@@ -293,7 +302,7 @@ public class Prepare {
 		Shp.discretizeShp(nUUnKut, new File(rootFileNU.getParentFile(), "nonUrba.shp"), "nonUrba",500);
 	}
 
-	public static void makePhysicNU() throws Exception {
+	public static void makePhysicNU() throws NoSuchAuthorityCodeException, IOException, FactoryException  {
 		File rootFileNU = new File(folderOut, "NU");
 		List<File> listFullNU = new ArrayList<File>();
 		listFullNU.add(new File(rootFileNU, "bufferRoad.shp"));
@@ -329,8 +338,8 @@ public class Prepare {
 		Prepare.buildingFolder = buildingFolder;
 	}
 
-	public static void setRoadFolder(File roadFolder) {
-		Prepare.roadFolder = roadFolder;
+	public static void setTransportFolder(File transportFolder) {
+		Prepare.transportFolder = transportFolder;
 	}
 
 	public static void setAmenityFolder(File amenityFolder) {
@@ -343,10 +352,6 @@ public class Prepare {
 
 	public static void setVegeFolder(File vegeFolder) {
 		Prepare.vegeFolder = vegeFolder;
-	}
-
-	public static void setTrainFolder(File trainFolder) {
-		Prepare.trainFolder = trainFolder;
 	}
 
 	public static void setNUFolder(File nUFolder) {
@@ -365,32 +370,43 @@ public class Prepare {
 	}
 
 	/**
-	 * trie les aménités déjà géocodés de SIRENE - contenue dans un fichier
+	 * Trie les aménités déjà géocodés de SIRENE - contenue dans un fichier
 	 * dataIn/sireneBPE/sirene.shp et de BPE contenue dans le fichier
 	 * dataIn/sireneBPE/BPE-tot.csv
 	 * 
-	 * @param rootFile    : dossier principal
-	 * @param empriseFile : shp de l'emprise générale (auto-généré)
-	 * @param nbDep       : liste des départements à prendre en compte
+	 * @param rootFile    dossier principal
+	 * @param empriseFile shp de l'emprise générale (auto-généré)
+	 * @param nbDep       liste des départements à prendre en compte
+	 * @throws IOException 
+	 * @throws TransformException 
+	 * @throws ParseException 
+	 * @throws FactoryException 
+	 * @throws NoSuchAuthorityCodeException 
+	 * @throws MismatchedDimensionException 
 	 * @throws Exception
 	 */
-	public static void sortAmenities() throws Exception {
+	public static void sortAmenities() throws IOException, MismatchedDimensionException, NoSuchAuthorityCodeException, FactoryException, ParseException, TransformException  {
 		File sireneFile = new File(amenityFolder, "sirene.csv");
+		File BPEFile = new File(amenityFolder, "BPE.csv");
+
 		if (multipleDepartment) {
-			sireneFile = new File(tmpFolder, "sirene.csv");
 			Csv.mergeCSVFiles(new File(amenityFolder, "sirene"), sireneFile);
+			Csv.mergeCSVFiles(new File(amenityFolder, "BPE"), BPEFile);
 		}
+		
 		CSVReader sirene = new CSVReader(new FileReader(sireneFile));
 		String[] header = sirene.readNext();
 		sirene.close();
 		sortSirene(header, sireneFile);
-
-//		sortBPE();
-//		mergeAmenities();
+		CSVReader bpe = new CSVReader(new FileReader(BPEFile));
+		String[] headerBPE = bpe.readNext();
+		bpe.close();
+		sortBPE(headerBPE, BPEFile);
+		mergeAmenities();
 	}
 
 	/**
-	 * regular indices from SIRENE ddb (may change?!) TODO replace indices
+	 * regular indices from SIRENE ddb (may change?!) 
 	 * 
 	 * @throws IOException
 	 * @throws MismatchedDimensionException
@@ -403,33 +419,36 @@ public class Prepare {
 			throws IOException, MismatchedDimensionException, NoSuchAuthorityCodeException, FactoryException,
 			ParseException, TransformException {
 		sortSirene(sireneHeader, sireneFile, "separateField", Attribute.getLatIndice(sireneHeader),
-				Attribute.getLongIndice(sireneHeader), 0, 0);
+				Attribute.getLongIndice(sireneHeader), Attribute.getIndice(sireneHeader, DataImporter.getSireneType()));
 	}
 
 	/**
-	 * TODO verify if it goes well (attribute numbers must change)
 	 * 
+	 * @param sireneHeader
+	 * @param sireneFile
+	 * @param coordType
+	 * @param iX
+	 * @param iY
+	 * @param iTypeGen
 	 * @throws IOException
 	 * @throws MismatchedDimensionException
+	 * @throws NumberFormatException
 	 * @throws NoSuchAuthorityCodeException
 	 * @throws FactoryException
-	 * @throws ParseException
 	 * @throws TransformException
+	 * @throws ParseException
 	 */
-	public static void sortSirene(String[] sireneHeader, File sireneFile, String coordType, int iPos1, int iPos2,
-			int iTypeGen, int iTypePart) throws IOException, MismatchedDimensionException, NoSuchAuthorityCodeException,
-			FactoryException, ParseException, TransformException {
-		// if multiple points
-
+	public static void sortSirene(String[] sireneHeader, File sireneFile, String coordType, int iX, int iY, int iTypeGen) throws IOException,
+			MismatchedDimensionException, NumberFormatException, NoSuchAuthorityCodeException, FactoryException, TransformException, ParseException {
 		File serviceSirene = new File(tmpFolder, "sireneServices.csv");
 		File loisirSirene = new File(tmpFolder, "sireneLoisirs.csv");
 		if (serviceSirene.exists()) {
 			Files.delete(serviceSirene.toPath());
 		}
-		if (serviceSirene.exists()) {
-			Files.delete(serviceSirene.toPath());
+		if (loisirSirene.exists()) {
+			Files.delete(loisirSirene.toPath());
 		}
-		preselecGeocode(sireneFile, adminFile);
+		sireneFile = preparePoint(sireneFile, adminFile, sireneFile, DataImporter.getSireneSRC(), DataImporter.getNameFieldCodeSIRENE());
 
 		CSVReader csvSIRENE = new CSVReader(new FileReader(sireneFile));
 		CSVWriter csvServiceSirene = new CSVWriter(new FileWriter(serviceSirene, true));
@@ -449,7 +468,7 @@ public class Prepare {
 		for (String[] row : csvSIRENE.readAll()) {
 			String[] result = new String[firstLineSirene.length + 2];
 			if (!(row[iTypeGen].isEmpty())) {
-				Double[] coord = Tools.getCoordFromCSV(coordType, row[iPos1], row[iPos2]);
+				Double[] coord = Tools.getCoordPointFromCSV(coordType, row[iX], row[iY]);
 				if (coord == null) {
 					continue;
 				}
@@ -458,9 +477,8 @@ public class Prepare {
 				if (x < env.getMaxX() && x > env.getMinX() && y < env.getMaxY() && y > env.getMinY()) {
 					String[] resultOut = SortAmenitiesCategories.sortCategoriesAmenenitiesNAFCPF(row[iTypeGen]);
 					if (!(resultOut[0] == null)) {
-						for (int i = 0; i < 9; i = i + 1) {
-							result[i] = row[i];
-						}
+						for (int i = 0; i < firstLineSirene.length; i = i + 1) 
+							result[i] = row[i];					
 						result[firstLineSirene.length] = resultOut[1];
 						result[firstLineSirene.length + 1] = resultOut[2];
 						switch (resultOut[0]) {
@@ -479,70 +497,28 @@ public class Prepare {
 		csvSIRENE.close();
 		csvServiceSirene.close();
 		csvLoisirSirene.close();
-
-		Tools.createPointFromCsv(serviceSirene, new File(rootFolder, "tmp/SIRENE-Services.shp"), empriseFile,
-				"service");
-		Tools.createPointFromCsv(loisirSirene, new File(rootFolder, "tmp/SIRENE-Loisirs.shp"), empriseFile, "leisure");
+		Tools.createPointFromCsv(serviceSirene, new File(tmpFolder, "SireneService.shp"), empriseFile, "service");
+		Tools.createPointFromCsv(loisirSirene, new File(tmpFolder, "SireneLeisure.shp"), empriseFile, "leisure");
 	}
 
 	/**
-	 * Classe servant à trier les entrées d'un CSV Sirene en comparant leurs codes
-	 * postaux à une liste de villes
 	 * 
-	 * @param pointIn    : le CSV contenant les aménités à trier
-	 * @param pointVille : la liste des villes
-	 * @return
 	 * @throws IOException
+	 * @throws MismatchedDimensionException
+	 * @throws NoSuchAuthorityCodeException
+	 * @throws FactoryException
+	 * @throws ParseException
+	 * @throws TransformException
 	 */
-	public static File preselecGeocode(File pointIn, File pointVille) throws IOException {
-		File pointOut = new File(tmpFolder, "sireneTri.csv");
+	public static void sortBPE(String[] BPEHeader, File BPEFile, String coordType, int iPos1, int iPos2, int iTypeGen)
+			throws IOException, MismatchedDimensionException, NoSuchAuthorityCodeException, FactoryException, TransformException, ParseException {
 
-		// no double file
-		if (pointOut.exists()) {
-			Files.delete(pointOut.toPath());
-		}
-		CSVReader csvVille = new CSVReader(new FileReader(pointVille));
-		CSVReader csvAm = new CSVReader(new FileReader(pointIn));
-		List<String[]> listVille = csvVille.readAll();
-		List<String[]> listAm = csvAm.readAll();
-
-		// get zipcodes indices
-		int numCodPostSiren = Attribute.getINSEEIndice(listAm.get(0));
-		int numCodPost = Attribute.getINSEEIndice(listVille.get(0));
-
-		// collection pour éliminer les doublons
-		ArrayList<String> deleteDouble = new ArrayList<>();
-
-		// copie des points sélectionnées dans un nouveau csv
-		CSVWriter csv2copy = new CSVWriter(new FileWriter(pointOut, false));
-		csv2copy.writeNext((String[]) listAm.get(0));
-		for (String[] row : listVille) {
-			String codePost = row[numCodPost];
-			if (!deleteDouble.contains(codePost)) {
-				for (String[] rOw : listAm) {
-					if (codePost.toUpperCase().equals(rOw[numCodPostSiren].toUpperCase())) {
-						csv2copy.writeNext(rOw);
-					}
-				}
-			}
-			deleteDouble.add(codePost);
-		}
-		csv2copy.close();
-		csvVille.close();
-		csvAm.close();
-		Files.copy(pointOut.toPath(), pointIn.toPath(), new CopyOption[] { StandardCopyOption.REPLACE_EXISTING });
-		Files.delete(pointOut.toPath());
-		return pointOut;
-	}
-
-	public static void sortBPE() throws IOException, MismatchedDimensionException, NoSuchAuthorityCodeException,
-			FactoryException, ParseException, TransformException {
 		// for the BPE file
-		File pointBPEIn = new File(rootFolder, "dataIn/sireneBPE/BPE-tot.csv");
-		File csvServicesBPE = new File(rootFolder, "tmp/BPE-Services.csv");
-		File csvLoisirsBPE = new File(rootFolder, "tmp/BPE-Loisirs.csv");
-		File csvTrainsBPE = new File(rootFolder, "tmp/BPE-Trains.csv");
-
+		File pointBPEIn = new File(amenityFolder, "BPE.csv");
+		File csvServicesBPE = new File(tmpFolder, "BPE-Services.csv");
+		File csvLoisirsBPE = new File(tmpFolder, "BPE-Loisirs.csv");
+		File csvTrainsBPE = new File(tmpFolder, "BPE-Trains.csv");
+		
 		if (csvLoisirsBPE.exists()) {
 			Files.delete(csvLoisirsBPE.toPath());
 		}
@@ -552,6 +528,8 @@ public class Prepare {
 		if (csvTrainsBPE.exists()) {
 			Files.delete(csvTrainsBPE.toPath());
 		}
+
+		BPEFile = preparePoint(BPEFile, adminFile, BPEFile, DataImporter.getBpeSRC(), DataImporter.getNameFieldCodeBPE());
 
 		CSVReader csvBPE = new CSVReader(new FileReader(pointBPEIn));
 		CSVWriter csvServiceBPE = new CSVWriter(new FileWriter(csvServicesBPE, true));
@@ -572,18 +550,21 @@ public class Prepare {
 		ReferencedEnvelope env = (envSDS.getFeatureSource().getFeatures()).getBounds();
 
 		for (String[] row : csvBPE.readAll()) {
-			String[] result = new String[11];
-			if (!(row[6].isEmpty())) {
-				Double x = Double.parseDouble((row[6].split(";"))[0]);
-				Double y = Double.parseDouble((row[7].split(";"))[0]);
+			String[] result = new String[firstLineBPE.length +2];
+			if (!(row[iTypeGen].isEmpty())) {
+				Double[] coord = Tools.getCoordPointFromCSV(coordType, row[iPos1], row[iPos2]);
+				if (coord == null) {
+					continue;
+				}
+				double x = coord[0];
+				double y = coord[1];
 				if (x < env.getMaxX() && x > env.getMinX() && y < env.getMaxY() && y > env.getMinY()) {
-					String[] resultOut = SortAmenitiesCategories.sortCategoriesAmenenitiesNAFCPF(row[5]);
+					String[] resultOut = SortAmenitiesCategories.sortCategoriesAmenenitiesNAFCPF(row[iTypeGen]);
 					if (!(resultOut[0] == null)) {
-						for (int i = 0; i < 9; i = i + 1) {
+						for (int i = 0; i < firstLineBPE.length; i = i + 1) 
 							result[i] = row[i];
-						}
-						result[9] = resultOut[1];
-						result[10] = resultOut[2];
+						result[firstLineBPE.length] = resultOut[1];
+						result[firstLineBPE.length + 1] = resultOut[2];
 						String[] resTrain = { result[1], String.valueOf(x), String.valueOf(y) };
 
 						switch (resultOut[0]) {
@@ -606,43 +587,122 @@ public class Prepare {
 		csvLoisirBPE.close();
 		csvTrainBPE.close();
 
-		Tools.createPointFromCsv(csvServicesBPE, new File(rootFolder, "tmp/BPE-Services.shp"), empriseFile, "service");
-		Tools.createPointFromCsv(csvLoisirsBPE, new File(rootFolder, "tmp/BPE-Loisirs.shp"), empriseFile, "leisure");
-		Tools.createPointFromCsv(csvTrainsBPE, new File(rootFolder, "dataOut/trainAutom.shp"), empriseFile, "train");
+		Tools.createPointFromCsv(csvServicesBPE, new File(tmpFolder, "BPEService.shp"), empriseFile, "service");
+		Tools.createPointFromCsv(csvLoisirsBPE, new File(tmpFolder, "BPELeisure.shp"), empriseFile, "leisure");
+		//TODO don't work for now - find better codes 
+		//		Tools.createPointFromCsv(csvTrainsBPE, new File(folderOut, "train.shp"), empriseFile, "train");
 	}
 
-	public static void mergeAmenities() throws Exception {
+	/**
+	 * Merges the amenities shapefiles previously generated (Sirene and BPE).
+	 * @throws MismatchedDimensionException
+	 * @throws NoSuchAuthorityCodeException
+	 * @throws IOException
+	 * @throws FactoryException
+	 * @throws TransformException
+	 * @throws ParseException
+	 */
+	public static void mergeAmenities() throws MismatchedDimensionException, NoSuchAuthorityCodeException, IOException, FactoryException, TransformException, ParseException {
 
-		// merge multiple services sources
-		System.out.println("merge services");
-		File pointServices = new File(rootFolder, "dataOut/serviceAutom.shp");
+		// results
+		File pointService = new File(folderOut, "service.shp");
+		File pointLeisure = new File(folderOut, "leisure.shp");
+
+		// previously generated shapefiles
 		List<File> listServices = new ArrayList<>();
-		File sireneGeocodedServiceFile = new File(rootFolder, "tmp/sirene-service-geocoded.csv");
-		if (sireneGeocodedServiceFile.exists()) {
-			listServices.add(Tools.createPointFromCsv(sireneGeocodedServiceFile,
-					new File(rootFolder, "tmp/Sirene-Services.shp"), empriseFile, "service"));
-		} else {
-			listServices.add(new File(rootFolder, "tmp/siren-Services.shp"));
-		}
-		listServices.add(new File(rootFolder, "tmp/BPE-Services.shp"));
+		listServices.add(new File(tmpFolder, "SireneService.shp"));
+		listServices.add(new File(tmpFolder, "BPEService.shp"));
+		Shp.mergeVectFiles(listServices, pointService, empriseFile, true);
 
-		Shp.mergeVectFiles(listServices, pointServices, empriseFile, true);
+		List<File> listLeisure = new ArrayList<>();
+		listServices.add(new File(tmpFolder, "BPELeisure.shp"));
+		listServices.add(new File(tmpFolder, "SireneLeisure.shp"));
+		listLeisure.add(
+				Tools.createLeisureAccess(new File(vegeFolder, "ZONE_DE_VEGETATION.shp"), new File(transportFolder, "TRONCON_DE_ROUTE.shp"), empriseFile,tmpFolder));
+		Shp.mergeVectFiles(listLeisure, pointLeisure, empriseFile, true);
+	}
 
-		// merge multiple loisirs sources
-		System.out.println("merge leisure");
-		File pointLoisirs = new File(rootFolder, "dataOut/loisirAutom.shp");
-		List<File> listLoisirs = new ArrayList<>();
-		listLoisirs.add(new File(rootFolder, "tmp/BPE-Loisirs.shp"));
-		File sireneGeocodedLoisirsFile = new File(rootFolder, "tmp/sirene-loisir-geocoded.csv");
-		if (sireneGeocodedLoisirsFile.exists()) {
-			listLoisirs.add(Tools.createPointFromCsv(sireneGeocodedLoisirsFile,
-					new File(rootFolder, "tmp/Sirene-Loisirs.shp"), empriseFile, "leisure"));
-		} else {
-			listServices.add(new File(rootFolder, "tmp/siren-Services.shp"));
+	/**
+	 * This method is used to prepare .csv entries of a File. It will sort them in comparing their community codes to an input city list. It also will convert the coordinates to
+	 * the designed coordinate reference system. Output overwrites the existing file.
+	 * 
+	 * @param pointIn
+	 *            Le CSV contenant les aménités à trier
+	 * @param pointVille
+	 *            La liste des villes
+	 * @return
+	 * @throws IOException
+	 * @throws FactoryException 
+	 * @throws NoSuchAuthorityCodeException 
+	 * @throws TransformException 
+	 * @throws NumberFormatException 
+	 * @throws MismatchedDimensionException 
+	 */
+	public static File preparePoint(File pointIn, File pointVille, File pointOut, String src, String communityCodeFiledName) throws IOException, NoSuchAuthorityCodeException, FactoryException, MismatchedDimensionException, NumberFormatException, TransformException {
+		
+		CSVReader csvVille = new CSVReader(new FileReader(pointVille));
+		CSVReader csvAm = new CSVReader(new FileReader(pointIn));
+		List<String[]> listVille = csvVille.readAll();
+		List<String[]> listAm = csvAm.readAll();
+
+		// get zipcodes indices
+		int numCodPostAmenity = Attribute.getIndice(listAm.get(0), communityCodeFiledName);
+		int numCodPost = Attribute.getIndice(listVille.get(0), DataImporter.getNameFieldCodeCommunity());
+
+		// collection pour éliminer les doublons
+		ArrayList<String> deleteDouble = new ArrayList<>();
+
+		// copie des points sélectionnées dans un nouveau csv
+		CSVWriter csv2copy = new CSVWriter(new FileWriter(pointOut, false));
+		csv2copy.writeNext((String[]) listAm.get(0));
+		for (String[] rowVille : listVille) {
+			String codePost = rowVille[numCodPost];
+			if (!deleteDouble.contains(codePost)) {
+				for (String[] rowAmenity : listAm) {
+					if (codePost.toUpperCase().equals(rowAmenity[numCodPostAmenity].toUpperCase())) {
+						csv2copy.writeNext(rowAmenity);
+					}
+				}
+			}
+			deleteDouble.add(codePost);
 		}
-		listLoisirs.add(Tools.createLeisureAccess(new File(rootFolder, "dataIn/vege/ZONE_VEGETATION.SHP"),
-				new File(rootFolder, "dataIn/route/CHEMIN.SHP"), new File(rootFolder, "dataOut/routeAutom.shp")));
-		Shp.mergeVectFiles(listLoisirs, pointLoisirs, empriseFile, true);
+		csv2copy.close();
+		csvVille.close();
+		csvAm.close();
+		
+		if (src != DataImporter.getMainSRC()) {
+			CSVReader csvChangeCoordTmp = new CSVReader(new FileReader(Files.copy(pointOut.toPath(), new File(tmpFolder,"preparePointReproj.csv").toPath(), StandardCopyOption.REPLACE_EXISTING).toFile()));
+			CSVWriter csvChangeCoord = new CSVWriter(new FileWriter(pointOut, true));
+			List<String[]> listEntries = csvChangeCoordTmp.readAll();
+			MathTransform transform = CRS.findMathTransform(CRS.decode("EPSG:" + src), CRS.decode("EPSG:" + DataImporter.getMainSRC()), true);
+			String[] firstLine = listEntries.remove(0);
+			csvChangeCoord.writeNext(firstLine);
+			int nColX = Attribute.getLatIndice(firstLine);
+			int nColY = Attribute.getLongIndice(firstLine);
+			for (String[] row : listEntries) {
+				// copy the same attributes
+				String[] result = row;
+				DirectPosition2D ptDst = new DirectPosition2D();
+				String x = row[nColX];
+				String y = row[nColY];
+				if (x != null && !x.isEmpty() && x != "" && y != null && !y.isEmpty() && y != "") {
+					transform.transform(new DirectPosition2D(Double.valueOf(x), Double.valueOf(y)), ptDst);
+					result[nColX] = String.valueOf(ptDst.getX());
+					result[nColY] = String.valueOf(ptDst.getY());
+					csvChangeCoord.writeNext(result);
+				}
+			}
+			csvChangeCoordTmp.close();
+			csvChangeCoord.close();
+		}
+		return pointOut;
+	}
+
+	public static void sortBPE(String[] bpeHeader, File bpeFile)
+			throws IOException, MismatchedDimensionException, NoSuchAuthorityCodeException, FactoryException,
+			ParseException, TransformException {
+		sortBPE(bpeHeader, bpeFile, "separateField", Attribute.getLatIndice(bpeHeader),
+				Attribute.getLongIndice(bpeHeader), Attribute.getIndice(bpeHeader, DataImporter.getBpeType()));
 	}
 
 }

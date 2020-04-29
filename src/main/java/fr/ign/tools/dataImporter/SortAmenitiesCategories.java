@@ -270,17 +270,13 @@ public class SortAmenitiesCategories {
 	}
 
 	/**
-	 * The real nomenclature can be seen here:
-	 * https://insee.fr/fr/statistiques/fichier/2406147/Nomenclatures_NAF_et_CPF_Edition_2019.pdf
-	 * TODO recreate an identical base with the actual codes ? descriptions of the
-	 * fields can be seen here:
-	 * https://static.data.gouv.fr/resources/base-sirene-des-entreprises-et-de-leurs-etablissements-siren-siret/20191126-150732/description-fichier-stocketablissement.pdf
-	 * Careful, some are under a awful other norm (info in the next field i.e
-	 * NAF1993 instead of NAFRev2. This looks like a boring an long task => see if
-	 * it's needed.
+	 * The real nomenclature can be seen here: https://insee.fr/fr/statistiques/fichier/2406147/Nomenclatures_NAF_et_CPF_Edition_2019.pdf TODO recreate an identical base with the
+	 * actual codes ? descriptions of the fields can be seen here:
+	 * https://static.data.gouv.fr/resources/base-sirene-des-entreprises-et-de-leurs-etablissements-siren-siret/20191126-150732/description-fichier-stocketablissement.pdf Careful,
+	 * some are under a awful other norm (info in the next field i.e NAF1993 instead of NAFRev2. This looks like a boring an long task => see if it's needed.
 	 * 
-	 * @param amen    : the "" field from the Sirene file
-	 * @param forMore : the "" type from the Sirene file
+	 * @param amen
+	 *            the "" field from the Sirene file
 	 * @return
 	 */
 	public static String[] sortCategoriesAmenenitiesNAFCPF(String amen) {
@@ -537,6 +533,7 @@ public class SortAmenitiesCategories {
 			break;
 		// trains
 
+			//TODO those doesn't work
 		case "E103": // Gare avec desserte train à grande vitesse (TAGV)
 			classement[2] = "";
 			classement[1] = "LGV";

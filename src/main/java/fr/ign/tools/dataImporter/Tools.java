@@ -1,6 +1,7 @@
 package fr.ign.tools.dataImporter;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -12,12 +13,13 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
+import org.geotools.data.DataUtilities;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
-import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.referencing.CRS;
 import org.locationtech.jts.geom.Coordinate;
@@ -27,11 +29,11 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.filter.Filter;
+import org.opengis.filter.FilterFactory2;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -76,15 +78,14 @@ public class Tools {
 	}
 	
 	/**
-	 * merge every shapefile in a folderIn type folder where every information of
-	 * the BD TOPO is stored into a separate folder
-	 * 
+	 * Merge every shapefile in a folderIn type folder where every information of the BD TOPO is stored into a separate folder
 	 * @param nom
 	 * @param fileOut
 	 * @return
+	 * @throws IOException
 	 * @throws Exception
 	 */
-	public static void mergeMultipleBdTopo(File folderIn, File empriseFile) throws Exception {
+	public static void mergeMultipleBdTopo(File folderIn, File empriseFile) throws IOException {
 		HashMap<String, List<File>> lists = new HashMap<String, List<File>>();
 		for (File folderDeptIn : folderIn.listFiles()) {
 			if (folderDeptIn.isDirectory()) {
@@ -106,8 +107,9 @@ public class Tools {
 			Shp.mergeVectFiles(listFile, new File(folderIn, key), empriseFile, true);
 		}
 	}
+	
 	/**
-	 * créée une emprise en fonction de la liste des villes contenus dans le fichier adminFile. Le fichier retouré est utilisé pour le découpage des shapefiles provenant de la
+	 * crée une emprise en fonction de la liste des villes contenus dans le fichier adminFile. Le fichier retourné est utilisé pour le découpage des shapefiles provenant de la
 	 * BDTopo.
 	 * 
 	 * @param rootFile:
@@ -120,8 +122,9 @@ public class Tools {
 	 * @throws ParseException
 	 * @throws NoSuchAuthorityCodeException
 	 * @throws FactoryException
+	 * @throws FileNotFoundException 
 	 */
-	public static File createEmpriseFile(File inFolder, File adminFile) throws MalformedURLException, IOException, ParseException, NoSuchAuthorityCodeException, FactoryException {
+	public static File createEmpriseFile(File inFolder, File adminFile) throws NoSuchAuthorityCodeException, FactoryException, FileNotFoundException, IOException {
 
 		ShapefileDataStore geoFlaSDS = new ShapefileDataStore((new File(inFolder, "admin/commune.shp")).toURI().toURL());
 		SimpleFeatureCollection geoFlaSFC = geoFlaSDS.getFeatureSource().getFeatures();
@@ -129,11 +132,11 @@ public class Tools {
 		DefaultFeatureCollection villeColl = new DefaultFeatureCollection();
 		DefaultFeatureCollection emprise = new DefaultFeatureCollection();
 
-		final int numInsee = Attribute.getINSEEIndice(listVilleReader.readNext());
+		final int numInsee = Attribute.getIndice(listVilleReader.readNext(), DataImporter.getNameFieldCodeCommunity());
 
 		for (String[] row : listVilleReader.readAll()) {
 			Arrays.stream(geoFlaSFC.toArray(new SimpleFeature[0])).forEach(feat -> {
-				if (row[numInsee].equals(feat.getAttribute("INSEE_COM"))) {
+				if (row[numInsee].equals(feat.getAttribute(DataImporter.getNameFieldCodeGeoFla()))) {
 					villeColl.add(feat);
 		}});}
 		SimpleFeatureBuilder sfBuilder = Schemas.getBasicSchema("emprise");
@@ -154,124 +157,129 @@ public class Tools {
 	 * quotidienne, si 2Ha<surface<100Ha, fréquence hebdomadaire, si surface>100Ha, fréquence mensuelle).
 	 * 
 	 * @param vegetFile
-	 *            : shapefile extrait de la BDTopo contenant les couches de végétation
-	 * @param routeFile
-	 *            : shapefile extrait de la BDTopo contenant les tronçons routiers
+	 *            Shapefile extrait de la BDTopo contenant les couches de végétation
+	 * @param roadFile
+	 *            Shapefile extrait de la BDTopo contenant les tronçons routiers
 	 * @param cheminFile
-	 *            : shapefile extrait de la BDTopo contenant les chemins
-	 * @return : shapefile contenant les points d'entrées aux forêts.
-	 * @throws Exception
+	 *            Shapefile extrait de la BDTopo contenant les chemins
+	 * @return Shapefile contenant les points d'entrées aux forêts.
+	 * @throws FactoryException 
+	 * @throws NoSuchAuthorityCodeException 
+	 * @throws IOException 
 	 */
-	public static File createLeisureAccess(File vegetFile, File routeFile, File cheminFile) throws Exception {
-		// Minimal area for a vegetation feature to be considered as an loisir resort is a half of an hectare
-		int minArea = 10000;	
-		ShapefileDataStore vegetSDS = new ShapefileDataStore(vegetFile.toURI().toURL());
-		//TODO set charset (verify if it's ok?)
-		System.out.println("createLeisureAccess charset tests"+vegetSDS.getCharset());
-		
-		vegetSDS.setCharset(Charset.forName("UTF-8"));
-		SimpleFeatureCollection veget = vegetSDS.getFeatureSource().getFeatures();
-		ShapefileDataStore routeSDS = new ShapefileDataStore(routeFile.toURI().toURL());
-		SimpleFeatureCollection route = routeSDS.getFeatureSource().getFeatures();
-		ShapefileDataStore cheminSDS = new ShapefileDataStore(cheminFile.toURI().toURL());
-		SimpleFeatureCollection chemin = cheminSDS.getFeatureSource().getFeatures();
+	public static File createLeisureAccess(File vegetFile, File roadFile, File empriseFile, File tmpFolder) throws NoSuchAuthorityCodeException, FactoryException, IOException {
+		ShapefileDataStore empriseSDS = new ShapefileDataStore(empriseFile.toURI().toURL());
+		SimpleFeatureCollection emprise = DataUtilities.collection(empriseSDS.getFeatureSource().getFeatures());
+		empriseSDS.dispose();
 
+		ShapefileDataStore vegetSDS = new ShapefileDataStore(vegetFile.toURI().toURL());
+		vegetSDS.setCharset(Charset.forName("UTF-8"));
+		SimpleFeatureCollection veget = Collec.snapDatas(vegetSDS.getFeatureSource().getFeatures(), emprise);
+	
 		DefaultFeatureCollection vegetDFC = new DefaultFeatureCollection();
 		SimpleFeatureBuilder sfBuilder = Schemas.getMUPAmenitySchema("leisure");
 
-		int i = 0;
-		SimpleFeatureIterator featIt = veget.features();
-		try {
+		//classification of the green spaces with their sizes
+		try (SimpleFeatureIterator featIt = veget.features()) {
 			while (featIt.hasNext()) {
 				SimpleFeature feat = featIt.next();
-				Object[] attr = { "", 0 };
-				// TODO débuger l'encodage (pas arrivé -- pas le temps)
-				if (feat.getAttribute("NATURE").equals("Bois") || feat.getAttribute("NATURE").equals("ForÃªt fermÃ©e de feuillus")
-						|| feat.getAttribute("NATURE").equals("ForÃªt fermÃ©e de conifÃ¨res") || feat.getAttribute("NATURE").equals("ForÃªt fermÃ©e mixte")
-						|| feat.getAttribute("NATURE").equals("ForÃªt ouverte") || feat.getAttribute("NATURE").equals("Zone arborÃ©e")) {
-					if (((Geometry) feat.getDefaultGeometry()).getArea() > minArea) {
+				if (feat.getAttribute("NATURE").equals("Bois") || feat.getAttribute("NATURE").equals("Forêt fermée de feuillus")
+						|| feat.getAttribute("NATURE").equals("Forêt fermée de conifères") || feat.getAttribute("NATURE").equals("Forêt fermée mixte")
+						|| feat.getAttribute("NATURE").equals("Forêt ouverte") || feat.getAttribute("NATURE").equals("Zone arborée")) {
+					String type ;
+					int level ;
+					if (((Geometry) feat.getDefaultGeometry()).getArea() > 1000) {
 						if (((Geometry) feat.getDefaultGeometry()).getArea() < 20000) {
-							attr[0] = "espace_vert_f1";
-							attr[1] = 1;
+							type = "espace_vert_f1";
+							level = 1;
 						} else if (((Geometry) feat.getDefaultGeometry()).getArea() < 1000000) {
-							attr[0] = "espace_vert_f2";
-							attr[1] = 2;
+							type = "espace_vert_f2";
+							level = 2;
 						} else {
-							attr[0] = "espace_vert_f3";
-							attr[1] = 3;
+							type = "espace_vert_f3";
+							level = 3;
 						}
 						sfBuilder.add((Geometry) feat.getDefaultGeometry());
-						SimpleFeature feature = sfBuilder.buildFeature(String.valueOf(i), attr);
-						vegetDFC.add(feature);
-						i = i + 1;
+						sfBuilder.set("TYPE",type);
+						sfBuilder.set("LEVEL" ,level );
+						vegetDFC.add(sfBuilder.buildFeature(Attribute.makeUniqueId()));
 					}
 				}
 			}
 		} catch (Exception problem) {
 			problem.printStackTrace();
-		} finally {
-			featIt.close();
-		}
+		} 
+		vegetSDS.dispose();
 
-		DefaultFeatureCollection loisirColl = new DefaultFeatureCollection();
+		//make road infos
+		FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2();
+		ShapefileDataStore roadSDS = new ShapefileDataStore(roadFile.toURI().toURL());
+		roadSDS.setCharset(Charset.forName("UTF-8"));
+		SimpleFeatureCollection road = Collec.snapDatas(roadSDS.getFeatureSource().getFeatures(), emprise);
+		List<Filter> filters = new ArrayList<Filter>(); 
+		filters.add(ff.like(ff.property("NATURE"), "Chemin"));
+		filters.add(ff.like(ff.property("NATURE"), "Sentier"));
+		SimpleFeatureCollection chemin = DataUtilities.collection(road.subCollection(ff.or(filters)));
+		filters.add(ff.like(ff.property("NATURE"), "Bretelle"));
+		filters.add(ff.like(ff.property("NATURE"), "Escalier"));
+		filters.add(ff.like(ff.property("NATURE"), "Type autoroutier" ));
+		SimpleFeatureCollection route = DataUtilities.collection(road.subCollection(ff.not(ff.or(filters))));
+		roadSDS.dispose();
+		
+		DefaultFeatureCollection leisureAccess = new DefaultFeatureCollection();
 		GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
 		SimpleFeatureBuilder pointSfBuilder = Schemas.getMUPAmenitySchema("leisure") ;
-		int cpt = 0;
 		// selection of the intersection points into those zones
-		int j = 0;
-		SimpleFeatureIterator vegetIt = vegetDFC.features();
-		try {
+		try (SimpleFeatureIterator vegetIt = vegetDFC.features()){
 			while (vegetIt.hasNext()) {
-				cpt = cpt + 1;
 				SimpleFeature featForet = vegetIt.next();
 				// snap of the wanted data
 				SimpleFeatureCollection snapRoute = Collec.snapDatas(route, ((Geometry) featForet.getDefaultGeometry()).buffer(15));
 				SimpleFeatureCollection snapChemin = Collec.snapDatas(chemin, ((Geometry) featForet.getDefaultGeometry()).buffer(15));
-				SimpleFeatureIterator routeIt = snapRoute.features();
-				try {
+				try (SimpleFeatureIterator routeIt = snapRoute.features()) {
 					while (routeIt.hasNext()) {
 						SimpleFeature featRoute = routeIt.next();
-						SimpleFeatureIterator itChemin = snapChemin.features();
-						try {
-							while (itChemin.hasNext()) {
+						try (SimpleFeatureIterator itChemin = snapChemin.features()) {
+							trail : while (itChemin.hasNext()) {
 								SimpleFeature featChemin = itChemin.next();
 								Coordinate[] coord = ((Geometry) featChemin.getDefaultGeometry()).intersection((Geometry) featRoute.getDefaultGeometry()).getCoordinates();
 								for (Coordinate co : coord) {
 									Point point = geometryFactory.createPoint(co);
 									if ((((Geometry) featForet.getDefaultGeometry()).buffer(15)).contains(point)) {
 										pointSfBuilder.add(point);
-										Object[] att = { featForet.getAttribute("TYPE"), featForet.getAttribute("LEVEL") };
-										SimpleFeature feature = pointSfBuilder.buildFeature(String.valueOf(j), att);
-										loisirColl.add(feature);
-										j = j + 1;
+										pointSfBuilder.set("TYPE", featForet.getAttribute("TYPE"));
+										pointSfBuilder.set("LEVEL", featForet.getAttribute("LEVEL"));
+										leisureAccess.add(pointSfBuilder.buildFeature(Attribute.makeUniqueId()));
+										//we limit to one point per trail
+										break trail;
 									}
 								}
 							}
 						} catch (Exception problem) {
 							problem.printStackTrace();
-						} finally {
-							itChemin.close();
 						}
 					}
 				} catch (Exception problem) {
 					problem.printStackTrace();
-				} finally {
-					routeIt.close();
-				}
+				} 
 			}
 		} catch (Exception problem) {
 			problem.printStackTrace();
-		} finally {
-			vegetIt.close();
-		}
-		routeSDS.dispose();
-		cheminSDS.dispose();
-		vegetSDS.dispose();
-
-		return Collec.exportSFC(loisirColl.collection(), new File(vegetFile.getParentFile().getParentFile().getParentFile(), "tmp/loisir2.shp"));
+		} 
+		return Collec.exportSFC(leisureAccess.collection(), new File(tmpFolder, "leisureAccess.shp"));
 	}
-	
-	public static Double[] getCoordFromCSV(String coordType, String row, String row2) {
+
+	/**
+	 * Sculpt the coordinates of points coming from string(s) to be easy to process
+	 * 
+	 * @param coordType
+	 *            If the coordinate is into one or two String (usually tab cells). If the value is <b>sameField</b>, the coordinates are contained only in the {@param row} string
+	 *            and values are separated with ';'
+	 * @param row
+	 * @param row2
+	 * @return
+	 */
+	public static Double[] getCoordPointFromCSV(String coordType, String row, String row2) {
 		Double[] result = new Double[2];
 		try {
 			switch (coordType) {
@@ -279,30 +287,30 @@ public class Tools {
 				result[0] = Double.parseDouble(row.split(";")[0]);
 				result[1] = Double.parseDouble(row.split(";")[1]);
 				break;
-			case "separateField":
+			default:
 				result[0] = Double.parseDouble(row);
 				result[1] = Double.parseDouble(row2);
 				break;
 			}
 		} catch (NumberFormatException n) {
-			System.out.println("no coord for entity " + row + ". Return null");
+			System.out.println("no coord for entity " + row + row2 + ". Return null");
 			return null;
 		}
 		return result;
 	}
 	
-	public static File setSpeed(File fileIn, File fileOut) throws Exception {
+	public static File setSpeed(File fileIn, File fileOut) throws NoSuchAuthorityCodeException, FactoryException, IOException {
 		ShapefileDataStore routesSDS = new ShapefileDataStore(fileIn.toURI().toURL());
 		routesSDS.setCharset(Charset.forName("UTF-8"));
-		SimpleFeatureIterator routeIt = routesSDS.getFeatureSource().getFeatures().features();
 		SimpleFeatureBuilder sfBuilder = Schemas.getMUPRoadSchema();
 		DefaultFeatureCollection roadDFC = new DefaultFeatureCollection();
-		try {
+		try (SimpleFeatureIterator routeIt = routesSDS.getFeatureSource().getFeatures().features()){
 			while (routeIt.hasNext()) {
 				SimpleFeature feat = routeIt.next();
 				String nature = (String) feat.getAttribute("NATURE");
 				switch (nature) {
 				case "Autoroute":
+				case "Type autoroutier":
 					sfBuilder.set("SPEED", 130); 
 					break;
 				case "Quasi-autoroute":
@@ -311,6 +319,11 @@ public class Tools {
 				case "Bretelle":
 					sfBuilder.set("SPEED", 50);
 					break;
+//				case "Chemin":
+//				case "Route empierrée":
+//				case "Piste cyclable":
+//					sfBuilder.set("SPEED", 10);
+//					break;
 				case "Route à 1 chaussée":
 				case "Route à 2 chaussées":
 				case "Rond-point":
@@ -324,8 +337,9 @@ public class Tools {
 						sfBuilder.set("SPEED", 40);
 						break;
 					default:
-						sfBuilder.set("SPEED",  80);
+						sfBuilder.set("SPEED", 80);
 					}
+					break;
 				default:
 					continue;
 				}
@@ -335,111 +349,61 @@ public class Tools {
 			}
 		} catch (Exception problem) {
 			problem.printStackTrace();
-		} finally {
-			routeIt.close();
-		}
+		} 
 		routesSDS.dispose();
 		return Collec.exportSFC(roadDFC.collection(), fileOut);
 	}
 	
-	public static File createPointFromCsv(File fileIn, File FileOut, File empriseFile, String name)
-			throws IOException, NoSuchAuthorityCodeException, FactoryException, ParseException, MismatchedDimensionException, TransformException {
+	public static File createPointFromCsv(File fileIn, File fileOut, File empriseFile, String name) throws IOException, NoSuchAuthorityCodeException, FactoryException, MismatchedDimensionException, TransformException, ParseException	 {
 
-		boolean wkt = false;
-		boolean mercador = false;
-
-		WKTReader wktReader = new WKTReader();
 		GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
 		DefaultFeatureCollection coll = new DefaultFeatureCollection();
 		SimpleFeatureBuilder pointSfBuilder = Schemas.getMUPAmenitySchema(name);
 
 		CSVReader ptCsv = new CSVReader(new FileReader(fileIn));
-
-		// case geocoded return lat/long
-		CoordinateReferenceSystem epsg4326 = CRS.decode("EPSG:4326");
-		CoordinateReferenceSystem epsg2154 = CRS.decode("EPSG:2154");
-		MathTransform transform = CRS.findMathTransform(epsg4326, epsg2154, true);
-
 		String[] firstLine = ptCsv.readNext();
-		int mercLat = 0;
-		int mercLng = 0;
-		for (int i = 0; i < firstLine.length; i = i + 1) {
-			String field = firstLine[i];
-			if (field.equals("Lat")) {
-				mercLat = i;
-				mercador = true;
-			}
-			if (field.equals("Lng")) {
-				mercLng = i;
-			}
-		}
+
+		// case it's X and Y coordinates
+		int nColX = Attribute.getLatIndice(firstLine);
+		int nColY = Attribute.getLongIndice(firstLine);
+		
 		// case the geometry is a WKT String
+		boolean wkt = false;
+		WKTReader wktReader = new WKTReader();
 		int nColWKT = 0;
 		for (int i = 0; i < firstLine.length; i = i + 1) {
-			String field = firstLine[i];
-			if (field.contains("WKT")) {
+			if (firstLine[i].contains("WKT")) {
 				nColWKT = i;
 				wkt = true;
+				System.out.println(fileIn + " uses WKT geometries");
 				break;
 			}
 		}
-		// case it's X and Y coordinates
-		int nColX = 0;
-		int nColY = 0;
-		for (int i = 0; i < firstLine.length; i = i + 1) {
-			String field = firstLine[i];
-			if (field.equals("X")) {
-				nColX = i;
-			}
-			if (field.equals("Y")) {
-				nColY = i;
-			}
+		int	n1 =0;
+		int n2=0;
+		switch (name) {
+		case "leisure":
+		case "service":
+			n1 = Attribute.getIndice(firstLine, "TYPE");
+			n2 = Attribute.getIndice(firstLine, "LEVEL");
+			break;
+		case "train":
+			n1 = Attribute.getIndice(firstLine, "NATURE");
+			break;
 		}
-		// case it's geocoded from the BPE database
-		for (int i = 0; i < firstLine.length; i = i + 1) {
-			String field = firstLine[i];
-			if (field.contains("lambert_x")) {
-				nColX = i;
-			}
-			if (field.contains("lambert_y")) {
-				nColY = i;
-			}
-		}
-		
-		int	nColType = Attribute.getIndice(firstLine, "TYPE");
-		int nColLevel = Attribute.getIndice(firstLine, "LEVEL");
-		// System.out.println("level colonne : " + nColLevel);
-		// System.out.println("type colonne : " + nColType);
-		// System.out.println("y colonne : " + nColY);
-		// System.out.println("x colonne : " + nColX);
+
 		Object[] attr = { 0, "" };
-		int i = 0;
 		for (String[] row : ptCsv.readAll()) {
 			if (wkt) {
-				System.out.println(row[nColX]+ row[nColY]);
 				pointSfBuilder.add(wktReader.read(row[nColWKT]));
-			}
-			if (mercador) {
-				System.out.println(row[nColX]+ row[nColY]);
-				DirectPosition2D ptSrc = new DirectPosition2D(Double.valueOf(row[mercLat]), Double.valueOf(row[mercLng]));
-				DirectPosition2D ptDst = new DirectPosition2D();
-				transform.transform(ptSrc, ptDst);
-				Point point = geometryFactory.createPoint(new Coordinate(ptDst.x, ptDst.y));
-				pointSfBuilder.add(point);
 			} else {
-				System.out.println(row[nColX]+ row[nColY]);
-				Point point = geometryFactory
-						.createPoint(new Coordinate(Double.valueOf(row[nColX]), Double.valueOf(row[nColY])));
-				pointSfBuilder.add(point);
+				pointSfBuilder.add(geometryFactory.createPoint(new Coordinate(Double.valueOf(row[nColX]), Double.valueOf(row[nColY]))));
 			}
-			attr[0] = row[nColType];
-			attr[1] = row[nColLevel];
-			SimpleFeature feature = pointSfBuilder.buildFeature(String.valueOf(i), attr);
-			coll.add(feature);
-			i = i + 1;
+			attr[0] = row[n1];
+			attr[1] = row[n2];
+			coll.add(pointSfBuilder.buildFeature(null, attr));
 		}
 		ptCsv.close();
-		Collec.exportSFC(coll.collection(), new File("/home/mcolomb/tmp/tmp.shp"));
-		return Collec.exportSFC(Collec.cropSFC(coll.collection(), empriseFile), FileOut);
+		return Collec.exportSFC(Collec.snapDatas(coll.collection(), empriseFile), fileOut);
 	}
 }
