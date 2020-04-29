@@ -11,7 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -628,7 +628,7 @@ public class AnalyseTask {
 	public static void makeAreaDiagram(File base) throws IOException {
 		String[] fLine = { "sizeCell", "surface" };
 		for (int n = 4; n <= 7; n++) {
-			Hashtable<String, double[]> result = new Hashtable<String, double[]>();
+			HashMap<String, double[]> result = new HashMap<String, double[]>();
 			for (File f : base.listFiles()) {
 				if (f.isDirectory() && f.getName().startsWith("Manu") && f.getName().split("--")[1].startsWith("N" + n)) {
 					System.out.println(f.getName());
@@ -654,7 +654,7 @@ public class AnalyseTask {
 	public static void makezoningDiagram(File base) throws IOException {
 		String[] fLine = { "sizeCell", "surfaceAU", "surfaceA", "surfaceNC", "surfaceZC", "surfaceU", "surfaceN" };
 		for (int n = 4; n <= 7; n++) {
-			Hashtable<String, double[]> result = new Hashtable<String, double[]>();
+			HashMap<String, double[]> result = new HashMap<String, double[]>();
 			// pour les 10 simus
 			for (File f : base.listFiles()) {
 				if (f.isDirectory() && f.getName().startsWith("Manu") && f.getName().split("--")[1].startsWith("N" + n)) {
@@ -736,7 +736,7 @@ public class AnalyseTask {
 	}
 
 	public static void compProjects(List<File> projectToTest, String name, File fileOut, String echelle) throws Exception {
-		Hashtable<String, List<File>> scenarCollec = new Hashtable<String, List<File>>();
+		HashMap<String, List<File>> scenarCollec = new HashMap<String, List<File>>();
 		for (File projet : projectToTest) {
 			if (projet.getName().startsWith(name)) {
 				for (File scenar : projet.listFiles()) {
@@ -804,8 +804,8 @@ public class AnalyseTask {
 		for (List<ScenarAnalyse> arL : anal.getScenarDiffSeed()) {
 
 			// des objets inter-échelles
-			Hashtable<DirectPosition2D, Float> SvgCellEval20 = new Hashtable<DirectPosition2D, Float>();
-			Hashtable<DirectPosition2D, Integer> SvgCellRepet20 = new Hashtable<DirectPosition2D, Integer>();
+			HashMap<DirectPosition2D, Float> SvgCellEval20 = new HashMap<DirectPosition2D, Float>();
+			HashMap<DirectPosition2D, Integer> SvgCellRepet20 = new HashMap<DirectPosition2D, Integer>();
 			// pour tous les fichiers de ces listes
 
 			// pour les trois premières échelles
@@ -873,12 +873,12 @@ public class AnalyseTask {
 					SvgCellEval20 = RasterAnalyse.mergeRasters(concernedFile).getCellEval();
 					SvgCellRepet20 = RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
 				} else if (ech == minSizeCell * 3) {
-					Hashtable<DirectPosition2D, Float> cellEval60 = (Hashtable<DirectPosition2D, Float>) RasterAnalyse.mergeRasters(concernedFile).getCellEval();
-					Hashtable<DirectPosition2D, Integer> cellRepet60 = (Hashtable<DirectPosition2D, Integer>) RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
+					HashMap<DirectPosition2D, Float> cellEval60 = (HashMap<DirectPosition2D, Float>) RasterAnalyse.mergeRasters(concernedFile).getCellEval();
+					HashMap<DirectPosition2D, Integer> cellRepet60 = (HashMap<DirectPosition2D, Integer>) RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
 					RasterAnalyse.compareInclusionSizeCell(SvgCellRepet20, SvgCellEval20, cellRepet60, cellEval60, nameTest, ech);
 				} else if (ech == minSizeCell * 9) {
-					Hashtable<DirectPosition2D, Float> cellEval180 = (Hashtable<DirectPosition2D, Float>) RasterAnalyse.mergeRasters(concernedFile).getCellEval();
-					Hashtable<DirectPosition2D, Integer> cellRepet180 = (Hashtable<DirectPosition2D, Integer>) RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
+					HashMap<DirectPosition2D, Float> cellEval180 = (HashMap<DirectPosition2D, Float>) RasterAnalyse.mergeRasters(concernedFile).getCellEval();
+					HashMap<DirectPosition2D, Integer> cellRepet180 = (HashMap<DirectPosition2D, Integer>) RasterAnalyse.mergeRasters(concernedFile).getCellRepet();
 					RasterAnalyse.compareInclusionSizeCell(SvgCellRepet20, SvgCellEval20, cellRepet180, cellEval180, nameTest, ech);
 				}
 				// fractal dimention calculation

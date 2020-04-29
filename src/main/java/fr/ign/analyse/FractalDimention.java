@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 
 import org.geotools.coverage.grid.GridCoverage2D;
@@ -80,9 +80,9 @@ public class FractalDimention {
 		}
 	}
 
-	public static Hashtable<String, Hashtable<String, Double>> getCorrFracDim(File batiFile, File fileOut,
+	public static HashMap<String, HashMap<String, Double>> getCorrFracDim(File batiFile, File fileOut,
 			int resolution, String name) throws IOException {
-		Hashtable<String, Hashtable<String, Double>> results = new Hashtable<String, Hashtable<String, Double>>();
+		HashMap<String, HashMap<String, Double>> results = new HashMap<String, HashMap<String, Double>>();
 		results.put(name,
 				calculFracCor(
 						importRaster(
@@ -104,12 +104,12 @@ public class FractalDimention {
 	 * @param resolution : resolution of the rasterization of the builing/MUPoutput
 	 *                   merge
 	 * @param name       : same of the MUP-City scenario
-	 * @return an Hashtable containing the result of the calculation
+	 * @return an HashMap containing the result of the calculation
 	 * @throws IOException
 	 */
-	public static Hashtable<String, Hashtable<String, Double>> getCorrFracDim(File batiFile, File mupFile, File fileOut,
+	public static HashMap<String, HashMap<String, Double>> getCorrFracDim(File batiFile, File mupFile, File fileOut,
 			int resolution, String name) throws IOException {
-		Hashtable<String, Hashtable<String, Double>> results = new Hashtable<String, Hashtable<String, Double>>();
+		HashMap<String, HashMap<String, Double>> results = new HashMap<String, HashMap<String, Double>>();
 		if (mupFile.isDirectory()) {
 			mupFile = OutputTools.getMupFileFromFolder(mupFile, String.valueOf(resolution));
 		}
@@ -190,7 +190,7 @@ public class FractalDimention {
 		return toTestRaster;
 	}
 
-	public static Hashtable<String, Double> calculFracCor(GridCoverage2D toTestRaster, File fileOut)
+	public static HashMap<String, Double> calculFracCor(GridCoverage2D toTestRaster, File fileOut)
 			throws IOException {
 //		Rasters.writeGeotiff(new File(fileOut, "tmp"), toTestRaster);
 //		DefaultSampling dS = new DefaultSampling(22, 3000, 1.5, Sequence.GEOM);
@@ -201,7 +201,7 @@ public class FractalDimention {
 //
 //		Estimation estim = new EstimationFactory(correlation).getDefaultEstimation();
 //
-//		Hashtable<String, Double> values = new Hashtable<String, Double>();
+//		HashMap<String, Double> values = new HashMap<String, Double>();
 //		values.put("dimension de corrélation", estim.getDimension());
 //		values.put("R2", estim.getR2());
 //		values.put("BootStrap Confidence Interval Low", estim.getBootStrapConfidenceInterval()[0]);

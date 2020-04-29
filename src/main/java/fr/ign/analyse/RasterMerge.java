@@ -3,7 +3,7 @@ package fr.ign.analyse;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 
 import org.geotools.coverage.grid.GridCoverage2D;
@@ -188,9 +188,9 @@ public class RasterMerge {
 		return fileOut;
 	}
 
-	public static void writeGeotiff(Hashtable<DirectPosition2D, Integer> table, File fileOut, int ech,
+	public static void writeGeotiff(HashMap<DirectPosition2D, Integer> table, File fileOut, int ech,
 			File exempleRaster) throws IOException {
-		Hashtable<DirectPosition2D, Float> convert = new Hashtable<DirectPosition2D, Float>();
+		HashMap<DirectPosition2D, Float> convert = new HashMap<DirectPosition2D, Float>();
 
 		for (DirectPosition2D pos : table.keySet()) {
 			convert.put(pos, (float) table.get(pos));
@@ -199,7 +199,7 @@ public class RasterMerge {
 
 	}
 
-	public static void writeGeotiff(Hashtable<DirectPosition2D, Float> table, int ech, File fileOut, File exempleRaster)
+	public static void writeGeotiff(HashMap<DirectPosition2D, Float> table, int ech, File fileOut, File exempleRaster)
 			throws IOException {
 		ParameterValue<OverviewPolicy> policy = AbstractGridFormat.OVERVIEW_POLICY.createValue();
 		policy.setValue(OverviewPolicy.IGNORE);

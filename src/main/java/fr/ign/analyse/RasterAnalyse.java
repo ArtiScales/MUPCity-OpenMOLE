@@ -5,7 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -82,7 +82,7 @@ public class RasterAnalyse {
 
 	public static void makeComparaisonDecFract(File mainFile, File discreteFile, String echellee) throws IOException {
 
-		Hashtable<String, double[]> resultTable = new Hashtable<String, double[]>();
+		HashMap<String, double[]> resultTable = new HashMap<String, double[]>();
 		String[] fLine = { "Paramètres", "Nombre de cellule totale", "Nombre de cellules dans la typologie rurale", "Nombre de cellules dans la typologie péri-urbaine",
 				"Nombre de cellules dans la typologie banlieue", "Nombre de cellules dans la typologie centre-ville", "zone urbanisée", "zone à urbaniser" };
 		echelle = echellee;
@@ -98,14 +98,14 @@ public class RasterAnalyse {
 				for (File ff : f.listFiles()) {
 					if (ff.getName().endsWith("evalAnal-" + echelle + ".0.tif")) {
 						double[] line = new double[fLine.length - 1];
-						Hashtable<String, Integer> typo = getDiscreteCharacteristic(ff, discreteFile, typoObjects, diffObject);
+						HashMap<String, Integer> typo = getDiscreteCharacteristic(ff, discreteFile, typoObjects, diffObject);
 						line[0] = typo.get("allIn");
 						line[1] = typo.get("rural");
 						line[2] = typo.get("peri-urbain");
 						line[3] = typo.get("banlieue");
 						line[4] = typo.get("hypercentre") + typo.get("peri-centre");
 
-						Hashtable<String, Integer> zone = getDiscreteCharacteristic(ff, zoneFile, zoneObjects, zoneObject);
+						HashMap<String, Integer> zone = getDiscreteCharacteristic(ff, zoneFile, zoneObjects, zoneObject);
 						line[5] = zone.get("U") + zone.get("ZC");
 						line[6] = zone.get("AU");
 
@@ -161,8 +161,8 @@ public class RasterAnalyse {
 	 * @return a list containing the number of the wanted filed
 	 * @throws IOException
 	 */
-	public static Hashtable<String, Integer> getDiscreteCharacteristic(File rasterFile, File discreteFile, String field, String[] wantedFeat) throws IOException {
-		Hashtable<String, Integer> result = new Hashtable<String, Integer>();
+	public static HashMap<String, Integer> getDiscreteCharacteristic(File rasterFile, File discreteFile, String field, String[] wantedFeat) throws IOException {
+		HashMap<String, Integer> result = new HashMap<String, Integer>();
 		
 		// 
 		ShapefileDataStore fabricSDS = new ShapefileDataStore(discreteFile.toURI().toURL());
@@ -269,8 +269,8 @@ public class RasterAnalyse {
 	 * @throws IOException
 	 */
 
-	public static void compareInclusionSizeCell(Hashtable<DirectPosition2D, Integer> SvgCellRepet20, Hashtable<DirectPosition2D, Float> SvgCellEval20,
-			Hashtable<DirectPosition2D, Integer> cellRepetParent, Hashtable<DirectPosition2D, Float> cellEvalParent, String namescenar, int echelle) throws IOException {
+	public static void compareInclusionSizeCell(HashMap<DirectPosition2D, Integer> SvgCellRepet20, HashMap<DirectPosition2D, Float> SvgCellEval20,
+			HashMap<DirectPosition2D, Integer> cellRepetParent, HashMap<DirectPosition2D, Float> cellEvalParent, String namescenar, int echelle) throws IOException {
 
 		// nb of cells
 		int cellIn = 0;
@@ -281,7 +281,7 @@ public class RasterAnalyse {
 		ArrayList<Float> cellOutEval = new ArrayList<Float>();
 		// TODO it's a weird line
 		@SuppressWarnings("unchecked")
-		Hashtable<DirectPosition2D, Float> doubleSvgCellEval20 = (Hashtable<DirectPosition2D, Float>) SvgCellEval20.clone();
+		HashMap<DirectPosition2D, Float> doubleSvgCellEval20 = (HashMap<DirectPosition2D, Float>) SvgCellEval20.clone();
 
 		for (DirectPosition2D coord : cellRepetParent.keySet()) {
 			double empXmin = coord.getX() - echelle / 2;
@@ -361,9 +361,9 @@ public class RasterAnalyse {
 	 */
 	public static void getEvals(String nameExplo, boolean isResultFile) throws NoSuchAuthorityCodeException, IOException, FactoryException, ParseException {
 
-		Hashtable<String, Hashtable<String, Double[]>> distServices = new Hashtable<String, Hashtable<String, Double[]>>();
-		Hashtable<String, Hashtable<String, Double[]>> distLeisure = new Hashtable<String, Hashtable<String, Double[]>>();
-		Hashtable<String, Hashtable<String, Double[]>> distTC = new Hashtable<String, Hashtable<String, Double[]>>();
+		HashMap<String, HashMap<String, Double[]>> distServices = new HashMap<String, HashMap<String, Double[]>>();
+		HashMap<String, HashMap<String, Double[]>> distLeisure = new HashMap<String, HashMap<String, Double[]>>();
+		HashMap<String, HashMap<String, Double[]>> distTC = new HashMap<String, HashMap<String, Double[]>>();
 		if (isResultFile) {
 			for (File f : rootFile.listFiles()) {
 				if (f.isDirectory() && f.getName().startsWith("result")) {
@@ -420,10 +420,10 @@ public class RasterAnalyse {
 	 * @return a Double tableau containing [0] mean and [1] standard deviation of the distances
 	 * @throws IOException
 	 */
-	public static Hashtable<String, Double[]> getDistanceFromLeisure(File mupOutputFile, String nameScenario)
+	public static HashMap<String, Double[]> getDistanceFromLeisure(File mupOutputFile, String nameScenario)
 			throws NoSuchAuthorityCodeException, IOException, FactoryException, ParseException {
 
-		Hashtable<String, Double[]> result = new Hashtable<String, Double[]>();
+		HashMap<String, Double[]> result = new HashMap<String, Double[]>();
 
 		String[] nameFac = { "lei1", "lei2", "lei3" };
 
@@ -441,10 +441,10 @@ public class RasterAnalyse {
 	 * @return a Double tableau containing [0] mean and [1] standard deviation of the distances
 	 * @throws IOException
 	 */
-	public static Hashtable<String, Double[]> getDistanceFromServices(File mupOutputFile, String nameScenario)
+	public static HashMap<String, Double[]> getDistanceFromServices(File mupOutputFile, String nameScenario)
 			throws NoSuchAuthorityCodeException, IOException, FactoryException, ParseException {
 
-		Hashtable<String, Double[]> result = new Hashtable<String, Double[]>();
+		HashMap<String, Double[]> result = new HashMap<String, Double[]>();
 
 		String[] nameFac = { "fac1", "fac2", "fac3" };
 
@@ -467,10 +467,10 @@ public class RasterAnalyse {
 	 * @throws FactoryException
 	 * @throws ParseException
 	 */
-	public static Hashtable<String, Double[]> getDistanceFromTC(File mupOutputFile, String nameScenario)
+	public static HashMap<String, Double[]> getDistanceFromTC(File mupOutputFile, String nameScenario)
 			throws NoSuchAuthorityCodeException, IOException, FactoryException, ParseException {
 
-		Hashtable<String, Double[]> result = new Hashtable<String, Double[]>();
+		HashMap<String, Double[]> result = new HashMap<String, Double[]>();
 
 		String[] nameFac = { "pt" };
 
@@ -596,7 +596,7 @@ public class RasterAnalyse {
 
 		// with the other parameters
 		// with the topological spaces
-		Hashtable<String, String[]> tabDifferentObjects = loopDiffEntities();
+		HashMap<String, String[]> tabDifferentObjects = loopDiffEntities();
 
 		// pour tous les scénarios de la liste - comprenant les mêmes scenarios et
 		// projets mais avec des tailles de cellules différentes
@@ -617,7 +617,7 @@ public class RasterAnalyse {
 				firstCol[0] = differentObject[0];
 				ShapefileDataStore discreteSDS = new ShapefileDataStore(discreteFile.toURI().toURL());
 				SimpleFeatureCollection discrete = discreteSDS.getFeatureSource().getFeatures();
-				Hashtable<String, double[]> result = new Hashtable<>();
+				HashMap<String, double[]> result = new HashMap<>();
 
 				// instanciation of the different entities in the result
 				SimpleFeatureIterator discreteIt = discrete.features();
@@ -631,8 +631,8 @@ public class RasterAnalyse {
 				} finally {
 					discreteIt.close();
 				}
-				Hashtable<String, Double> entitySurf = new Hashtable<String, Double>();
-				Hashtable<String, Double> entityNumber = new Hashtable<String, Double>();
+				HashMap<String, Double> entitySurf = new HashMap<String, Double>();
+				HashMap<String, Double> entityNumber = new HashMap<String, Double>();
 				SimpleFeatureIterator discreteIt2 = discrete.features();
 				try {
 					while (discreteIt2.hasNext()) {
@@ -736,8 +736,8 @@ public class RasterAnalyse {
 		// variables to create statistics
 
 		DescriptiveStatistics statNb = new DescriptiveStatistics();
-		Hashtable<DirectPosition2D, Integer> cellRepetCentroid = new Hashtable<DirectPosition2D, Integer>();
-		Hashtable<DirectPosition2D, ArrayList<Float>> cellEvalCentroid = new Hashtable<DirectPosition2D, ArrayList<Float>>();
+		HashMap<DirectPosition2D, Integer> cellRepetCentroid = new HashMap<DirectPosition2D, Integer>();
+		HashMap<DirectPosition2D, ArrayList<Float>> cellEvalCentroid = new HashMap<DirectPosition2D, ArrayList<Float>>();
 
 		int nbDeScenar = 0; // le nombre total de scénarios analysés dans la fonction
 
@@ -789,8 +789,8 @@ public class RasterAnalyse {
 					try {
 						val = ((float[]) coverage.evaluate(coordCentre))[0];
 					} catch (ClassCastException c) {
-						double zob = ((double[]) coverage.evaluate(coordCentre))[0];
-						val = (float) zob;
+						double tmpval = ((double[]) coverage.evaluate(coordCentre))[0];
+						val = (float) tmpval;
 					}
 
 					if (val > 0) {
@@ -820,7 +820,7 @@ public class RasterAnalyse {
 			iter = iter + 1;
 		}
 
-		Hashtable<DirectPosition2D, Float> cellEvalFinal = moyenneEvals(cellEvalCentroid);
+		HashMap<DirectPosition2D, Float> cellEvalFinal = moyenneEvals(cellEvalCentroid);
 
 		RasterMergeResult result = new RasterMergeResult();
 
@@ -842,8 +842,8 @@ public class RasterAnalyse {
 	 * 
 	 * @return
 	 */
-	public static Hashtable<String, String[]> loopDiffEntities() {
-		Hashtable<String, String[]> tabDifferentObjects = new Hashtable<String, String[]>();
+	public static HashMap<String, String[]> loopDiffEntities() {
+		HashMap<String, String[]> tabDifferentObjects = new HashMap<String, String[]>();
 		String[] differentObjects = { "UrbanFabric", "typo" };
 		tabDifferentObjects.put(differentObjects[0], differentObjects);
 		String[] differentObjects2 = { "Morphology", "morpholo" };
@@ -856,7 +856,7 @@ public class RasterAnalyse {
 	}
 
 	public static File createStatDiscreteSingleSimu(String nameScenar, File mupOutputFile, File discreteFile) throws IOException {
-		Hashtable<String, String[]> tabDifferentObjects = loopDiffEntities();
+		HashMap<String, String[]> tabDifferentObjects = loopDiffEntities();
 
 		// loop on those different objects
 		for (String[] differentObject : tabDifferentObjects.values()) {
@@ -888,8 +888,8 @@ public class RasterAnalyse {
 		nameLineFabric[3] = "average evaluation";
 		nameLineFabric[4] = "standard deviation of evaluation";
 
-		Hashtable<String, double[]> cellByFabric = new Hashtable<String, double[]>();
-		Hashtable<String, DescriptiveStatistics> descStatByFabric = new Hashtable<String, DescriptiveStatistics>();
+		HashMap<String, double[]> cellByFabric = new HashMap<String, double[]>();
+		HashMap<String, DescriptiveStatistics> descStatByFabric = new HashMap<String, DescriptiveStatistics>();
 		System.out.println("pour le sujet " + champ[0]);
 		ShapefileDataStore fabricSDS = new ShapefileDataStore(discreteFile.toURI().toURL());
 		SimpleFeatureCollection fabricType = fabricSDS.getFeatureSource().getFeatures();
@@ -916,7 +916,7 @@ public class RasterAnalyse {
 				double Ymin = env.getMinY();
 				double Ymax = env.getMaxY();
 				// if the geographic feature has already been analysed
-				if (cellByFabric.contains(cityName)) {
+				if (cellByFabric.containsKey(cityName)) {
 					resultFabric = cellByFabric.get(cityName);
 					stat = descStatByFabric.get(cityName);
 				}
@@ -953,7 +953,7 @@ public class RasterAnalyse {
 		} finally {
 			iteratorGeoFeat.close();
 		}
-		Csv.generateCsvFile(cellByFabric, statFile, ("cellBy" + champ[0]), nameLineFabric, false);
+		Csv.generateCsvFile(cellByFabric, ("cellBy" + champ[0]), statFile, nameLineFabric, false);
 		fabricSDS.dispose();
 
 		return statFile;
@@ -961,7 +961,7 @@ public class RasterAnalyse {
 
 	public static void prepareForCityComparison(File f, String scenarName) throws IOException {
 		String[] firstLine = { "nameCommune" };
-		Hashtable<String, double[]> result = new Hashtable<String, double[]>();
+		HashMap<String, double[]> result = new HashMap<String, double[]>();
 		int nbSim = 1;
 		for (File resultFile : f.listFiles()) {
 			if (resultFile.getName().endsWith(scenarName)) {
@@ -1006,7 +1006,7 @@ public class RasterAnalyse {
 	 * @return String[] with 0 : the type of entity and 1 : the attribute name
 	 */
 	public static File createStatsStabDiscrete(String nameScenar, RasterMergeResult result, File discreteFile) throws IOException {
-		Hashtable<String, String[]> tabDifferentObjects = loopDiffEntities();
+		HashMap<String, String[]> tabDifferentObjects = loopDiffEntities();
 
 		// loop on those different objects
 		for (String[] differentObject : tabDifferentObjects.values()) {
@@ -1038,8 +1038,8 @@ public class RasterAnalyse {
 		nameLineFabric[3] = "Unstable cells";
 		nameLineFabric[4] = "average evaluation";
 
-		Hashtable<String, double[]> cellByFabric = new Hashtable<String, double[]>();
-		Hashtable<String, List<Double>> evals = new Hashtable<String, List<Double>>();
+		HashMap<String, double[]> cellByFabric = new HashMap<String, double[]>();
+		HashMap<String, List<Double>> evals = new HashMap<String, List<Double>>();
 
 		System.out.println("pour le sujet " + champ[0]);
 		ShapefileDataStore fabricSDS = new ShapefileDataStore(discreteFile.toURI().toURL());
@@ -1092,7 +1092,7 @@ public class RasterAnalyse {
 						// on fait une liste vide
 						List<Double> salut = new ArrayList<>();
 						// si l'entité possède déjà une liste d'évaluations, on la récupère à la place
-						if (evals.contains(fabricName)) {
+						if (evals.containsKey(fabricName)) {
 							salut = evals.get(fabricName);
 						}
 						// on ajoute cette nouvelle évaluation
@@ -1153,7 +1153,7 @@ public class RasterAnalyse {
 		for (int i = 2; i < fileRepli.size() + 2; i++) {
 			nameLineFabric[i] = (i - 1) + " replication";
 		}
-		Hashtable<String, double[]> cellsByCity = new Hashtable<String, double[]>();
+		HashMap<String, double[]> cellsByCity = new HashMap<String, double[]>();
 
 		ShapefileDataStore fabricSDS = new ShapefileDataStore(discreteFile.toURI().toURL());
 		SimpleFeatureCollection fabricType = fabricSDS.getFeatureSource().getFeatures();
@@ -1206,7 +1206,7 @@ public class RasterAnalyse {
 			iteratorCity.close();
 		}
 
-		Hashtable<String, double[]> result = new Hashtable<String, double[]>();
+		HashMap<String, double[]> result = new HashMap<String, double[]>();
 
 		// calculate the coefficient of variation
 		for (String city : cellsByCity.keySet()) {
@@ -1222,7 +1222,7 @@ public class RasterAnalyse {
 			result.put(city, line);
 		}
 
-		Csv.generateCsvFile(result, statFile, "cellsForCities", nameLineFabric, false);
+		Csv.generateCsvFile(result, "cellsForCities", statFile, nameLineFabric, false);
 		fabricSDS.dispose();
 
 		return statFile;
@@ -1236,19 +1236,19 @@ public class RasterAnalyse {
 	 */
 	public static void createStatsEvol(double[] histo, String echelle) throws IOException {
 
-		Hashtable<String, double[]> enForme = new Hashtable<String, double[]>();
+		HashMap<String, double[]> enForme = new HashMap<String, double[]>();
 		enForme.put("histo", histo);
-		Csv.generateCsvFileCol(enForme, statFile, "selected_cells_all_simu-" + echelle);
+		Csv.generateCsvFileCol(enForme, "selected_cells_all_simu-" + echelle, statFile);
 	}
 
 	/**
 	 * Put all evaluations of an input in a .csv file
 	 *
 	 */
-	public static void createStatEvals(Hashtable<DirectPosition2D, Float> cellEvalFinal) throws Exception {
+	public static void createStatEvals(HashMap<DirectPosition2D, Float> cellEvalFinal) throws Exception {
 
 		// fichier final
-		Hashtable<String, double[]> deuForme = new Hashtable<String, double[]>();
+		HashMap<String, double[]> deuForme = new HashMap<String, double[]>();
 		double[] distrib = new double[cellEvalFinal.size()];
 		int cpt = 0;
 		for (DirectPosition2D it : cellEvalFinal.keySet()) {
@@ -1257,11 +1257,11 @@ public class RasterAnalyse {
 		}
 		deuForme.put("Évaluations du scénario", distrib);
 		statFile.mkdirs();
-		Csv.generateCsvFileCol(deuForme, statFile, "evaluation_moyenne-" + echelle);
+		Csv.generateCsvFileCol(deuForme, "evaluation_moyenne-" + echelle, statFile);
 	}
 
-	private static Hashtable<DirectPosition2D, Float> moyenneEvals(Hashtable<DirectPosition2D, ArrayList<Float>> cellEval) {
-		Hashtable<DirectPosition2D, Float> cellEvalFinal = new Hashtable<DirectPosition2D, Float>();
+	private static HashMap<DirectPosition2D, Float> moyenneEvals(HashMap<DirectPosition2D, ArrayList<Float>> cellEval) {
+		HashMap<DirectPosition2D, Float> cellEvalFinal = new HashMap<DirectPosition2D, Float>();
 		for (DirectPosition2D temp : cellEval.keySet()) {
 			float somme = 0;
 			ArrayList<Float> tablTemp = new ArrayList<Float>();
@@ -1274,9 +1274,9 @@ public class RasterAnalyse {
 		return cellEvalFinal;
 	}
 
-	public static void HighAndLowEvals(Hashtable<DirectPosition2D, ArrayList<Float>> cellEval, File fileOut, File fileExample) throws IOException {
-		Hashtable<DirectPosition2D, Float> cellEvalMin = new Hashtable<DirectPosition2D, Float>();
-		Hashtable<DirectPosition2D, Float> cellEvalMax = new Hashtable<DirectPosition2D, Float>();
+	public static void HighAndLowEvals(HashMap<DirectPosition2D, ArrayList<Float>> cellEval, File fileOut, File fileExample) throws IOException {
+		HashMap<DirectPosition2D, Float> cellEvalMin = new HashMap<DirectPosition2D, Float>();
+		HashMap<DirectPosition2D, Float> cellEvalMax = new HashMap<DirectPosition2D, Float>();
 		for (DirectPosition2D temp : cellEval.keySet()) {
 			ArrayList<Float> tablTemp = new ArrayList<Float>();
 			tablTemp.addAll(cellEval.get(temp));
@@ -1337,8 +1337,8 @@ public class RasterAnalyse {
 	 */
 
 	public static StatTab statDescriptive(String nameScenar, RasterMergeResult result, double variationThreshold, boolean surface) {
-		Hashtable<DirectPosition2D, Integer> cellRepet = result.getCellRepet();
-		Hashtable<DirectPosition2D, Float> cellEval = result.getCellEval();
+		HashMap<DirectPosition2D, Integer> cellRepet = result.getCellRepet();
+		HashMap<DirectPosition2D, Float> cellEval = result.getCellEval();
 		DescriptiveStatistics statNb = result.getHistoDS();
 
 		double[] tableauFinal = new double[(int) (12 + result.getNbScenar())];

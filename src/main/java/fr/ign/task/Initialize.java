@@ -666,6 +666,7 @@ public class Initialize {
 	private static <T> void unregisterImageIO(Class<T> category) {
 		IIORegistry registry = IIORegistry.getDefaultInstance();
 		Iterator<T> it = registry.getServiceProviders(category, false);
+		//TODO erase that google sheet
 		ArrayList<T> providers = Lists.newArrayList(it);
 		for (T spi : providers) {
 			if (spi.getClass().getPackage().getName().contains("com.sun")) {
