@@ -21,6 +21,8 @@ import org.opengis.referencing.operation.TransformException;
  */
 public class DataImporter {
 
+	private static int meshresolution = 500; 
+	
 	private static String mainSRC = "2154";
 	
 	static boolean multipleDepartment = false;
@@ -57,6 +59,7 @@ public class DataImporter {
 		Prepare.setRootFolder(rootFolder);
 		Prepare.setFolderIn(folderIn);
 		Prepare.setFolderOut(folderOut);
+		Prepare.setNUOutFolder(new File(folderOut, "NU"));
 		new File(folderOut, "NU").mkdirs();
 		Prepare.setTmpFolder(new File(rootFolder, "tmp"));
 		new File(rootFolder, "tmp").mkdirs();
@@ -65,7 +68,7 @@ public class DataImporter {
 		Prepare.setAmenityFolder(new File(folderIn, "amenity"));
 		Prepare.setAdminFile(new File(folderIn, "listeCommunities.csv"));
 		Prepare.setVegeFolder(new File(folderIn, "vege"));
-		Prepare.setNUFolder(new File(folderIn, "NU"));
+		Prepare.setNUInFolder(new File(folderIn, "NU"));
 		Prepare.setHydroFolder(new File(folderIn, "hydro"));
 		Prepare.setEmpriseFile(new File(folderIn,"emprise.shp"));
 		Prepare.setMultipleDepartment(multipleDepartment);
@@ -87,34 +90,26 @@ public class DataImporter {
 
 		// Amenities
 
-		// // IN CASE OF NO GEOCODED SIRENE POINTS
+		// // IN CASE OF NO GEOCODED SIRENE POINTS (probably not working)
 		// // sort the different amenities -first part (before the geocoding
 		// sortAndGeocodeAmenities(rootFile, empriseFile, listDep, dbInfo);
 
 		// IN CASE OF GEOCODED SIRENE POINTS (you can find french ones here : http://data.cquest.org/geo_sirene/v2019/last/dep/)
-//		Prepare.sortAmenities();
+		Prepare.sortAmenities();
 		// Train
 //		Prepare.prepareTrain();
-		// Zones Non Urbanisables
-		Prepare.makeFullZoneNU();
-		//
-		Prepare.makePhysicNU();
+//		// Zones Non Urbanisables
+//		Prepare.makeFullZoneNU();
+//		//
+//		Prepare.makePhysicNU();
 	}
 
 	public static String getNameFieldCodeCommunity() {
 		return nameFieldCodeCommunity;
 	}
 
-	public static void setNameFieldCodeCommunity(String nameFieldCodeCommunity) {
-		DataImporter.nameFieldCodeCommunity = nameFieldCodeCommunity;
-	}
-
 	public static String getNameFieldCodeGeoFla() {
 		return nameFieldCodeGeoFla;
-	}
-
-	public static void setNameFieldCodeGeoFla(String nameFieldCodeGeoFla) {
-		DataImporter.nameFieldCodeGeoFla = nameFieldCodeGeoFla;
 	}
 
 	public static String getNameFieldCodeSIRENE() {
@@ -129,48 +124,27 @@ public class DataImporter {
 		return mainSRC;
 	}
 
-	public static void setMainSRC(String mainSRC) {
-		DataImporter.mainSRC = mainSRC;
-	}
-
 	public static String getSireneSRC() {
 		return sireneSRC;
-	}
-
-	public static void setSireneSRC(String sireneSRC) {
-		DataImporter.sireneSRC = sireneSRC;
 	}
 
 	public static String getNameFieldCodeBPE() {
 		return nameFieldCodeBPE;
 	}
 
-	public static void setNameFieldCodeBPE(String nameFieldCodeBPE) {
-		DataImporter.nameFieldCodeBPE = nameFieldCodeBPE;
-	}
-
 	public static String getBpeSRC() {
 		return bpeSRC;
-	}
-
-	public static void setBpeSRC(String bpeSRC) {
-		DataImporter.bpeSRC = bpeSRC;
 	}
 
 	public static String getBpeType() {
 		return bpeType;
 	}
 
-	public static void setBpeType(String bpeType) {
-		DataImporter.bpeType = bpeType;
-	}
-
 	public static String getSireneType() {
 		return sireneType;
 	}
 
-	public static void setSireneType(String sireneType) {
-		DataImporter.sireneType = sireneType;
+	public static int getMeshresolution() {
+		return meshresolution;
 	}
-
 }

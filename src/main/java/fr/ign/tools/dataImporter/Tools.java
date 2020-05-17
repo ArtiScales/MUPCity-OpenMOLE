@@ -20,15 +20,18 @@ import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.referencing.CRS;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.geometry.MismatchedDimensionException;
@@ -53,6 +56,13 @@ import fr.ign.cogit.geoxygene.util.conversion.ShapefileReader;
 import fr.ign.cogit.geoxygene.util.conversion.ShapefileWriter;
 
 public class Tools {
+	/**
+	 * Delete road segments that are isolated from the main 
+	 * @param roadFile
+	 * @param outFile
+	 * @throws NoSuchAuthorityCodeException
+	 * @throws FactoryException
+	 */
 	public static void deleteIsolatedRoadSections(File roadFile, File outFile) throws NoSuchAuthorityCodeException, FactoryException{
 		// delete the segments which are not linked to the main road network -- uses of geox tool coz I failed with geotools graphs. Conectors between objects still broken
 
@@ -124,28 +134,22 @@ public class Tools {
 	 * @throws FactoryException
 	 * @throws FileNotFoundException 
 	 */
-	public static File createEmpriseFile(File inFolder, File adminFile) throws NoSuchAuthorityCodeException, FactoryException, FileNotFoundException, IOException {
-
+	public static File createEmpriseFile(File inFolder, File adminFile) throws IOException, NoSuchAuthorityCodeException, FactoryException {
 		ShapefileDataStore geoFlaSDS = new ShapefileDataStore((new File(inFolder, "admin/commune.shp")).toURI().toURL());
-		SimpleFeatureCollection geoFlaSFC = geoFlaSDS.getFeatureSource().getFeatures();
 		CSVReader listVilleReader = new CSVReader(new FileReader(adminFile));
 		DefaultFeatureCollection villeColl = new DefaultFeatureCollection();
 		DefaultFeatureCollection emprise = new DefaultFeatureCollection();
-
 		final int numInsee = Attribute.getIndice(listVilleReader.readNext(), DataImporter.getNameFieldCodeCommunity());
-
 		for (String[] row : listVilleReader.readAll()) {
-			Arrays.stream(geoFlaSFC.toArray(new SimpleFeature[0])).forEach(feat -> {
-				if (row[numInsee].equals(feat.getAttribute(DataImporter.getNameFieldCodeGeoFla()))) {
+			Arrays.stream(geoFlaSDS.getFeatureSource().getFeatures().toArray(new SimpleFeature[0])).forEach(feat -> {
+				if (row[numInsee].equals(feat.getAttribute(DataImporter.getNameFieldCodeGeoFla())))
 					villeColl.add(feat);
-		}});}
+		});}
 		SimpleFeatureBuilder sfBuilder = Schemas.getBasicSchema("emprise");
 		sfBuilder.add(Geom.unionSFC(villeColl).buffer(3000));
 		emprise.add(sfBuilder.buildFeature(null));
-
 		listVilleReader.close();
 		geoFlaSDS.dispose();
-
 		return Collec.exportSFC(emprise.collection(), new File(inFolder, "emprise.shp"));
 	}
 	
@@ -171,46 +175,52 @@ public class Tools {
 		ShapefileDataStore empriseSDS = new ShapefileDataStore(empriseFile.toURI().toURL());
 		SimpleFeatureCollection emprise = DataUtilities.collection(empriseSDS.getFeatureSource().getFeatures());
 		empriseSDS.dispose();
-
 		ShapefileDataStore vegetSDS = new ShapefileDataStore(vegetFile.toURI().toURL());
 		vegetSDS.setCharset(Charset.forName("UTF-8"));
-		SimpleFeatureCollection veget = Collec.snapDatas(vegetSDS.getFeatureSource().getFeatures(), emprise);
-	
 		DefaultFeatureCollection vegetDFC = new DefaultFeatureCollection();
-		SimpleFeatureBuilder sfBuilder = Schemas.getMUPAmenitySchema("leisure");
-
+		
+		SimpleFeatureTypeBuilder sfTypeBuilder = new SimpleFeatureTypeBuilder();
+		sfTypeBuilder.setCRS(CRS.decode("EPSG:2154"));
+		sfTypeBuilder.setName("vege");
+		sfTypeBuilder.add("the_geom", Polygon.class);
+		sfTypeBuilder.setDefaultGeometry("the_geom");
+		sfTypeBuilder.add("TYPE", String.class);
+		sfTypeBuilder.add("LEVEL", Integer.class);
+		SimpleFeatureType pointFeatureType = sfTypeBuilder.buildFeatureType();
+		SimpleFeatureBuilder sfBuilder = new SimpleFeatureBuilder(pointFeatureType);
+		
 		//classification of the green spaces with their sizes
-		try (SimpleFeatureIterator featIt = veget.features()) {
+		try (SimpleFeatureIterator featIt = Collec.snapDatas(vegetSDS.getFeatureSource().getFeatures(), emprise).features()) {
 			while (featIt.hasNext()) {
 				SimpleFeature feat = featIt.next();
-				if (feat.getAttribute("NATURE").equals("Bois") || feat.getAttribute("NATURE").equals("Forêt fermée de feuillus")
-						|| feat.getAttribute("NATURE").equals("Forêt fermée de conifères") || feat.getAttribute("NATURE").equals("Forêt fermée mixte")
-						|| feat.getAttribute("NATURE").equals("Forêt ouverte") || feat.getAttribute("NATURE").equals("Zone arborée")) {
-					String type ;
-					int level ;
-					if (((Geometry) feat.getDefaultGeometry()).getArea() > 1000) {
-						if (((Geometry) feat.getDefaultGeometry()).getArea() < 20000) {
-							type = "espace_vert_f1";
-							level = 1;
-						} else if (((Geometry) feat.getDefaultGeometry()).getArea() < 1000000) {
-							type = "espace_vert_f2";
-							level = 2;
-						} else {
-							type = "espace_vert_f3";
-							level = 3;
-						}
-						sfBuilder.add((Geometry) feat.getDefaultGeometry());
-						sfBuilder.set("TYPE",type);
-						sfBuilder.set("LEVEL" ,level );
-						vegetDFC.add(sfBuilder.buildFeature(Attribute.makeUniqueId()));
+				Geometry featGeom = (Geometry) feat.getDefaultGeometry();
+				String nature = (String) feat.getAttribute("NATURE");
+				if ((nature.equals("Bois") || nature.equals("Forêt fermée de feuillus") || nature.equals("Forêt fermée de conifères")
+						|| nature.equals("Forêt fermée mixte") || nature.equals("Forêt ouverte") || nature.equals("Zone arborée"))
+						&& featGeom.getArea() > 1000) {
+					String type;
+					int level;
+					if (featGeom.getArea() < 20000) {
+						type = "espace_vert_f1";
+						level = 1;
+					} else if (featGeom.getArea() < 1000000) {
+						type = "espace_vert_f2";
+						level = 2;
+					} else {
+						type = "espace_vert_f3";
+						level = 3;
 					}
+					sfBuilder.add(featGeom);
+					sfBuilder.set("TYPE", type);
+					sfBuilder.set("LEVEL", level);
+					vegetDFC.add(sfBuilder.buildFeature(Attribute.makeUniqueId()));
 				}
 			}
 		} catch (Exception problem) {
 			problem.printStackTrace();
-		} 
+		}
 		vegetSDS.dispose();
-
+Collec.exportSFC(vegetDFC, new File("/tmp/vege"));
 		//make road infos
 		FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2();
 		ShapefileDataStore roadSDS = new ShapefileDataStore(roadFile.toURI().toURL());
@@ -225,30 +235,30 @@ public class Tools {
 		filters.add(ff.like(ff.property("NATURE"), "Type autoroutier" ));
 		SimpleFeatureCollection route = DataUtilities.collection(road.subCollection(ff.not(ff.or(filters))));
 		roadSDS.dispose();
-		
 		DefaultFeatureCollection leisureAccess = new DefaultFeatureCollection();
 		GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
 		SimpleFeatureBuilder pointSfBuilder = Schemas.getMUPAmenitySchema("leisure") ;
 		// selection of the intersection points into those zones
 		try (SimpleFeatureIterator vegetIt = vegetDFC.features()){
-			while (vegetIt.hasNext()) {
+			while (vegetIt.hasNext()) {	
 				SimpleFeature featForet = vegetIt.next();
+				Geometry geomForet = ((Geometry) featForet.getDefaultGeometry()).buffer(15);
 				// snap of the wanted data
-				SimpleFeatureCollection snapRoute = Collec.snapDatas(route, ((Geometry) featForet.getDefaultGeometry()).buffer(15));
-				SimpleFeatureCollection snapChemin = Collec.snapDatas(chemin, ((Geometry) featForet.getDefaultGeometry()).buffer(15));
+				SimpleFeatureCollection snapRoute = Collec.snapDatas(route, geomForet);
+				SimpleFeatureCollection snapChemin = Collec.snapDatas(chemin, geomForet);
+				// loop on roads
 				try (SimpleFeatureIterator routeIt = snapRoute.features()) {
 					while (routeIt.hasNext()) {
-						SimpleFeature featRoute = routeIt.next();
-						try (SimpleFeatureIterator itChemin = snapChemin.features()) {
-							trail : while (itChemin.hasNext()) {
-								SimpleFeature featChemin = itChemin.next();
-								Coordinate[] coord = ((Geometry) featChemin.getDefaultGeometry()).intersection((Geometry) featRoute.getDefaultGeometry()).getCoordinates();
-								for (Coordinate co : coord) {
+						Geometry geomRoute = (Geometry) routeIt.next().getDefaultGeometry();
+						// loop on trails
+						try (SimpleFeatureIterator itChemin = Collec.snapDatas(snapChemin, geomRoute).features()) {
+							trail: while (itChemin.hasNext()) {
+								for (Coordinate co : ((Geometry) itChemin.next().getDefaultGeometry()).intersection(geomRoute).getCoordinates()) {
 									Point point = geometryFactory.createPoint(co);
-									if ((((Geometry) featForet.getDefaultGeometry()).buffer(15)).contains(point)) {
+									if (geomForet.contains(point)) {
 										pointSfBuilder.add(point);
-										pointSfBuilder.set("TYPE", featForet.getAttribute("TYPE"));
-										pointSfBuilder.set("LEVEL", featForet.getAttribute("LEVEL"));
+										pointSfBuilder.set("TYPE", (String) featForet.getAttribute("TYPE"));
+										pointSfBuilder.set("LEVEL", (int) featForet.getAttribute("LEVEL"));
 										leisureAccess.add(pointSfBuilder.buildFeature(Attribute.makeUniqueId()));
 										//we limit to one point per trail
 										break trail;
@@ -293,7 +303,6 @@ public class Tools {
 				break;
 			}
 		} catch (NumberFormatException n) {
-			System.out.println("no coord for entity " + row + row2 + ". Return null");
 			return null;
 		}
 		return result;
