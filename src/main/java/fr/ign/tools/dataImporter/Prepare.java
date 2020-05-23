@@ -34,7 +34,11 @@ import fr.ign.cogit.geoToolsFunctions.Csv;
 import fr.ign.cogit.geoToolsFunctions.Schemas;
 import fr.ign.cogit.geoToolsFunctions.vectors.Collec;
 import fr.ign.cogit.geoToolsFunctions.vectors.Shp;
-
+/**
+ * Class containing methods to prepare. 
+ * @author Maxime Colomb
+ *
+ */
 public class Prepare {
 
 	static boolean multipleDepartment;
@@ -128,7 +132,6 @@ public class Prepare {
 			}			
 		}
 		return result;
-
 	}
 
 	/**
@@ -357,7 +360,6 @@ public class Prepare {
 			Csv.mergeCSVFiles(new File(amenityFolder, "sirene"), sireneFile);
 			Csv.mergeCSVFiles(new File(amenityFolder, "BPE"), BPEFile);
 		}
-		
 		CSVReader sirene = new CSVReader(new FileReader(sireneFile));
 		String[] header = sirene.readNext();
 		sirene.close();
@@ -408,12 +410,10 @@ public class Prepare {
 		File loisirSirene = new File(tmpFolder, "sireneLoisirs.csv");
 		File errorAmenities = new File(tmpFolder, "errorAmenities.csv");
 
-		if (serviceSirene.exists()) {
+		if (serviceSirene.exists())
 			Files.delete(serviceSirene.toPath());
-		}
-		if (loisirSirene.exists()) {
+		if (loisirSirene.exists())
 			Files.delete(loisirSirene.toPath());
-		}
 		sireneFile = preparePoint(sireneFile, adminFile, sireneFile, DataImporter.getSireneSRC(), DataImporter.getNameFieldCodeSIRENE());
 
 		CSVReader csvSIRENE = new CSVReader(new FileReader(sireneFile));
@@ -422,9 +422,8 @@ public class Prepare {
 		CSVWriter csvErrorAmenities = new CSVWriter(new FileWriter(errorAmenities, true));
 		String[] firstLineSirene = csvSIRENE.readNext();
 		String[] newFirstLineSirene = new String[firstLineSirene.length + 2];
-		for (int k = 0; k < firstLineSirene.length; k = k + 1) {
+		for (int k = 0; k < firstLineSirene.length; k = k + 1)
 			newFirstLineSirene[k] = firstLineSirene[k];
-		}
 		newFirstLineSirene[firstLineSirene.length] = "TYPE";
 		newFirstLineSirene[firstLineSirene.length + 1] = "LEVEL";
 		csvLoisirSirene.writeNext(newFirstLineSirene);
@@ -489,16 +488,12 @@ public class Prepare {
 		File csvTrainsBPE = new File(tmpFolder, "BPE-Trains.csv");
 		File errorAmenities = new File(tmpFolder, "errorAmenities.csv");
 
-		if (csvLoisirsBPE.exists()) {
+		if (csvLoisirsBPE.exists())
 			Files.delete(csvLoisirsBPE.toPath());
-		}
-		if (csvServicesBPE.exists()) {
+		if (csvServicesBPE.exists())
 			Files.delete(csvServicesBPE.toPath());
-		}
-		if (csvTrainsBPE.exists()) {
+		if (csvTrainsBPE.exists())
 			Files.delete(csvTrainsBPE.toPath());
-		}
-
 		BPEFile = preparePoint(BPEFile, adminFile, BPEFile, DataImporter.getBpeSRC(), DataImporter.getNameFieldCodeBPE());
 
 		CSVReader csvBPE = new CSVReader(new FileReader(pointBPEIn));
@@ -509,9 +504,8 @@ public class Prepare {
 
 		String[] firstLineBPE = csvBPE.readNext();
 		String[] newFirstLineBPE = new String[firstLineBPE.length + 2];
-		for (int k = 0; k < firstLineBPE.length; k = k + 1) {
+		for (int k = 0; k < firstLineBPE.length; k = k + 1)
 			newFirstLineBPE[k] = firstLineBPE[k];
-		}
 		newFirstLineBPE[firstLineBPE.length] = "TYPE";
 		newFirstLineBPE[firstLineBPE.length + 1] = "LEVEL";
 		csvLoisirBPE.writeNext(newFirstLineBPE);
@@ -575,11 +569,9 @@ public class Prepare {
 	 * @throws ParseException
 	 */
 	public static void mergeAmenities() throws MismatchedDimensionException, NoSuchAuthorityCodeException, IOException, FactoryException, TransformException, ParseException {
-
 		// results
 		File pointService = new File(folderOut, "service.shp");
 		File pointLeisure = new File(folderOut, "leisure.shp");
-
 		// previously generated shapefiles
 		List<File> listServices = new ArrayList<>();
 		listServices.add(new File(tmpFolder, "SireneService.shp"));
@@ -629,13 +621,10 @@ public class Prepare {
 		csv2copy.writeNext((String[]) listAm.get(0));
 		for (String[] rowVille : listVille) {
 			String codePost = rowVille[numCodPost];
-			if (!deleteDouble.contains(codePost)) {
-				for (String[] rowAmenity : listAm) {
-					if (codePost.toUpperCase().equals(rowAmenity[numCodPostAmenity].toUpperCase())) {
+			if (!deleteDouble.contains(codePost))
+				for (String[] rowAmenity : listAm)
+					if (codePost.toUpperCase().equals(rowAmenity[numCodPostAmenity].toUpperCase()))
 						csv2copy.writeNext(rowAmenity);
-					}
-				}
-			}
 			deleteDouble.add(codePost);
 		}
 		csv2copy.close();
