@@ -45,8 +45,8 @@ import au.com.bytecode.opencsv.CSVReader;
 import fr.ign.analyse.obj.Analyse;
 import fr.ign.analyse.obj.ScenarAnalyse;
 import fr.ign.analyse.obj.ScenarAnalyseFile;
-import fr.ign.cogit.geoToolsFunctions.Csv;
-import fr.ign.cogit.geoToolsFunctions.Rasters;
+import fr.ign.artiscales.tools.geoToolsFunctions.Csv;
+import fr.ign.artiscales.tools.geoToolsFunctions.Rasters;
 import fr.ign.tools.ScenarTools;
 import fr.ign.tools.StatTab;
 

@@ -12,7 +12,7 @@ import org.opengis.parameter.InvalidParameterValueException;
 import org.opengis.parameter.ParameterNotFoundException;
 import org.opengis.referencing.operation.TransformException;
 
-import fr.ign.cogit.geoToolsFunctions.Rasters;
+import fr.ign.artiscales.tools.geoToolsFunctions.Rasters;
 import fr.ign.task.AnalyseTask;
 import fr.ign.task.ProjectCreationDecompTask;
 import fr.ign.task.SimulTask;
@@ -140,7 +140,7 @@ public class minCellSize {
 						for (File fileFile : scenarFile.listFiles()) {
 							if (fileFile.getName().contains("evalAnal") && fileFile.getName().endsWith(".tif")) {
 								File cutedFile = new File(cutScenar, fileFile.getName());
-								Rasters.cut(fileFile, empriseFile, cutedFile);
+								Rasters.crop(fileFile, empriseFile, cutedFile);
 							}
 						}
 					}

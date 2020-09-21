@@ -40,11 +40,11 @@ import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.operation.TransformException;
 
 import au.com.bytecode.opencsv.CSVReader;
-import fr.ign.cogit.geoToolsFunctions.Attribute;
-import fr.ign.cogit.geoToolsFunctions.Schemas;
-import fr.ign.cogit.geoToolsFunctions.vectors.Collec;
-import fr.ign.cogit.geoToolsFunctions.vectors.Geom;
-import fr.ign.cogit.geoToolsFunctions.vectors.Shp;
+import fr.ign.artiscales.tools.geoToolsFunctions.Attribute;
+import fr.ign.artiscales.tools.geoToolsFunctions.Schemas;
+import fr.ign.artiscales.tools.geoToolsFunctions.vectors.Collec;
+import fr.ign.artiscales.tools.geoToolsFunctions.vectors.Geom;
+import fr.ign.artiscales.tools.geoToolsFunctions.vectors.Shp;
 import fr.ign.cogit.geoxygene.api.feature.IFeature;
 import fr.ign.cogit.geoxygene.api.feature.IFeatureCollection;
 import fr.ign.cogit.geoxygene.contrib.cartetopo.Arc;

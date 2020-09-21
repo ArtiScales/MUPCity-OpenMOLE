@@ -10,8 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -26,7 +26,7 @@ import fr.ign.analyse.RasterMergeResult;
 import fr.ign.analyse.obj.Analyse;
 import fr.ign.analyse.obj.ProjetAnalyse;
 import fr.ign.analyse.obj.ScenarAnalyse;
-import fr.ign.cogit.geoToolsFunctions.Csv;
+import fr.ign.artiscales.tools.geoToolsFunctions.Csv;
 
 public class AnalyseTask {
 

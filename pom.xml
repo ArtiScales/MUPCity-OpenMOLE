@@ -7,11 +7,11 @@
 	<description>Projet maven type pour produire un jar qui peut être lancé sur OpenMole</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<mupcity.version>1.2.4-ORIGINAL</mupcity.version>
+		<mupcity.version>1.2.3-ORIGINAL</mupcity.version>
 		<geotools.version>21.0</geotools.version>
              	<geoxygene.version>1.10-SNAPSHOT</geoxygene.version>
 		<fracgis.version>0.7.1-ORIGINAL</fracgis.version> 
-		<artiscales.tools.version>0.2-SNAPSHOT</artiscales.tools.version>
+		<artiscales.tools.version>0.3-SNAPSHOT</artiscales.tools.version>
 	</properties>
 	<build>
 		<plugins>
@@ -170,7 +170,7 @@
 			<version>${geotools.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>fr.ign.cogit</groupId>
+			<groupId>fr.ign.artiscales.tools</groupId>
 			<artifactId>ArtiScales-tools</artifactId>
 			<version>${artiscales.tools.version}</version>
 		</dependency>

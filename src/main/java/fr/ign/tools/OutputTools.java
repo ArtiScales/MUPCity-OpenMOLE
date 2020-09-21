@@ -25,9 +25,9 @@ import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import au.com.bytecode.opencsv.CSVReader;
-import fr.ign.cogit.geoToolsFunctions.Csv;
-import fr.ign.cogit.geoToolsFunctions.Rasters;
-import fr.ign.cogit.geoToolsFunctions.vectors.Collec;
+import fr.ign.artiscales.tools.geoToolsFunctions.Csv;
+import fr.ign.artiscales.tools.geoToolsFunctions.Rasters;
+import fr.ign.artiscales.tools.geoToolsFunctions.vectors.Collec;
 
 public class OutputTools {
 

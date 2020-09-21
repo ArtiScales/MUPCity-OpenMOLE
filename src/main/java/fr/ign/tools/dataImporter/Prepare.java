@@ -29,11 +29,11 @@ import org.opengis.referencing.operation.TransformException;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
-import fr.ign.cogit.geoToolsFunctions.Attribute;
-import fr.ign.cogit.geoToolsFunctions.Csv;
-import fr.ign.cogit.geoToolsFunctions.Schemas;
-import fr.ign.cogit.geoToolsFunctions.vectors.Collec;
-import fr.ign.cogit.geoToolsFunctions.vectors.Shp;
+import fr.ign.artiscales.tools.geoToolsFunctions.Attribute;
+import fr.ign.artiscales.tools.geoToolsFunctions.Csv;
+import fr.ign.artiscales.tools.geoToolsFunctions.Schemas;
+import fr.ign.artiscales.tools.geoToolsFunctions.vectors.Collec;
+import fr.ign.artiscales.tools.geoToolsFunctions.vectors.Shp;
 /**
  * Class containing methods to prepare. 
  * @author Maxime Colomb

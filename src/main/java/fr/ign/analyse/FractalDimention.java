@@ -5,8 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import org.geotools.coverage.grid.GridCoverage2D;
@@ -24,8 +24,8 @@ import org.thema.data.feature.DefaultFeatureCoverage;
 import org.thema.data.feature.Feature;
 import org.thema.process.Rasterizer;
 
-import fr.ign.cogit.geoToolsFunctions.Csv;
-import fr.ign.cogit.geoToolsFunctions.Rasters;
+import fr.ign.artiscales.tools.geoToolsFunctions.Csv;
+import fr.ign.artiscales.tools.geoToolsFunctions.Rasters;
 import fr.ign.tools.OutputTools;
 
 
@@ -217,43 +217,43 @@ public class FractalDimention {
 
 	public static File rasterize(File batiFile, File fileOut, int resolution)
 			throws MalformedURLException, IOException {
-		if (!fileOut.exists()) {
-		HashSet<Feature> batiCol = new HashSet<>();
-
-		ShapefileDataStore batiDS = new ShapefileDataStore((batiFile).toURI().toURL());
-		SimpleFeatureCollection bati = batiDS.getFeatureSource().getFeatures();
-
-		CoordinateReferenceSystem sourceCRS = bati.getSchema().getCoordinateReferenceSystem();
-		// rasterisation avec les outils de théma
-		// create a thema collection
-		int h = 0;
-		SimpleFeatureIterator iteratorBati = bati.features();
-		try {
-			// Pour toutes les entitées
-			while (iteratorBati.hasNext()) {
-				Feature f = new DefaultFeature((Object) h, (Geometry) (iteratorBati.next()).getDefaultGeometry());
-				h = h + 1;
-				batiCol.add(f);
-			}
-		} catch (Exception problem) {
-			problem.printStackTrace();
-		} finally {
-			iteratorBati.close();
-		}
-
-		DefaultFeatureCoverage<Feature> featCov = new DefaultFeatureCoverage<Feature>(batiCol);
-		Rasterizer rast = new Rasterizer(featCov, resolution);
-		WritableRaster wRaster = rast.rasterize(null);
-		ReferencedEnvelope envBati = new ReferencedEnvelope(featCov.getEnvelope().getMinX(),
-				featCov.getEnvelope().getMaxX(), featCov.getEnvelope().getMinY(), featCov.getEnvelope().getMaxY(),
-				sourceCRS);
-		GridCoverage2D rasterBati = new GridCoverageFactory().create("bati", wRaster, envBati);
-		writeGeotiff(fileOut, rasterBati);
-		batiDS.dispose();
-		}
-		else {
-			System.out.println("rasterized build already exists");
-		}
+//		if (!fileOut.exists()) {
+//		HashSet<Feature> batiCol = new HashSet<>();
+//
+//		ShapefileDataStore batiDS = new ShapefileDataStore((batiFile).toURI().toURL());
+//		SimpleFeatureCollection bati = batiDS.getFeatureSource().getFeatures();
+//
+//		CoordinateReferenceSystem sourceCRS = bati.getSchema().getCoordinateReferenceSystem();
+//		// rasterisation avec les outils de théma
+//		// create a thema collection
+//		int h = 0;
+//		SimpleFeatureIterator iteratorBati = bati.features();
+//		try {
+//			// Pour toutes les entitées
+//			while (iteratorBati.hasNext()) {
+//				Feature f = new DefaultFeature((Object) h, (Geometry) (iteratorBati.next()).getDefaultGeometry());
+//				h = h + 1;
+//				batiCol.add(f);
+//			}
+//		} catch (Exception problem) {
+//			problem.printStackTrace();
+//		} finally {
+//			iteratorBati.close();
+//		}
+//
+//		DefaultFeatureCoverage<Feature> featCov = new DefaultFeatureCoverage<Feature>(batiCol);
+//		Rasterizer rast = new Rasterizer(featCov, resolution);
+//		WritableRaster wRaster = rast.rasterize(null);
+//		ReferencedEnvelope envBati = new ReferencedEnvelope(featCov.getEnvelope().getMinX(),
+//				featCov.getEnvelope().getMaxX(), featCov.getEnvelope().getMinY(), featCov.getEnvelope().getMaxY(),
+//				sourceCRS);
+//		GridCoverage2D rasterBati = new GridCoverageFactory().create("bati", wRaster, envBati);
+//		writeGeotiff(fileOut, rasterBati);
+//		batiDS.dispose();
+//		}
+//		else {
+//			System.out.println("rasterized build already exists");
+//		}
 		return fileOut;
 	}
 
